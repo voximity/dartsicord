@@ -12,6 +12,12 @@ class Message extends DiscordObject {
   int id;
 
   Message(this.content, this.id, {this.author, this.textChannel});
+  
+  static Message fromDynamic(dynamic obj, DiscordClient client) {
+    return new Message(obj["content"], obj["id"],
+    author: User.fromDynamic(obj["author"], client),
+    textChannel: client.getChannel(obj["channel_id"]))..client = client;
+  }
 
   Future reply(String text) async => this.textChannel.sendMessage(text);
 }

@@ -95,7 +95,7 @@ class DiscordClient extends EventExhibitor {
               break;
             case "GUILD_CREATE":
               final event = new GuildCreateEvent();
-              final guild = new Guild(packet.data["name"], packet.data["id"]);
+              /*final guild = new Guild(packet.data["name"], packet.data["id"]);
               for (int i = 0; i < packet.data["channels"].length; i++) {
                 if (packet.data["channels"][i]["type"] != 0)
                   continue;
@@ -107,7 +107,8 @@ class DiscordClient extends EventExhibitor {
                 channel.client = this;
                 guild.channels.add(channel);
               }
-              guild.client = this;
+              guild.client = this;*/
+              final guild = Guild.fromDynamic(packet.data, this);
               event.guild = guild;
               guilds.add(guild);
 
@@ -116,12 +117,7 @@ class DiscordClient extends EventExhibitor {
               break;
             case "MESSAGE_CREATE":
               final event = new MessageCreateEvent();
-
-              final channel = getChannel(packet.data["channel_id"]);
-              final author = new User(packet.data["author"]["username"], packet.data["author"]["discriminator"], packet.data["author"]["id"]);
-
-              final message = new Message(packet.data["content"], packet.data["id"], author: author, textChannel: channel);
-              message.client = this;
+              final message = Message.fromDynamic(packet.data, this);
 
               event.message = message;
 

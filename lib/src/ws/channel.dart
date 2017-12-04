@@ -17,6 +17,14 @@ class TextChannel extends DiscordObject implements Channel {
   int id;
 
   Future sendMessage(String content) async => client.sendMessage(content, this);
+
+  TextChannel(this.name, this.id);
+
+  static TextChannel fromDynamic(dynamic obj, DiscordClient client) {
+    if (obj["type"] != 0)
+      return null;
+    return new TextChannel(obj["name"], obj["id"])..client = client;
+  }
 }
 
 class GuildTextChannel extends DiscordObject implements TextChannel {
@@ -26,6 +34,10 @@ class GuildTextChannel extends DiscordObject implements TextChannel {
   Guild guild;
 
   Future sendMessage(String content) async => client.sendMessage(content, this);
+
+  static TextChannel fromDynamic(dynamic obj, DiscordClient client) {
+    return new TextChannel(obj["name"], obj["id"])..client = client;
+  }
 }
 
 class VoiceChannel extends DiscordObject implements Channel {
