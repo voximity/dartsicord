@@ -1,22 +1,15 @@
-# discord
+# discord-dart
 
-A library for Dart developers.
+This is a basic Dart library intending to provide fundamental functionality to Discord's API.
+Many features are missing from this library. It is expandable, so I am open to modification.
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+Currently, this library is able to process basic text commands and reply accordingly.
+This library will go as far as full text functionality but no voice functionality.
 
 ## Usage
 
-A simple usage example:
+Examples can/will be found in the example directory.
 
-    import 'package:discord/discord.dart';
+## Issues
 
-    main() {
-      var awesome = new Awesome();
-    }
-
-## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: http://example.com/issues/replaceme
+You know where to put them.
