@@ -4,18 +4,25 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 
-import "route.dart";
+import "internals.dart";
+import "event.dart";
 import "ws/guild.dart";
 import "ws/channel.dart";
 import "ws/message.dart";
 import "ws/user.dart";
 
-class DiscordClient {
+class DiscordObject {
+  DiscordClient client;
+}
+
+class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
   WebSocket _socket;
   int _lastSeq = null;
 
   String token;
+  List<Guild> guilds;
+  bool ready = false;
 
   Future _getGateway() async {
     final route = new Route(this) + "gateway";
@@ -25,16 +32,33 @@ class DiscordClient {
 
   void _sendHeartbeat(Timer timer) {
     print("sending heartbeat");
-    _socket.add(JSON.encode({
-      "op": 1,
-      "d": _lastSeq
-    }));
+    _socket.add(new Packet(data: _lastSeq));
   }
 
+  EventStream<ReadyEvent> onReady;
+  EventStream<GuildCreateEvent> onGuildCreate;
+  EventStream<MessageCreateEvent> onMessage;
 
+  void _defineEvents() {
+    onReady = createEvent();
+    onGuildCreate = createEvent();
+    onMessage = createEvent();
+  }
+
+  Guild getGuild(int id) => guilds.firstWhere((g) => g.id == id);
+  Channel getChannel(int id) => guilds.firstWhere((g) => g.channels.any((c) => c.id == id)).channels.firstWhere((c) => c.id == id);
 
   DiscordClient() {
+    _defineEvents();
 
+    guilds = [];
+  }
+
+  Future sendMessage(String content, TextChannel channel) async {
+    final route = new Route(this) + "channels" + channel.id.toString() + "messages";
+    final response = route.post({
+      "content": content
+    }, headers: {"Authorization": "Bot $token"});
   }
 
   Future connect(String token) async {
@@ -46,18 +70,65 @@ class DiscordClient {
 
     _socket.listen((payloadRaw) {
       final payload = JSON.decode(payloadRaw);
-      final opcode = payload["op"];
-      final data = payload["d"];
+      final packet = new Packet(
+        data: payload["d"],
+        event: payload["t"],
+        opcode: payload["op"],
+         seq: payload["s"]);
 
-      print(payloadRaw);
+      //print(payloadRaw);
 
-      if (payload["s"] != null)
-        _lastSeq = payload["s"];
+      if (packet.seq != null)
+        _lastSeq = packet.seq;
 
-      switch (opcode) {
+      switch (packet.opcode) {
         case 0: // Dispatch
           final event = payload["t"];
           
+          switch (event) {
+            case "READY":
+              final event = new ReadyEvent();
+              onReady.add(event);
+              ready = true;
+              break;
+            case "GUILD_CREATE":
+              final event = new GuildCreateEvent();
+              final guild = new Guild(packet.data["name"], packet.data["id"]);
+              for (int i = 0; i < packet.data["channels"].length; i++) {
+                if (packet.data["channels"][i]["type"] != 0)
+                  continue;
+                
+                final channel = new GuildTextChannel();
+                channel.guild = guild;
+                channel.id = packet.data["channels"][i]["id"];
+                channel.name = packet.data["channels"][i]["name"];
+                channel.client = this;
+                guild.channels.add(channel);
+              }
+              guild.client = this;
+              event.guild = guild;
+              guilds.add(guild);
+
+              if (ready)
+                onGuildCreate.add(event);
+              break;
+            case "MESSAGE_CREATE":
+              final event = new MessageCreateEvent();
+
+              final channel = getChannel(packet.data["channel_id"]);
+              final author = new User(packet.data["author"]["username"], packet.data["author"]["discriminator"], packet.data["author"]["id"]);
+
+              final message = new Message(packet.data["content"], packet.data["id"], author: author, textChannel: channel);
+              message.client = this;
+
+              event.message = message;
+
+              onMessage.add(event);
+              break;
+            default:
+              break;
+          }
+
           break;
         case 1: // Heartbeat
           _sendHeartbeat(_heartbeat);
@@ -67,11 +138,8 @@ class DiscordClient {
         case 9: // Invalid Session
           break;
         case 10: // Hello
-          _heartbeat = new Timer.periodic(new Duration(milliseconds: data["heartbeat_interval"]), _sendHeartbeat);
-          _socket.add(JSON.encode({
-            "op": 2,
-            "s": _lastSeq,
-            "d": {
+          _heartbeat = new Timer.periodic(new Duration(milliseconds: packet.data["heartbeat_interval"]), _sendHeartbeat);
+          _socket.add(new Packet(opcode: 2, seq: _lastSeq, data: {
               "token": token,
               "properties": {
                 "\$os": "windows",
@@ -80,7 +148,6 @@ class DiscordClient {
               },
               "compress": false,
               "large_threshold": 250
-            }
           }));
           print("sending identify");
           break;

@@ -1,8 +1,13 @@
 import "../route.dart";
+import "../client.dart";
 
-class Guild {
+import "channel.dart";
+import "user.dart";
+
+class Guild extends DiscordObject {
   String name;
   int id;
+  List<TextChannel> channels = [];
 
   Guild(this.name, this.id);
 }
