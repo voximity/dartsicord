@@ -1,4 +1,4 @@
-import "../route.dart";
+import "../internals.dart";
 import "../client.dart";
 import "guild.dart";
 import "channel.dart";

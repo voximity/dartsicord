@@ -32,7 +32,7 @@ class DiscordClient extends EventExhibitor {
 
   void _sendHeartbeat(Timer timer) {
     print("sending heartbeat");
-    _socket.add(new Packet(data: _lastSeq));
+    _socket.add(new Packet(data: _lastSeq).toString());
   }
 
   EventStream<ReadyEvent> onReady;
@@ -148,7 +148,7 @@ class DiscordClient extends EventExhibitor {
               },
               "compress": false,
               "large_threshold": 250
-          }));
+          }).toString());
           print("sending identify");
           break;
         case 11: // Heartbeat ACK

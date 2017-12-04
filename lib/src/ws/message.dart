@@ -1,5 +1,5 @@
 import "dart:async";
-import "../route.dart";
+import "../internals.dart";
 import "../client.dart";
 import "user.dart";
 import "guild.dart";
