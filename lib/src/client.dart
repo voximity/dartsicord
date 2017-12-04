@@ -23,6 +23,7 @@ class DiscordClient extends EventExhibitor {
   String token;
   List<Guild> guilds;
   bool ready = false;
+  int userId;
 
   Future _getGateway() async {
     final route = new Route(this) + "gateway";
@@ -90,6 +91,7 @@ class DiscordClient extends EventExhibitor {
               final event = new ReadyEvent();
               onReady.add(event);
               ready = true;
+              userId = packet.data["user"]["id"];
               break;
             case "GUILD_CREATE":
               final event = new GuildCreateEvent();
