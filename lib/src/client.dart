@@ -12,6 +12,10 @@ import "ws/message.dart";
 import "ws/user.dart";
 
 class DiscordObject {
+  /// ID of the object.
+  int id;
+
+  /// The Client the object was instantiated by.
   DiscordClient client;
 }
 
@@ -46,8 +50,10 @@ class DiscordClient extends EventExhibitor {
     onMessage = createEvent();
   }
 
-  Guild getGuild(int id) => guilds.firstWhere((g) => g.id == id);
-  Channel getChannel(int id) => guilds.firstWhere((g) => g.channels.any((c) => c.id == id)).channels.firstWhere((c) => c.id == id);
+  Guild getGuild(int id) =>
+    guilds.firstWhere((g) => g.id == id);
+  TextChannel getTextChannel(int id) =>
+    guilds.firstWhere((g) => g.textChannels.any((c) => c.id == id)).textChannels.firstWhere((c) => c.id == id);
 
   DiscordClient() {
     _defineEvents();
@@ -94,34 +100,20 @@ class DiscordClient extends EventExhibitor {
               userId = packet.data["user"]["id"];
               break;
             case "GUILD_CREATE":
-              final event = new GuildCreateEvent();
-              /*final guild = new Guild(packet.data["name"], packet.data["id"]);
-              for (int i = 0; i < packet.data["channels"].length; i++) {
-                if (packet.data["channels"][i]["type"] != 0)
-                  continue;
-                
-                final channel = new GuildTextChannel();
-                channel.guild = guild;
-                channel.id = packet.data["channels"][i]["id"];
-                channel.name = packet.data["channels"][i]["name"];
-                channel.client = this;
-                guild.channels.add(channel);
-              }
-              guild.client = this;*/
               final guild = Guild.fromDynamic(packet.data, this);
-              event.guild = guild;
-              guilds.add(guild);
 
+              guilds.add(guild);
               if (ready)
-                onGuildCreate.add(event);
+                onGuildCreate.add(new GuildCreateEvent(guild));
               break;
             case "MESSAGE_CREATE":
-              final event = new MessageCreateEvent();
               final message = Message.fromDynamic(packet.data, this);
 
-              event.message = message;
-
-              onMessage.add(event);
+              onMessage.add(new MessageCreateEvent(message,
+                author: message.author,
+                channel: message.textChannel,
+                guild: message.guild
+              ));
               break;
             default:
               break;

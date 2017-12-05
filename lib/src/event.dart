@@ -41,10 +41,14 @@ class ReadyEvent {
 }
 class GuildCreateEvent {
   Guild guild;
+
+  GuildCreateEvent(this.guild);
 }
 class MessageCreateEvent {
   Channel channel;
   Guild guild;
   User author;
   Message message;
+
+  MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 }

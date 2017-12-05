@@ -32,5 +32,5 @@ class Packet {
 
   Packet({this.opcode = 1, this.data, this.seq = null, this.event});
 
-  String toString() => JSON.encode({"op": opcode, "d": data, "s": null, "t": event});
+  String toString() => JSON.encode({"op": opcode, "d": data, "s": seq, "t": event});
 }

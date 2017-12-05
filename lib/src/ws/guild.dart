@@ -5,9 +5,13 @@ import "channel.dart";
 import "user.dart";
 
 class Guild extends DiscordObject {
+  /// Name of guild.
   String name;
+
   int id;
-  List<TextChannel> channels = [];
+
+  List<Channel> channels = [];
+  List<TextChannel> get textChannels => channels.where((c) => c is TextChannel);
 
   Guild(this.name, this.id);
 
@@ -19,7 +23,7 @@ class Guild extends DiscordObject {
       for(int i = 0; i < obj["channels"].length; i++) {
         if (obj["channels"][i]["type"] != 0)
           continue;
-        final channel = TextChannel.fromDynamic(obj["channels"][i], client);
+        final channel = TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
         g.channels.add(channel);
       }
     }

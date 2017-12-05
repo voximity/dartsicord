@@ -6,37 +6,32 @@ import "message.dart";
 import "user.dart";
 
 abstract class Channel extends DiscordObject {
+  /// Name of the channel.
   String name;
+
   int id;
 }
-
-
 
 class TextChannel extends DiscordObject implements Channel {
   String name;
   int id;
 
+  /// Guild of the channel, if any.
+  Guild guild;
+
+  /// Send a message to the channel.
   Future sendMessage(String content) async => client.sendMessage(content, this);
 
   TextChannel(this.name, this.id);
 
-  static TextChannel fromDynamic(dynamic obj, DiscordClient client) {
+  static TextChannel fromDynamic(dynamic obj, DiscordClient client, {Guild guild}) {
     if (obj["type"] != 0)
       return null;
-    return new TextChannel(obj["name"], obj["id"])..client = client;
-  }
-}
-
-class GuildTextChannel extends DiscordObject implements TextChannel {
-  String name;
-  int id;
-
-  Guild guild;
-
-  Future sendMessage(String content) async => client.sendMessage(content, this);
-
-  static TextChannel fromDynamic(dynamic obj, DiscordClient client) {
-    return new TextChannel(obj["name"], obj["id"])..client = client;
+    
+    final channel = new TextChannel(obj["name"], obj["id"])
+      ..client = client
+      ..guild = guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null);
+    return channel;
   }
 }
 

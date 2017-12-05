@@ -6,39 +6,27 @@ import "guild.dart";
 import "channel.dart";
 
 class Message extends DiscordObject {
+  /// Content of the message.
   String content;
+
+  /// Author of the message.
   User author;
+
+  /// Channel the message was sent in.
   TextChannel textChannel;
+
+  /// Guild the message was sent in, if any.
+  Guild guild = null;
+
   int id;
 
-  Message(this.content, this.id, {this.author, this.textChannel});
+  Message(this.content, this.id, {this.author, this.textChannel, this.guild});
   
-  static Message fromDynamic(dynamic obj, DiscordClient client) {
-    return new Message(obj["content"], obj["id"],
+  static Message fromDynamic(dynamic obj, DiscordClient client) =>
+    new Message(obj["content"], obj["id"],
     author: User.fromDynamic(obj["author"], client),
-    textChannel: client.getChannel(obj["channel_id"]))..client = client;
-  }
+    textChannel: client.getTextChannel(obj["channel_id"]),
+    guild: client.getTextChannel(obj["channel_id"]).guild)..client = client;
 
   Future reply(String text) async => this.textChannel.sendMessage(text);
-}
-
-
-
-class GuildMessage extends Message {
-  String content;
-  User author;
-  int id;
-
-  Guild guild;
-  GuildTextChannel guildTextChannel;
-
-  GuildMessage(String content, int id, {User author}) : super(content, id, author: author);
-}
-
-class DMMessage extends Message {
-  String content;
-  User author;
-  int id;
-
-  DMMessage(String content, int id, {User author}) : super(content, id, author: author);
 }
