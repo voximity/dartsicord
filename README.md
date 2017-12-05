@@ -1,4 +1,4 @@
-# discord-dart
+# dartsicord
 
 This is a basic Dart library intending to provide fundamental functionality to Discord's API.
 Many features are missing from this library. It is expandable, so I am open to modification.

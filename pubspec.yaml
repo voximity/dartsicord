@@ -1,14 +1,11 @@
-name: discord
-description: A starting point for Dart libraries or applications.
-version: 0.0.1
-#homepage: https://www.example.com
-#author: vox <email@example.com>
+name: dartsicord
+description: A Discord library for Dart
+version: 0.0.2
+homepage: https://github.com/voximity/dartsicord
 
 environment:
   sdk: '>=1.20.1 <2.0.0'
 
-#dependencies:
-#  path: ^1.4.1
 dependencies:
   http: "^0.11.3+16"
 
