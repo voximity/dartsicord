@@ -28,11 +28,12 @@ class DiscordClient extends EventExhibitor {
   String token;
   List<Guild> guilds;
   bool ready = false;
-  int userId;
+  User user;
 
   EventStream<ReadyEvent> onReady;
   EventStream<GuildCreateEvent> onGuildCreate;
   EventStream<MessageCreateEvent> onMessage;
+  EventStream<MessageDeleteEvent> onMessageDelete;
 
   // Internal methods
 
@@ -51,6 +52,7 @@ class DiscordClient extends EventExhibitor {
     onReady = createEvent();
     onGuildCreate = createEvent();
     onMessage = createEvent();
+    onMessageDelete = createEvent();
   }
 
   // External methods
@@ -108,7 +110,7 @@ class DiscordClient extends EventExhibitor {
               final event = new ReadyEvent();
               onReady.add(event);
               ready = true;
-              userId = packet.data["user"]["id"];
+              user = User.fromDynamic(packet.data["user"], this);
               break;
             case "GUILD_CREATE":
               final guild = Guild.fromDynamic(packet.data, this);
@@ -124,6 +126,12 @@ class DiscordClient extends EventExhibitor {
                 author: message.author,
                 channel: message.textChannel,
                 guild: message.guild
+              ));
+              break;
+            case "MESSAGE_DELETE":
+              onMessageDelete.add(new MessageDeleteEvent(
+                getTextChannel(packet.data["channel_id"]),
+                packet.data["id"]
               ));
               break;
             default:

@@ -23,6 +23,9 @@ class Message extends DiscordObject {
   /// Guild the message was sent in, if any.
   Guild guild = null;
 
+  /// Whether or not the message was created by the client user.
+  bool get isAuthor => author.id == client.user.id;
+
   int id;
 
   //
@@ -30,7 +33,7 @@ class Message extends DiscordObject {
   //
 
   Future edit(String content, {Embed embed}) async {
-    if (author.id != client.userId)
+    if (!isAuthor)
       throw new NotAuthorException();
 
     final route = new Route(client) + "channels" + textChannel.id.toString() + "messages" + id.toString();
