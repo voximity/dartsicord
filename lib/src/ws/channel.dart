@@ -4,6 +4,7 @@ import "../client.dart";
 import "guild.dart";
 import "message.dart";
 import "user.dart";
+import "embed.dart";
 
 abstract class Channel extends DiscordObject {
   /// Name of the channel.
@@ -20,7 +21,7 @@ class TextChannel extends DiscordObject implements Channel {
   Guild guild;
 
   /// Send a message to the channel.
-  Future sendMessage(String content) async => client.sendMessage(content, this);
+  Future<Message> sendMessage(String content, {Embed embed}) async => client.sendMessage(content, this, embed: embed);
 
   TextChannel(this.name, this.id);
 

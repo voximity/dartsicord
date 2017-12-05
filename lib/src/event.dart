@@ -5,6 +5,10 @@ import "ws/user.dart";
 import "ws/channel.dart";
 import "ws/message.dart";
 
+//
+// Event system
+//
+
 class EventStream<T> extends Stream<T> {
   StreamController<T> _controller;
   Stream<T> _stream;
@@ -34,16 +38,20 @@ abstract class EventExhibitor {
   Future<List> destroyEvents() => Future.wait(_events.map((event) => event.close()));
 }
 
-
+//
+// Events
+//
 
 class ReadyEvent {
   
 }
+
 class GuildCreateEvent {
   Guild guild;
 
   GuildCreateEvent(this.guild);
 }
+
 class MessageCreateEvent {
   Channel channel;
   Guild guild;

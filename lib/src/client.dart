@@ -10,6 +10,7 @@ import "ws/guild.dart";
 import "ws/channel.dart";
 import "ws/message.dart";
 import "ws/user.dart";
+import "ws/embed.dart";
 
 class DiscordObject {
   /// ID of the object.
@@ -29,6 +30,12 @@ class DiscordClient extends EventExhibitor {
   bool ready = false;
   int userId;
 
+  EventStream<ReadyEvent> onReady;
+  EventStream<GuildCreateEvent> onGuildCreate;
+  EventStream<MessageCreateEvent> onMessage;
+
+  // Internal methods
+
   Future _getGateway() async {
     final route = new Route(this) + "gateway";
     final response = await route.get();
@@ -40,20 +47,31 @@ class DiscordClient extends EventExhibitor {
     _socket.add(new Packet(data: _lastSeq).toString());
   }
 
-  EventStream<ReadyEvent> onReady;
-  EventStream<GuildCreateEvent> onGuildCreate;
-  EventStream<MessageCreateEvent> onMessage;
-
   void _defineEvents() {
     onReady = createEvent();
     onGuildCreate = createEvent();
     onMessage = createEvent();
   }
 
+  // External methods
+
   Guild getGuild(int id) =>
     guilds.firstWhere((g) => g.id == id);
+  
   TextChannel getTextChannel(int id) =>
     guilds.firstWhere((g) => g.textChannels.any((c) => c.id == id)).textChannels.firstWhere((c) => c.id == id);
+
+  Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) async {
+    final route = new Route(this) + "channels" + channel.id.toString() + "messages";
+    final response = await route.post({
+      "content": content,
+      "embed": embed != null ? embed.toDynamic() : null
+    });
+    final parsed = JSON.decode(response.body);
+    return Message.fromDynamic(parsed, this);
+  }
+
+  // Constructor
 
   DiscordClient() {
     _defineEvents();
@@ -61,12 +79,7 @@ class DiscordClient extends EventExhibitor {
     guilds = [];
   }
 
-  Future sendMessage(String content, TextChannel channel) async {
-    final route = new Route(this) + "channels" + channel.id.toString() + "messages";
-    final response = route.post({
-      "content": content
-    }, headers: {"Authorization": "Bot $token"});
-  }
+  
 
   Future connect(String token) async {
     this.token = token;
@@ -82,8 +95,6 @@ class DiscordClient extends EventExhibitor {
         event: payload["t"],
         opcode: payload["op"],
          seq: payload["s"]);
-
-      //print(payloadRaw);
 
       if (packet.seq != null)
         _lastSeq = packet.seq;

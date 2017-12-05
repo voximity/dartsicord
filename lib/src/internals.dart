@@ -20,8 +20,20 @@ class Route {
     return this;
   }
 
-  Future<http.Response> get({dynamic headers}) async => http.get(url, headers: headers);
-  Future<http.Response> post(dynamic body, {Map<String, String> headers}) async => http.post(url, body: body, headers: headers);
+  Map<String, String> authHeader({Map<String, String> header}) {
+    if (header == null)
+      header = {};
+
+    header["Authorization"] = "Bot ${client.token}";
+    header["Content-Type"] = "application/json";
+    return header;
+  }
+
+  Future<http.Response> get({Map<String, String> headers}) async => http.get(url, headers: authHeader(header: headers));
+  Future<http.Response> delete({Map<String, String> headers}) async => http.delete(url, headers: authHeader(header: headers));
+  Future<http.Response> post(dynamic body, {Map<String, String> headers}) async => http.post(url, body: JSON.encode(body), headers: authHeader(header: headers));
+  Future<http.Response> patch(dynamic body, {Map<String, String> headers}) async => http.patch(url, body: JSON.encode(body), headers: authHeader(header: headers));
+  Future<http.Response> put(dynamic body, {Map<String, String> headers}) async => http.put(url, body: JSON.encode(body), headers: authHeader(header: headers));
 }
 
 class Packet {
