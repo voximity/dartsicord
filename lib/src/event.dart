@@ -61,7 +61,7 @@ class MessageCreateEvent {
   MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 }
 class MessageDeleteEvent {
-  Channel channel;
+  TextChannel channel;
   int messageId;
 
   MessageDeleteEvent(this.channel, this.messageId);

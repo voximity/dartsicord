@@ -1,6 +1,7 @@
 import "package:http/http.dart" as http;
 
 import "client.dart";
+import "exception.dart";
 
 import "dart:async";
 import "dart:convert";
