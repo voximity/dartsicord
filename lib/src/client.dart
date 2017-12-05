@@ -44,7 +44,6 @@ class DiscordClient extends EventExhibitor {
   }
 
   void _sendHeartbeat(Timer timer) {
-    print("sending heartbeat");
     _socket.add(new Packet(data: _lastSeq).toString());
   }
 
@@ -87,7 +86,6 @@ class DiscordClient extends EventExhibitor {
     this.token = token;
 
     final gateway = await _getGateway();
-    print(gateway);
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) {
@@ -158,7 +156,6 @@ class DiscordClient extends EventExhibitor {
               "compress": false,
               "large_threshold": 250
           }).toString());
-          print("sending identify");
           break;
         case 11: // Heartbeat ACK
           break;

@@ -3,6 +3,7 @@ import "../client.dart";
 
 import "channel.dart";
 import "user.dart";
+import "permission.dart";
 
 import "dart:async";
 import "dart:convert";
@@ -13,10 +14,16 @@ class Guild extends DiscordObject {
 
   int id;
 
+  /// A list of [Channel] objects that the guild has.
   List<Channel> channels = [];
-  List<Role> roles = [];
+
+  /// A list of [TextChannel] objects, derived from the [channels] property.
   List<TextChannel> get textChannels => channels.where((c) => c is TextChannel);
 
+  /// A list of [Role] objects that the guild has.
+  List<Role> roles = [];
+
+  /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
     final route = new Route(client) + "guilds" + id.toString() + "members" + user.id.toString();
     final response = await route.get();
@@ -52,14 +59,31 @@ class Guild extends DiscordObject {
 class Role extends DiscordObject {
   int id;
 
+  /// The guild that this role is in.
   Guild guild;
 
+  /// The name of the role.
   String name;
+
+  /// The color of the role. Can be set using hexadecimal, e.g. 0x00AAFF.
   int color;
+
+  /// Whether or not the role is hoisted, meaning it appears separately in the user list.
   bool hoisted;
+
+  /// The position of the role in the role list.
   int position;
+
+  /// The raw permissions of the role.
   int permissionsRaw;
+
+  /// A list of [Permission] objects generated from the [permissionsRaw] variable.
+  List<Permission> get permissions => Permission.fromRaw(permissionsRaw, Permission.RolePermissions);
+
+  /// Whether or not this role is created and managed by a bot user.
   bool managed;
+
+  /// Whether or not this role is mentionable.
   bool mentionable;
 
   Role(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});

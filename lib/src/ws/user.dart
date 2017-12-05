@@ -26,12 +26,16 @@ class Member extends DiscordObject {
   /// The user representing this member.
   User user;
 
+  /// The nickname of the member.
   String nickname;
 
+  /// A list of Role objects that the user possesses in the guild.
   List<Role> roles;
 
+  /// Whether or not the user is deafened by the guild.
   bool deafened;
 
+  /// Whether or not the user is muted by the guild.
   bool muted;
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
@@ -43,6 +47,10 @@ class Member extends DiscordObject {
       Role role = guild.roles.firstWhere((r) => r.id == roleId);
       roleList.add(role);
     }
-    return new Member(User.fromDynamic(obj["user"], client), guild, roles: roleList, nickname: obj["nick"], deafened: obj["deaf"], muted: obj["mute"])..client = client;
+    return new Member(User.fromDynamic(obj["user"], client), guild,
+      roles: roleList,
+      nickname: obj["nick"],
+      deafened: obj["deaf"],
+      muted: obj["mute"])..client = client;
   }
 }
