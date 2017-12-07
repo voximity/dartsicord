@@ -6,6 +6,7 @@ import "dart:io";
 
 import "internals.dart";
 import "event.dart";
+import "enums.dart";
 import "ws/guild.dart";
 import "ws/channel.dart";
 import "ws/message.dart";
@@ -26,8 +27,11 @@ class DiscordClient extends EventExhibitor {
   int _lastSeq = null;
 
   String token;
+  TokenType tokenType;
+
   List<Guild> guilds;
   bool ready = false;
+
   User user;
 
   EventStream<ReadyEvent> onReady;
@@ -59,8 +63,13 @@ class DiscordClient extends EventExhibitor {
   Guild getGuild(int id) =>
     guilds.firstWhere((g) => g.id == id);
   
-  TextChannel getTextChannel(int id) =>
-    guilds.firstWhere((g) => g.textChannels.any((c) => c.id == id)).textChannels.firstWhere((c) => c.id == id);
+  Future<Channel> getChannel(int id) async {
+    final route = new Route(this) + "channels" + id.toString();
+    final response = await route.get();
+    return Channel.fromDynamic(JSON.decode(response.body), this);
+  }
+  Future<TextChannel> getTextChannel(int id) async =>
+    await getChannel(id) as TextChannel;
 
   Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) async {
     final route = new Route(this) + "channels" + channel.id.toString() + "messages";
@@ -70,6 +79,15 @@ class DiscordClient extends EventExhibitor {
     });
     final parsed = JSON.decode(response.body);
     return Message.fromDynamic(parsed, this);
+  }
+
+  Future<TextChannel> createDirectMessage(User recipient) async {
+    final route = new Route(this) + "users" + "@me" + "channels";
+    final response = await route.post({
+      "recipient_id": recipient.id
+    });
+    final channel = TextChannel.fromDynamic(JSON.decode(response.body), this);
+    return channel;
   }
 
   // Constructor
@@ -82,13 +100,14 @@ class DiscordClient extends EventExhibitor {
 
   
 
-  Future connect(String token) async {
+  Future connect(String token, {TokenType tokenType = TokenType.Bot}) async {
     this.token = token;
+    this.tokenType = tokenType;
 
     final gateway = await _getGateway();
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
-    _socket.listen((payloadRaw) {
+    _socket.listen((payloadRaw) async {
       final payload = JSON.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
@@ -108,17 +127,17 @@ class DiscordClient extends EventExhibitor {
               final event = new ReadyEvent();
               onReady.add(event);
               ready = true;
-              user = User.fromDynamic(packet.data["user"], this);
+              user = await User.fromDynamic(packet.data["user"], this);
               break;
             case "GUILD_CREATE":
-              final guild = Guild.fromDynamic(packet.data, this);
+              final guild = await Guild.fromDynamic(packet.data, this);
 
               guilds.add(guild);
               if (ready)
                 onGuildCreate.add(new GuildCreateEvent(guild));
               break;
             case "MESSAGE_CREATE":
-              final message = Message.fromDynamic(packet.data, this);
+              final message = await Message.fromDynamic(packet.data, this);
 
               onMessage.add(new MessageCreateEvent(message,
                 author: message.author,
@@ -128,7 +147,7 @@ class DiscordClient extends EventExhibitor {
               break;
             case "MESSAGE_DELETE":
               onMessageDelete.add(new MessageDeleteEvent(
-                getTextChannel(packet.data["channel_id"]),
+                await getChannel(packet.data["channel_id"]),
                 packet.data["id"]
               ));
               break;
@@ -165,7 +184,7 @@ class DiscordClient extends EventExhibitor {
     }, onError: (e) {
       print(e.toString());
     }, onDone: () {
-      print("done");
+      print("ended");
     }, cancelOnError: true);
   }
 }

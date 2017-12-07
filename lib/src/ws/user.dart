@@ -4,6 +4,8 @@ import "guild.dart";
 import "channel.dart";
 import "message.dart";
 
+import "dart:async";
+
 class User extends DiscordObject {
   /// Username of the user.
   String username;
@@ -13,9 +15,11 @@ class User extends DiscordObject {
 
   int id;
 
+  Future<TextChannel> createDirectMessage() async => await client.createDirectMessage(this);
+
   User(this.username, this.discriminator, this.id);
 
-  static User fromDynamic(dynamic obj, DiscordClient client) =>
+  static Future<User> fromDynamic(dynamic obj, DiscordClient client) async =>
     new User(obj["username"], obj["discriminator"], obj["id"])..client = client;
 }
 
@@ -40,14 +44,14 @@ class Member extends DiscordObject {
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 
-  static Member fromDynamic(dynamic obj, DiscordClient client, Guild guild) {
+  static Future<Member> fromDynamic(dynamic obj, DiscordClient client, Guild guild) async {
     List<Role> roleList = [];
     for (int i = 0; i < obj["roles"].length; i++) {
       int roleId = obj["roles"][i];
       Role role = guild.roles.firstWhere((r) => r.id == roleId);
       roleList.add(role);
     }
-    return new Member(User.fromDynamic(obj["user"], client), guild,
+    return new Member(await User.fromDynamic(obj["user"], client), guild,
       roles: roleList,
       nickname: obj["nick"],
       deafened: obj["deaf"],

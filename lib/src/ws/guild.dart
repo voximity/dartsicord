@@ -32,7 +32,7 @@ class Guild extends DiscordObject {
 
   Guild(this.name, this.id);
 
-  static Guild fromDynamic(dynamic obj, DiscordClient client) {
+  static Future<Guild> fromDynamic(dynamic obj, DiscordClient client) async {
     final g = new Guild(obj["name"], obj["id"]);
     g.client = client;
 
@@ -40,7 +40,7 @@ class Guild extends DiscordObject {
       for(int i = 0; i < obj["channels"].length; i++) {
         if (obj["channels"][i]["type"] != 0)
           continue;
-        final channel = TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
+        final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
         g.channels.add(channel);
       }
     }

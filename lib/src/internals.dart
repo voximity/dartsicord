@@ -2,6 +2,7 @@ import "package:http/http.dart" as http;
 
 import "client.dart";
 import "exception.dart";
+import "enums.dart";
 
 import "dart:async";
 import "dart:convert";
@@ -25,7 +26,7 @@ class Route {
     if (header == null)
       header = {};
 
-    header["Authorization"] = "Bot ${client.token}";
+    header["Authorization"] = (client.tokenType == TokenType.Bot ? "Bot " : "") + "${client.token}";
     header["Content-Type"] = "application/json";
     return header;
   }

@@ -18,7 +18,7 @@ class Message extends DiscordObject {
   User author;
 
   /// Channel the message was sent in.
-  TextChannel textChannel;
+  TextChannel channel;
 
   /// Guild the message was sent in, if any.
   Guild guild = null;
@@ -36,7 +36,7 @@ class Message extends DiscordObject {
     if (!isAuthor)
       throw new NotAuthorException();
 
-    final route = new Route(client) + "channels" + textChannel.id.toString() + "messages" + id.toString();
+    final route = new Route(client) + "channels" + channel.id.toString() + "messages" + id.toString();
     this.content = content;
     this.embed ??= embed;
 
@@ -44,21 +44,21 @@ class Message extends DiscordObject {
   }
 
   Future delete() async {
-    final route = new Route(client) + "channels" + textChannel.id.toString() + "messages" + id.toString();
+    final route = new Route(client) + "channels" + channel.id.toString() + "messages" + id.toString();
     await route.delete();
   }
 
-  Future<Message> reply(String text, {Embed embed}) async => this.textChannel.sendMessage(text, embed: embed);
+  Future<Message> reply(String text, {Embed embed}) async => this.channel.sendMessage(text, embed: embed);
 
   //
-  // Constructor
+  // Constructors
   //
 
-  Message(this.content, this.id, {this.author, this.textChannel, this.guild});
+  Message(this.content, this.id, {this.author, this.channel, this.guild});
   
-  static Message fromDynamic(dynamic obj, DiscordClient client) =>
+  static Future<Message> fromDynamic(dynamic obj, DiscordClient client) async =>
     new Message(obj["content"], obj["id"],
-    author: User.fromDynamic(obj["author"], client),
-    textChannel: client.getTextChannel(obj["channel_id"]),
-    guild: client.getTextChannel(obj["channel_id"]).guild)..client = client;
+    author: await User.fromDynamic(obj["author"], client),
+    channel: await client.getChannel(obj["channel_id"]),
+    guild: (await client.getTextChannel(obj["channel_id"])).guild)..client = client;
 }
