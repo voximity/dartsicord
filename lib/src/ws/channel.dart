@@ -8,6 +8,8 @@ import "user.dart";
 import "embed.dart";
 
 abstract class Channel extends DiscordObject {
+  static Route endpoint = new Route() + "channels";
+  
   /// Name of the channel.
   String name;
 
@@ -23,6 +25,7 @@ abstract class Channel extends DiscordObject {
 }
 
 class TextChannel extends DiscordObject implements Channel {
+
   String name;
   int id;
 
@@ -64,8 +67,7 @@ class TextChannel extends DiscordObject implements Channel {
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromDynamic(obj["recipients"][i], client));
-        final channel = new TextChannel("DM", obj["id"], channelType,
-          recipients: users)
+        final channel = new TextChannel("DM", obj["id"], channelType, recipients: users)
           ..client = client;
         return channel;
 
@@ -73,8 +75,7 @@ class TextChannel extends DiscordObject implements Channel {
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromDynamic(obj["recipients"][i], client));
-        final channel = new TextChannel("GroupDM", obj["id"], channelType,
-          recipients: users)
+        final channel = new TextChannel("GroupDM", obj["id"], channelType, recipients: users)
           ..client = client;
         return channel;
 

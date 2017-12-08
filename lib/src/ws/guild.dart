@@ -9,6 +9,8 @@ import "dart:async";
 import "dart:convert";
 
 class Guild extends DiscordObject {
+  static Route endpoint = new Route() + "guilds";
+
   /// Name of guild.
   String name;
 
@@ -25,10 +27,32 @@ class Guild extends DiscordObject {
 
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
-    final route = new Route(client) + "guilds" + id.toString() + "members" + user.id.toString();
-    final response = await route.get();
+    final route = Guild.endpoint + id.toString() + "members" + user.id.toString();
+    final response = await route.get(client: client);
     return Member.fromDynamic(JSON.decode(response.body), client, this);
   }
+
+  Future kickMember(Member member) async {
+    final route = Guild.endpoint + id.toString() + "members" + member.id.toString();
+    await route.delete(client: client);
+  }
+  Future banMember(Member member, {int deleteMessagesCount}) async {
+    final route = Guild.endpoint + id.toString() + "bans" + member.id.toString();
+    await route.put({"delete-message-days": deleteMessagesCount}, client: client);
+  }
+
+  Future addMemberRole(Member member, Role role) async {
+    final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
+    await route.put({}, client: client);
+  }
+  Future removeMemberRole(Member member, Role role) async {
+    final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
+    await route.delete(client: client);
+  }
+
+  //
+  // Constructors
+  //
 
   Guild(this.name, this.id);
 

@@ -7,6 +7,8 @@ import "message.dart";
 import "dart:async";
 
 class User extends DiscordObject {
+  static Route endpoint = new Route() + "users";
+
   /// Username of the user.
   String username;
 
@@ -41,6 +43,11 @@ class Member extends DiscordObject {
 
   /// Whether or not the user is muted by the guild.
   bool muted;
+
+  Future kick() => guild.kickMember(this);
+  Future ban({int deleteMessagesCount}) => guild.banMember(this, deleteMessagesCount: deleteMessagesCount);
+  Future addRole(Role role) => guild.addMemberRole(this, role);
+  Future removeRole(Role role) => guild.removeMemberRole(this, role);
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 

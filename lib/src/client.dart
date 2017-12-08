@@ -42,8 +42,8 @@ class DiscordClient extends EventExhibitor {
   // Internal methods
 
   Future _getGateway() async {
-    final route = new Route(this) + "gateway";
-    final response = await route.get();
+    final route = new Route() + "gateway";
+    final response = await route.get(client: this);
     return JSON.decode(response.body)["url"];
   }
 
@@ -64,28 +64,28 @@ class DiscordClient extends EventExhibitor {
     guilds.firstWhere((g) => g.id == id);
   
   Future<Channel> getChannel(int id) async {
-    final route = new Route(this) + "channels" + id.toString();
-    final response = await route.get();
+    final route = Channel.endpoint + id.toString();
+    final response = await route.get(client: this);
     return Channel.fromDynamic(JSON.decode(response.body), this);
   }
   Future<TextChannel> getTextChannel(int id) async =>
     await getChannel(id) as TextChannel;
 
   Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) async {
-    final route = new Route(this) + "channels" + channel.id.toString() + "messages";
+    final route = Channel.endpoint + channel.id.toString() + "messages";
     final response = await route.post({
       "content": content,
       "embed": embed != null ? embed.toDynamic() : null
-    });
+    }, client: this);
     final parsed = JSON.decode(response.body);
     return Message.fromDynamic(parsed, this);
   }
 
   Future<TextChannel> createDirectMessage(User recipient) async {
-    final route = new Route(this) + "users" + "@me" + "channels";
+    final route = User.endpoint + "@me" + "channels";
     final response = await route.post({
       "recipient_id": recipient.id
-    });
+    }, client: this);
     final channel = TextChannel.fromDynamic(JSON.decode(response.body), this);
     return channel;
   }
@@ -141,7 +141,7 @@ class DiscordClient extends EventExhibitor {
 
               onMessage.add(new MessageCreateEvent(message,
                 author: message.author,
-                channel: message.textChannel,
+                channel: message.channel,
                 guild: message.guild
               ));
               break;

@@ -36,7 +36,7 @@ class Message extends DiscordObject {
     if (!isAuthor)
       throw new NotAuthorException();
 
-    final route = new Route(client) + "channels" + channel.id.toString() + "messages" + id.toString();
+    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
     this.content = content;
     this.embed ??= embed;
 
@@ -44,7 +44,7 @@ class Message extends DiscordObject {
   }
 
   Future delete() async {
-    final route = new Route(client) + "channels" + channel.id.toString() + "messages" + id.toString();
+    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
     await route.delete();
   }
 
