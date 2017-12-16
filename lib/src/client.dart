@@ -179,7 +179,7 @@ class DiscordClient extends EventExhibitor {
                 "\$browser": "dartsicord",
                 "\$device": "dartsicord"
               },
-              "shard": shard != null ? [shard, shardCount] : null,
+              //"shard": shard != null ? [shard, shardCount] : null,
               "compress": false,
               "large_threshold": 250
           }).toString());
