@@ -56,6 +56,12 @@ class GuildCreateEvent {
   GuildCreateEvent(this.guild);
 }
 
+class GuildUpdateEvent {
+  Guild guild;
+
+  GuildUpdateEvent(this.guild);
+}
+
 class GuildDeleteEvent {
   Guild guild;
 
