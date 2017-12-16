@@ -24,6 +24,9 @@ class DiscordClient extends EventExhibitor {
   WebSocket _socket;
   int _lastSeq = null;
 
+  int shard;
+  int shardCount;
+
   String token;
   TokenType tokenType;
 
@@ -90,7 +93,7 @@ class DiscordClient extends EventExhibitor {
 
   // Constructor
 
-  DiscordClient() {
+  DiscordClient({this.shard, this.shardCount}) {
     _defineEvents();
 
     guilds = [];
@@ -167,9 +170,10 @@ class DiscordClient extends EventExhibitor {
               "token": token,
               "properties": {
                 "\$os": "windows",
-                "\$browser": "discord-dart",
-                "\$device": "discord-dart"
+                "\$browser": "dartsicord",
+                "\$device": "dartsicord"
               },
+              "shard": shard != null ? [shard, shardCount] : null,
               "compress": false,
               "large_threshold": 250
           }).toString());
