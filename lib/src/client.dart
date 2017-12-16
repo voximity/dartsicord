@@ -40,6 +40,8 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildCreateEvent> onGuildCreate;
   EventStream<GuildUpdateEvent> onGuildUpdate;
   EventStream<GuildDeleteEvent> onGuildDelete;
+  EventStream<BanAddEvent> onBanAdd;
+  EventStream<BanRemoveEvent> onBanRemove;
   EventStream<ChannelCreateEvent> onChannelCreate;
   EventStream<ChannelUpdateEvent> onChannelUpdate;
   EventStream<ChannelDeleteEvent> onChannelDelete;
@@ -165,6 +167,21 @@ class DiscordClient extends EventExhibitor {
               guilds.remove(guild);
               if (ready)
                 onGuildDelete.add(new GuildDeleteEvent(guild));
+              break;
+            case "GUILD_BAN_ADD":
+              final member = await Member.fromDynamic(packet.data, this, await Guild.fromDynamic(packet.data["guild"], this));
+
+              member.guild.bans.add(member);
+              if (ready)
+                onBanAdd.add(new BanAddEvent(member));
+              break;
+
+            case "GUILD_BAN_REMOVE":
+              final member = await Member.fromDynamic(packet.data, this, await Guild.fromDynamic(packet.data["guild"], this));
+
+              member.guild.bans.remove(member);
+              if (ready)
+                onBanRemove.add(new BanRemoveEvent(member));
               break;
             case "CHANNEL_CREATE":
               final channel = await Channel.fromDynamic(packet.data, this);

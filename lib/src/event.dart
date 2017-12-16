@@ -68,6 +68,18 @@ class GuildDeleteEvent {
   GuildDeleteEvent(this.guild);
 }
 
+class BanAddEvent {
+  Member member;
+
+  BanAddEvent(this.member);
+}
+
+class BanRemoveEvent {
+  Member member;
+
+  BanRemoveEvent(this.member);
+}
+
 class ChannelCreateEvent {
   Channel channel;
 
