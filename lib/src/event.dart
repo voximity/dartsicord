@@ -56,6 +56,24 @@ class GuildCreateEvent {
   GuildCreateEvent(this.guild);
 }
 
+class GuildDeleteEvent {
+  Guild guild;
+
+  GuildDeleteEvent(this.guild);
+}
+
+class ChannelCreateEvent {
+  Channel channel;
+
+  ChannelCreateEvent(this.channel);
+}
+
+class ChannelDeleteEvent {
+  Channel channel;
+
+  ChannelDeleteEvent(this.channel);
+}
+
 class MessageCreateEvent {
   Channel channel;
   Guild guild;
@@ -64,6 +82,7 @@ class MessageCreateEvent {
 
   MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 }
+
 class MessageDeleteEvent {
   TextChannel channel;
   int messageId;
