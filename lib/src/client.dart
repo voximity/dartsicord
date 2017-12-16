@@ -36,7 +36,13 @@ class DiscordClient extends EventExhibitor {
   User user;
 
   EventStream<ReadyEvent> onReady;
+  EventStream<ResumedEvent> onResumed;
   EventStream<GuildCreateEvent> onGuildCreate;
+  EventStream<GuildUpdateEvent> onGuildUpdate;
+  EventStream<GuildDeleteEvent> onGuildDelete;
+  EventStream<ChannelCreateEvent> onChannelCreate;
+  EventStream<ChannelUpdateEvent> onChannelUpdate;
+  EventStream<ChannelDeleteEvent> onChannelDelete;
   EventStream<MessageCreateEvent> onMessage;
   EventStream<MessageDeleteEvent> onMessageDelete;
 
@@ -54,7 +60,12 @@ class DiscordClient extends EventExhibitor {
 
   void _defineEvents() {
     onReady = createEvent();
+    onResumed = createEvent();
     onGuildCreate = createEvent();
+    onGuildDelete = createEvent();
+    onChannelCreate = createEvent();
+    onChannelUpdate = createEvent();
+    onChannelDelete = createEvent();
     onMessage = createEvent();
     onMessageDelete = createEvent();
   }
@@ -136,12 +147,59 @@ class DiscordClient extends EventExhibitor {
               ready = true;
               user = await User.fromDynamic(packet.data["user"], this);
               break;
+            case "RESUMED":
+              onResumed.add(new ResumedEvent());
+              break;
             case "GUILD_CREATE":
               final guild = await Guild.fromDynamic(packet.data, this);
 
               guilds.add(guild);
               if (ready)
                 onGuildCreate.add(new GuildCreateEvent(guild));
+              break;
+            case "GUILD_UPDATE":
+              final guild = await Guild.fromDynamic(packet.data, this);
+
+              guilds.removeWhere((x) => x.id == guild.id);
+              guilds.add(guild);
+              if (ready)
+                onGuildUpdate.add(new GuildUpdateEvent(guild));
+              break;
+            case "GUILD_DELETE":
+              final guild = await Guild.fromDynamic(packet.data, this);
+
+              guilds.remove(guild);
+              if (ready)
+                onGuildDelete.add(new GuildDeleteEvent(guild));
+              break;
+            case "CHANNEL_CREATE":
+              final channel = await Channel.fromDynamic(packet.data, this);
+
+              if (Channel.types[channel.type] == ChannelType.GuildText)
+                channel.guild.channels.add(channel);
+
+              onChannelCreate.add(new ChannelCreateEvent(channel));
+
+              break;
+            case "CHANNEL_UPDATE":
+              final channel = await Channel.fromDynamic(packet.data, this);
+
+              if (Channel.types[channel.type] == ChannelType.GuildText) {
+                channel.guild.channels.removeWhere((c) => c.id == channel.id);
+                channel.guild.channels.add(channel);
+              }
+
+              onChannelUpdate.add(new ChannelUpdateEvent(channel));
+
+              break;
+            case "CHANNEL_DELETE":
+              final channel = await Channel.fromDynamic(packet.data, this);
+
+              if (Channel.types[channel.type] == ChannelType.GuildText)
+                channel.guild.channels.remove(channel);
+
+              onChannelDelete.add(new ChannelDeleteEvent(channel));
+
               break;
             case "MESSAGE_CREATE":
               final message = await Message.fromDynamic(packet.data, this);

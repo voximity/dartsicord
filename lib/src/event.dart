@@ -46,10 +46,44 @@ class ReadyEvent {
   
 }
 
+class ResumedEvent {
+  
+}
+
 class GuildCreateEvent {
   Guild guild;
 
   GuildCreateEvent(this.guild);
+}
+
+class GuildUpdateEvent {
+  Guild guild;
+
+  GuildUpdateEvent(this.guild);
+}
+
+class GuildDeleteEvent {
+  Guild guild;
+
+  GuildDeleteEvent(this.guild);
+}
+
+class ChannelCreateEvent {
+  Channel channel;
+
+  ChannelCreateEvent(this.channel);
+}
+
+class ChannelUpdateEvent {
+  Channel channel;
+
+  ChannelUpdateEvent(this.channel);
+}
+
+class ChannelDeleteEvent {
+  Channel channel;
+
+  ChannelDeleteEvent(this.channel);
 }
 
 class MessageCreateEvent {
@@ -60,6 +94,7 @@ class MessageCreateEvent {
 
   MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 }
+
 class MessageDeleteEvent {
   TextChannel channel;
   int messageId;
