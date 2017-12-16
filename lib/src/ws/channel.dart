@@ -13,6 +13,9 @@ abstract class Channel extends DiscordObject {
   /// Name of the channel.
   String name;
 
+  /// Guild of the channel, if any. Refer to [type] property and check for [GuildText].
+  Guild guild;
+
   int id;
 
   static Future<Channel> fromDynamic(dynamic obj, DiscordClient client) async {
@@ -28,8 +31,6 @@ class TextChannel extends DiscordObject implements Channel {
 
   String name;
   int id;
-
-  /// Guild of the channel, if any. Refer to [type] property and check for [GuildText].
   Guild guild;
 
   /// The recipient of this DM, if any. Refer to [type] property and check for [Dm].
@@ -88,7 +89,6 @@ class TextChannel extends DiscordObject implements Channel {
 class VoiceChannel extends DiscordObject implements Channel {
   String name;
   int id;
-
   Guild guild;
 
   VoiceChannel(this.name, this.id);
