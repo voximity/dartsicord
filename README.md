@@ -6,10 +6,26 @@ Many features are missing from this library. It is expandable, so I am open to m
 Currently, this library is able to process basic text commands and reply accordingly.
 This library will go as far as full text functionality but no voice functionality.
 
-## Usage
+## Examples
 
-Examples can/will be found in the example directory.
+A simple ping-pong bot can be located in the example directory, or can be found here.
 
-## Issues
+```dart
+import "package:dartsicord/dartsicord.dart";
 
-You know where to put them.
+void main() {
+	final client = new DiscordClient();
+
+	client.onMessage.listen((event) async {
+		if (event.message.content.toLowerCase() == "ping")
+		await event.message.reply("pong");
+	});
+
+	client.connect("YOUR-TOKEN");
+}
+```
+
+## Contributing
+
+Feel free to fork and contribute. Try to keep my style of code, or else I might get mad. That means double quotes
+and decent organization. I'll still probably fix any consistency issues after you've made a pull request.
