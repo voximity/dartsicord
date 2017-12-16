@@ -36,6 +36,7 @@ class DiscordClient extends EventExhibitor {
   User user;
 
   EventStream<ReadyEvent> onReady;
+  EventStream<ResumedEvent> onResumed;
   EventStream<GuildCreateEvent> onGuildCreate;
   EventStream<GuildDeleteEvent> onGuildDelete;
   EventStream<MessageCreateEvent> onMessage;
@@ -55,6 +56,7 @@ class DiscordClient extends EventExhibitor {
 
   void _defineEvents() {
     onReady = createEvent();
+    onResumed = createEvent();
     onGuildCreate = createEvent();
     onGuildDelete = createEvent();
     onMessage = createEvent();
@@ -131,6 +133,9 @@ class DiscordClient extends EventExhibitor {
               onReady.add(event);
               ready = true;
               user = await User.fromDynamic(packet.data["user"], this);
+              break;
+            case "RESUMED":
+              onResumed.add(new ResumedEvent());
               break;
             case "GUILD_CREATE":
               final guild = await Guild.fromDynamic(packet.data, this);

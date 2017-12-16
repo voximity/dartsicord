@@ -46,6 +46,10 @@ class ReadyEvent {
   
 }
 
+class ResumedEvent {
+  
+}
+
 class GuildCreateEvent {
   Guild guild;
 
