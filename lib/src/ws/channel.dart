@@ -13,10 +13,22 @@ abstract class Channel extends DiscordObject {
   /// Name of the channel.
   String name;
 
-  /// Guild of the channel, if any. Refer to [type] property and check for [GuildText].
+  /// Guild of the channel, if any.
   Guild guild;
 
+  /// Type of the channel.
+  ChannelType type;
+
   int id;
+
+  /// A list of Channel types, by their API ID.
+  static Map<int, ChannelType> types = {
+    0: ChannelType.GuildText,
+    1: ChannelType.Dm,
+    2: ChannelType.GuildVoice,
+    3: ChannelType.GroupDm,
+    4: ChannelType.GuildCategory
+  };
 
   static Future<Channel> fromDynamic(dynamic obj, DiscordClient client) async {
     int type = obj["type"];
@@ -31,6 +43,9 @@ class TextChannel extends DiscordObject implements Channel {
 
   String name;
   int id;
+  ChannelType type;
+
+  /// Guild of the channel, if any. Refer to the [type] property and check for [GuildText].
   Guild guild;
 
   /// The recipient of this DM, if any. Refer to [type] property and check for [Dm].
@@ -39,24 +54,13 @@ class TextChannel extends DiscordObject implements Channel {
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
   List<User> recipients;
 
-  /// Type of the channel.
-  ChannelType type;
-
   /// Send a message to the channel.
   Future<Message> sendMessage(String content, {Embed embed}) async => await client.sendMessage(content, this, embed: embed);
 
   TextChannel(this.name, this.id, this.type, {this.guild, this.recipients});
 
-  static Map<int, ChannelType> ChannelTypes = {
-    0: ChannelType.GuildText,
-    1: ChannelType.Dm,
-    2: ChannelType.GuildVoice,
-    3: ChannelType.GroupDm,
-    4: ChannelType.GuildCategory
-  };
-
   static Future<TextChannel> fromDynamic(dynamic obj, DiscordClient client, {Guild guild}) async {
-    final channelType = ChannelTypes[obj["type"]];
+    final channelType = Channel.types[obj["type"]];
     switch (channelType) {
       case ChannelType.GuildText:
         final channel = new TextChannel(obj["name"], obj["id"], channelType,
@@ -90,6 +94,7 @@ class VoiceChannel extends DiscordObject implements Channel {
   String name;
   int id;
   Guild guild;
+  ChannelType type;
 
   VoiceChannel(this.name, this.id);
 
