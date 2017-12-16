@@ -68,6 +68,12 @@ class ChannelCreateEvent {
   ChannelCreateEvent(this.channel);
 }
 
+class ChannelUpdateEvent {
+  Channel channel;
+
+  ChannelUpdateEvent(this.channel);
+}
+
 class ChannelDeleteEvent {
   Channel channel;
 

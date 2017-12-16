@@ -40,6 +40,7 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildCreateEvent> onGuildCreate;
   EventStream<GuildDeleteEvent> onGuildDelete;
   EventStream<ChannelCreateEvent> onChannelCreate;
+  EventStream<ChannelUpdateEvent> onChannelUpdate;
   EventStream<ChannelDeleteEvent> onChannelDelete;
   EventStream<MessageCreateEvent> onMessage;
   EventStream<MessageDeleteEvent> onMessageDelete;
@@ -60,6 +61,10 @@ class DiscordClient extends EventExhibitor {
     onReady = createEvent();
     onResumed = createEvent();
     onGuildCreate = createEvent();
+    onGuildDelete = createEvent();
+    onChannelCreate = createEvent();
+    onChannelUpdate = createEvent();
+    onChannelDelete = createEvent();
     onMessage = createEvent();
     onMessageDelete = createEvent();
   }
@@ -159,6 +164,17 @@ class DiscordClient extends EventExhibitor {
                 channel.guild.channels.add(channel);
 
               onChannelCreate.add(new ChannelCreateEvent(channel));
+
+              break;
+            case "CHANNEL_UPDATE":
+              final channel = await Channel.fromDynamic(packet.data, this);
+
+              if (Channel.types[channel.type] == ChannelType.GuildText) {
+                channel.guild.channels.removeWhere((c) => c.id == channel.id);
+                channel.guild.channels.add(channel);
+              }
+
+              onChannelUpdate.add(new ChannelUpdateEvent(channel));
 
               break;
             case "CHANNEL_DELETE":
