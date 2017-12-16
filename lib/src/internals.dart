@@ -12,15 +12,15 @@ class Route {
 
   Route();
 
-  Route operator +(String other) {
-    return new Route()..url = url + other;
-  }
+  Route operator +(String other) =>
+    new Route()..url = url + "/$other";
 
   Map<String, String> authHeader({Map<String, String> header, DiscordClient client}) {
     if (header == null)
       header = {};
 
-    header["Authorization"] = (client.tokenType == TokenType.Bot ? "Bot " : "") + "${client.token}";
+    if (client != null)
+      header["Authorization"] = (client.tokenType == TokenType.Bot ? "Bot " : "") + "${client.token}";
     header["Content-Type"] = "application/json";
     return header;
   }
