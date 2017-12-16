@@ -61,6 +61,12 @@ class DiscordClient extends EventExhibitor {
 
   // External methods
 
+  Future modify({String username}) async {
+    final route = User.endpoint + "@me";
+    final response = await route.patch({"username": username}, client: this);
+    return User.fromDynamic(JSON.decode(response.body), this);
+  }
+
   Guild getGuild(int id) =>
     guilds.firstWhere((g) => g.id == id);
   

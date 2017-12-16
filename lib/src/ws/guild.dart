@@ -25,6 +25,11 @@ class Guild extends DiscordObject {
   /// A list of [Role] objects that the guild has.
   List<Role> roles = [];
 
+  Future leave() async {
+    final route = User.endpoint + "@me" + "guilds" + id.toString();
+    await route.delete(client: client);
+  }
+
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
     final route = Guild.endpoint + id.toString() + "members" + user.id.toString();
