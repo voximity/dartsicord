@@ -9,3 +9,4 @@ export "src/ws/user.dart";
 
 export "src/client.dart";
 export "src/enums.dart";
+export "src/exception.dart";

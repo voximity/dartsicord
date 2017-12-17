@@ -24,17 +24,52 @@ class Route {
     header["Content-Type"] = "application/json";
     return header;
   }
+  void handleStatusCode(http.Response response) {
+    switch (response.statusCode) {
+      case 200: // OK
+        break;
+      case 201: // CREATED
+        break;
+      case 204: // NO CONTENT
+        break;
+      case 304: // NOT MODIFIED
+        break;
+      case 400: // BAD REQUEST
+        throw new BadRequestException();
+      case 401: // UNAUTHORIZED
+        throw new UnauthorizedException();
+      case 403: // FORBIDDEN
+        throw new ForbiddenException();
+      case 404: // NOT FOUND
+        throw new NotFoundException();
+      case 405: // METHOD NOT ALLOWED
+        throw new MethodNotAllowedException();
+      case 429: // TOO MANY REQUESTS
+        throw new TooManyRequestsException();
+      case 502: // GATEWAY UNAVAILABLE
+        throw new GatewayUnavailableException();
+      default: // 5xx
+        throw new ServerErrorException();
+    }
+  }
 
-  Future<http.Response> get({Map<String, String> headers, DiscordClient client}) async =>
-    http.get(url, headers: authHeader(header: headers, client: client));
-  Future<http.Response> delete({Map<String, String> headers, DiscordClient client}) async =>
-    http.delete(url, headers: authHeader(header: headers, client: client));
-  Future<http.Response> post(dynamic body, {Map<String, String> headers, DiscordClient client}) async =>
-    http.post(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
-  Future<http.Response> patch(dynamic body, {Map<String, String> headers, DiscordClient client}) async =>
-    http.patch(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
-  Future<http.Response> put(dynamic body, {Map<String, String> headers, DiscordClient client}) async =>
-    http.put(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
+  Future<http.Response> get({Map<String, String> headers, DiscordClient client}) async {
+    final response = await http.get(url, headers: authHeader(header: headers, client: client));
+    print(response.statusCode);
+    return response;
+  }
+  Future<http.Response> delete({Map<String, String> headers, DiscordClient client}) async {
+    return http.delete(url, headers: authHeader(header: headers, client: client));
+  }
+  Future<http.Response> post(dynamic body, {Map<String, String> headers, DiscordClient client}) async {
+    return http.post(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
+  }
+  Future<http.Response> patch(dynamic body, {Map<String, String> headers, DiscordClient client}) async {
+    return http.patch(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
+  }
+  Future<http.Response> put(dynamic body, {Map<String, String> headers, DiscordClient client}) async {
+    return http.put(url, body: JSON.encode(body), headers: authHeader(header: headers, client: client));
+  }
 }
 
 class Packet {

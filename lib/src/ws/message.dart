@@ -53,7 +53,7 @@ class Message extends DiscordObject {
     await route.delete();
   }
 
-  Future<Message> reply(String text, {Embed embed}) async => this.channel.sendMessage(text, embed: embed);
+  Future<Message> reply(String text, {Embed embed}) async => await this.channel.sendMessage(text, embed: embed);
 
   //
   // Constructors
