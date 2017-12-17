@@ -87,6 +87,13 @@ class GuildMemberAddEvent {
   GuildMemberAddEvent(this.member, this.guild);
 }
 
+class GuildMemberUpdateEvent {
+  Member member;
+  Guild guild;
+
+  GuildMemberUpdateEvent(this.member, this.guild);
+}
+
 class GuildMemberRemoveEvent {
   Member member;
   Guild guild;

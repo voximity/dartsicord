@@ -43,6 +43,7 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildBanAddEvent> onBanAdd;
   EventStream<GuildBanRemoveEvent> onBanRemove;
   EventStream<GuildMemberAddEvent> onMemberAdd;
+  EventStream<GuildMemberUpdateEvent> onMemberUpdate;
   EventStream<GuildMemberRemoveEvent> onMemberRemove;
   EventStream<ChannelCreateEvent> onChannelCreate;
   EventStream<ChannelUpdateEvent> onChannelUpdate;
@@ -66,7 +67,13 @@ class DiscordClient extends EventExhibitor {
     onReady = createEvent();
     onResumed = createEvent();
     onGuildCreate = createEvent();
+    onGuildUpdate = createEvent();
     onGuildDelete = createEvent();
+    onBanAdd = createEvent();
+    onBanRemove = createEvent();
+    onMemberAdd = createEvent();
+    onMemberUpdate = createEvent();
+    onMemberRemove = createEvent();
     onChannelCreate = createEvent();
     onChannelUpdate = createEvent();
     onChannelDelete = createEvent();
@@ -190,6 +197,14 @@ class DiscordClient extends EventExhibitor {
 
               member.guild.members.add(member);
               onMemberAdd.add(new GuildMemberAddEvent(member, guild));
+              break;
+            case "GUILD_MEMBER_UPDATE":
+              final guild = await Guild.fromDynamic(packet.data["guild_id"], this);
+              final member = await Member.fromDynamic(packet.data, this, guild);
+
+              guild.members.removeWhere((x) => x.id == member.id);
+              guild.members.add(member);
+              onMemberUpdate.add(new GuildMemberUpdateEvent(member, guild));
               break;
             case "GUILD_MEMBER_REMOVE":
               final guild = await Guild.fromDynamic(packet.data["guild_id"], this);
