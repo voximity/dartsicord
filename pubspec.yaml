@@ -1,6 +1,6 @@
 name: dartsicord
 description: A Discord library for Dart
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/voximity/dartsicord
 
 environment:
