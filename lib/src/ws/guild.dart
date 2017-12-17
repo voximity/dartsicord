@@ -53,6 +53,12 @@ class Guild extends DiscordObject {
     await route.put({"delete-message-days": deleteMessagesCount}, client: client);
   }
 
+  /// Ban a user's ID from this guild.
+  Future banId(int userId) async {
+    final route = Guild.endpoint + id.toString() + "bans" + userId.toString();
+    await route.put({}, client: client);
+  }
+
   /// Give a member a role.
   Future addMemberRole(Member member, Role role) async {
     final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
