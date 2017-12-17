@@ -3,8 +3,11 @@
 This is a basic Dart library intending to provide fundamental functionality to Discord's API.
 Many features are missing from this library. It is expandable, so I am open to modification.
 
-Currently, this library is able to process basic text commands and reply accordingly.
-This library will go as far as full text functionality but no voice functionality.
+This library has a relatively good feature base. Most important REST methods are added.
+It is well organized so modification shouldn't be difficult.
+
+I plan to have all events and most REST methods in by 0.1.0. If and when voice support is
+added, I will release 1.0.0.
 
 ## Examples
 
