@@ -47,7 +47,7 @@ class Message extends DiscordObject {
     this.content = content;
     this.embed ??= embed;
 
-    await route.patch({"content": content, "embed": embed.toDynamic()});
+    await route.patch({"content": content, "embed": embed.toMap()});
   }
 
   /// Delete the message.
@@ -65,9 +65,9 @@ class Message extends DiscordObject {
 
   Message(this.content, this.id, {this.author, this.channel, this.guild});
   
-  static Future<Message> fromDynamic(dynamic obj, DiscordClient client) async =>
+  static Future<Message> fromMap(dynamic obj, DiscordClient client) async =>
     new Message(obj["content"], obj["id"],
-    author: await User.fromDynamic(obj["author"], client),
+    author: obj["author"] != null ? await User.fromMap(obj["author"], client) : null,
     channel: await client.getChannel(obj["channel_id"]),
     guild: (await client.getTextChannel(obj["channel_id"])).guild)..client = client;
 }

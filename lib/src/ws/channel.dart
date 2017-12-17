@@ -30,12 +30,12 @@ abstract class Channel extends DiscordObject {
     4: ChannelType.GuildCategory
   };
 
-  static Future<Channel> fromDynamic(dynamic obj, DiscordClient client) async {
+  static Future<Channel> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
     int type = obj["type"];
     if (type == 2)
-      return VoiceChannel.fromDynamic(obj, client);
+      return VoiceChannel.fromMap(obj, client);
     else
-      return TextChannel.fromDynamic(obj, client);
+      return TextChannel.fromMap(obj, client);
   }
 }
 
@@ -59,7 +59,7 @@ class TextChannel extends DiscordObject implements Channel {
 
   TextChannel(this.name, this.id, this.type, {this.guild, this.recipients});
 
-  static Future<TextChannel> fromDynamic(dynamic obj, DiscordClient client, {Guild guild}) async {
+  static Future<TextChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
     final channelType = Channel.types[obj["type"]];
     switch (channelType) {
       case ChannelType.GuildText:
@@ -71,7 +71,7 @@ class TextChannel extends DiscordObject implements Channel {
       case ChannelType.Dm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
-          users.add(await User.fromDynamic(obj["recipients"][i], client));
+          users.add(await User.fromMap(obj["recipients"][i], client));
         final channel = new TextChannel("DM", obj["id"], channelType, recipients: users)
           ..client = client;
         return channel;
@@ -79,7 +79,7 @@ class TextChannel extends DiscordObject implements Channel {
       case ChannelType.GroupDm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
-          users.add(await User.fromDynamic(obj["recipients"][i], client));
+          users.add(await User.fromMap(obj["recipients"][i], client));
         final channel = new TextChannel("GroupDM", obj["id"], channelType, recipients: users)
           ..client = client;
         return channel;
@@ -98,7 +98,7 @@ class VoiceChannel extends DiscordObject implements Channel {
 
   VoiceChannel(this.name, this.id);
 
-  static Future<VoiceChannel> fromDynamic(dynamic obj, DiscordClient client, {Guild guild}) async {
+  static Future<VoiceChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
     return null;
   }
 }

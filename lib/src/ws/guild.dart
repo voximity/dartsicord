@@ -38,7 +38,7 @@ class Guild extends DiscordObject {
   Future<Member> getMember(User user) async {
     final route = Guild.endpoint + id.toString() + "members" + user.id.toString();
     final response = await route.get(client: client);
-    return Member.fromDynamic(JSON.decode(response.body), client, this);
+    return Member.fromMap(JSON.decode(response.body), client, this);
   }
 
   /// Kick a member from this guild.
@@ -89,20 +89,20 @@ class Guild extends DiscordObject {
         for(int i = 0; i < obj["channels"].length; i++) {
           if (obj["channels"][i]["type"] != 0)
             continue;
-          final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: this);
+          final channel = await TextChannel.fromMap(obj["channels"][i], client, guild: this);
           channels.add(channel);
         }
       }
       if (obj["roles"] != null) {
         for(int i = 0; i < obj["roles"].length; i++) {
-          final role = Role.fromDynamic(obj["roles"][i], client);
+          final role = Role.fromMap(obj["roles"][i], client);
           role.guild = this;
           roles.add(role);
         }
       }
   }
 
-  static Future<Guild> fromDynamic(dynamic obj, DiscordClient client) async {
+  static Future<Guild> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
     if (obj["unavailable"]) {
       final g = new Guild(obj["name"], obj["id"]);
       g.client = client;
@@ -111,13 +111,13 @@ class Guild extends DiscordObject {
         for(int i = 0; i < obj["channels"].length; i++) {
           if (obj["channels"][i]["type"] != 0)
             continue;
-          final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
+          final channel = await TextChannel.fromMap(obj["channels"][i], client, guild: g);
           g.channels.add(channel);
         }
       }
       if (obj["roles"] != null) {
         for(int i = 0; i < obj["roles"].length; i++) {
-          final role = Role.fromDynamic(obj["roles"][i], client);
+          final role = Role.fromMap(obj["roles"][i], client);
           role.guild = g;
           g.roles.add(role);
         }
@@ -161,7 +161,7 @@ class Role extends DiscordObject {
 
   Role(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});
 
-  static Role fromDynamic(dynamic obj, DiscordClient client) {
+  static Role fromMap(Map<String, dynamic> obj, DiscordClient client) {
     return new Role(
       obj["name"], obj["id"],
       hoisted: obj["hoist"],

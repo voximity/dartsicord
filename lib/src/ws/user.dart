@@ -22,7 +22,7 @@ class User extends DiscordObject {
 
   User(this.username, this.discriminator, this.id);
 
-  static Future<User> fromDynamic(dynamic obj, DiscordClient client) async =>
+  static Future<User> fromMap(dynamic obj, DiscordClient client) async =>
     new User(obj["username"], obj["discriminator"], obj["id"])..client = client;
 }
 
@@ -59,14 +59,14 @@ class Member extends DiscordObject {
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 
-  static Future<Member> fromDynamic(dynamic obj, DiscordClient client, Guild guild) async {
+  static Future<Member> fromMap(dynamic obj, DiscordClient client, Guild guild) async {
     List<Role> roleList = [];
     for (int i = 0; i < obj["roles"].length; i++) {
       int roleId = obj["roles"][i];
       Role role = guild.roles.firstWhere((r) => r.id == roleId);
       roleList.add(role);
     }
-    return new Member(await User.fromDynamic(obj["user"], client), guild,
+    return new Member(await User.fromMap(obj["user"], client), guild,
       roles: roleList,
       nickname: obj["nick"],
       deafened: obj["deaf"],

@@ -65,6 +65,12 @@ class DiscordClient extends EventExhibitor {
   EventStream<MessageCreateEvent> onMessage;
   /// Fired when the client sees a message delete.
   EventStream<MessageDeleteEvent> onMessageDelete;
+  /// Fired when the client sees a channel created.
+  EventStream<ChannelCreateEvent> onChannelCreate;
+  /// Fired when the client sees a channel updated.
+  EventStream<ChannelUpdateEvent> onChannelUpdate;
+  /// Fired when the client sees a channel deleted.
+  EventStream<ChannelDeleteEvent> onChannelDelete;
 
   // Internal methods
 
@@ -80,9 +86,15 @@ class DiscordClient extends EventExhibitor {
 
   void _defineEvents() {
     onReady = createEvent();
+
     onGuildCreate = createEvent();
+
     onMessage = createEvent();
     onMessageDelete = createEvent();
+
+    onChannelCreate = createEvent();
+    onChannelUpdate = createEvent();
+    onChannelDelete = createEvent();
   }
 
   // External methods
@@ -91,7 +103,7 @@ class DiscordClient extends EventExhibitor {
   Future modify({String username}) async {
     final route = User.endpoint + "@me";
     final response = await route.patch({"username": username}, client: this);
-    return User.fromDynamic(JSON.decode(response.body), this);
+    return User.fromMap(JSON.decode(response.body), this);
   }
 
   /// Get a guild from the client's cache.
@@ -102,7 +114,7 @@ class DiscordClient extends EventExhibitor {
   Future<Channel> getChannel(int id) async {
     final route = Channel.endpoint + id.toString();
     final response = await route.get(client: this);
-    return Channel.fromDynamic(JSON.decode(response.body), this);
+    return Channel.fromMap(JSON.decode(response.body), this);
   }
 
   /// Get a text channel given its [id].
@@ -118,10 +130,10 @@ class DiscordClient extends EventExhibitor {
     final route = Channel.endpoint + channel.id.toString() + "messages";
     final response = await route.post({
       "content": content,
-      "embed": embed != null ? embed.toDynamic() : null
+      "embed": embed != null ? embed.toMap() : null
     }, client: this);
     final parsed = JSON.decode(response.body);
-    return Message.fromDynamic(parsed, this);
+    return (await Message.fromMap(parsed, this))..author = user;
   }
 
   /// Creates a direct message channel with the given [recipient].
@@ -130,7 +142,7 @@ class DiscordClient extends EventExhibitor {
     final response = await route.post({
       "recipient_id": recipient.id
     }, client: this);
-    final channel = TextChannel.fromDynamic(JSON.decode(response.body), this);
+    final channel = TextChannel.fromMap(JSON.decode(response.body), this);
     return channel;
   }
 
@@ -157,7 +169,8 @@ class DiscordClient extends EventExhibitor {
         data: payload["d"],
         event: payload["t"],
         opcode: payload["op"],
-         seq: payload["s"]);
+        seq: payload["s"],
+        client: this);
 
       if (packet.seq != null)
         _lastSeq = packet.seq;
@@ -168,33 +181,30 @@ class DiscordClient extends EventExhibitor {
           
           switch (event) {
             case "READY":
-              final event = new ReadyEvent();
-              onReady.add(event);
-              ready = true;
-              user = await User.fromDynamic(packet.data["user"], this);
+              await ReadyEvent.construct(packet);
               break;
+
+            case "CHANNEL_CREATE":
+              await ChannelCreateEvent.construct(packet);
+              break;
+            case "CHANNEL_UPDATE":
+              await ChannelUpdateEvent.construct(packet);
+              break;
+            case "CHANNEL_DELETE":
+              await ChannelDeleteEvent.construct(packet);
+              break;
+
             case "GUILD_CREATE":
-              final guild = await Guild.fromDynamic(packet.data, this);
-
-              guilds.add(guild);
-              if (ready)
-                onGuildCreate.add(new GuildCreateEvent(guild));
+              await GuildCreateEvent.construct(packet);
               break;
-            case "MESSAGE_CREATE":
-              final message = await Message.fromDynamic(packet.data, this);
 
-              onMessage.add(new MessageCreateEvent(message,
-                author: message.author,
-                channel: message.channel,
-                guild: message.guild
-              ));
+            case "MESSAGE_CREATE":
+              await MessageCreateEvent.construct(packet);
               break;
             case "MESSAGE_DELETE":
-              onMessageDelete.add(new MessageDeleteEvent(
-                await getChannel(packet.data["channel_id"]),
-                packet.data["id"]
-              ));
+              await MessageDeleteEvent.construct(packet);
               break;
+
             default:
               break;
           }

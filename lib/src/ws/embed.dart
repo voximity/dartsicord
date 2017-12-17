@@ -15,11 +15,11 @@ class Embed {
   EmbedAuthor author;
   List<EmbedField> fields = [];
 
-  dynamic toDynamic() {
+  Map<String, dynamic> toMap() {
     final fieldsMap = [];
     fields.forEach((f) => fieldsMap.add(f.toDynamic()));
     
-    final finalDynamic = {
+    final finalMap = {
       "title": title,
       "type": type,
       "description": description,
@@ -35,7 +35,7 @@ class Embed {
       "author": author?.toDynamic(),
       "fields": fieldsMap
     };
-    return finalDynamic;
+    return finalMap;
   }
 }
 class EmbedFooter {

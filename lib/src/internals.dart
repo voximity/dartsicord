@@ -81,12 +81,13 @@ class Route {
 }
 
 class Packet {
+  DiscordClient client;
   int opcode;
   int seq;
   dynamic data;
   String event;
 
-  Packet({this.opcode = 1, this.data, this.seq = null, this.event});
+  Packet({this.opcode = 1, this.data, this.seq = null, this.event, this.client});
 
   String toString() => JSON.encode({"op": opcode, "d": data, "s": seq, "t": event});
 }
