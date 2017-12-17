@@ -32,6 +32,11 @@ class Message extends DiscordObject {
   // Methods
   //
 
+  Future react(String emoji) async {
+    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString() + "reactions" + emoji + "@me";
+    await route.put({}, client: client);
+  }
+
   Future edit(String content, {Embed embed}) async {
     if (!isAuthor)
       throw new NotAuthorException();
