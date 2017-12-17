@@ -68,16 +68,30 @@ class GuildDeleteEvent {
   GuildDeleteEvent(this.guild);
 }
 
-class BanAddEvent {
+class GuildBanAddEvent {
   Member member;
 
-  BanAddEvent(this.member);
+  GuildBanAddEvent(this.member);
 }
 
-class BanRemoveEvent {
+class GuildBanRemoveEvent {
   Member member;
 
-  BanRemoveEvent(this.member);
+  GuildBanRemoveEvent(this.member);
+}
+
+class GuildMemberAddEvent {
+  Member member;
+  Guild guild;
+
+  GuildMemberAddEvent(this.member, this.guild);
+}
+
+class GuildMemberRemoveEvent {
+  Member member;
+  Guild guild;
+
+  GuildMemberRemoveEvent(this.member, this.guild);
 }
 
 class ChannelCreateEvent {

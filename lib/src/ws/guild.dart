@@ -28,6 +28,9 @@ class Guild extends DiscordObject {
   /// A list of [Member] objects that the guild bans has.
   List<Member> bans = [];
 
+  /// A list of [Member] objects that the guild has.
+  List<Member> members = [];
+
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
     final route = Guild.endpoint + id.toString() + "members" + user.id.toString();

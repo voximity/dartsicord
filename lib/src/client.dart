@@ -40,8 +40,10 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildCreateEvent> onGuildCreate;
   EventStream<GuildUpdateEvent> onGuildUpdate;
   EventStream<GuildDeleteEvent> onGuildDelete;
-  EventStream<BanAddEvent> onBanAdd;
-  EventStream<BanRemoveEvent> onBanRemove;
+  EventStream<GuildBanAddEvent> onBanAdd;
+  EventStream<GuildBanRemoveEvent> onBanRemove;
+  EventStream<GuildMemberAddEvent> onMemberAdd;
+  EventStream<GuildMemberRemoveEvent> onMemberRemove;
   EventStream<ChannelCreateEvent> onChannelCreate;
   EventStream<ChannelUpdateEvent> onChannelUpdate;
   EventStream<ChannelDeleteEvent> onChannelDelete;
@@ -173,14 +175,28 @@ class DiscordClient extends EventExhibitor {
 
               member.guild.bans.add(member);
               if (ready)
-                onBanAdd.add(new BanAddEvent(member));
+                onBanAdd.add(new GuildBanAddEvent(member));
               break;
             case "GUILD_BAN_REMOVE":
               final member = await Member.fromDynamic(packet.data, this, await Guild.fromDynamic(packet.data["guild"], this));
 
               member.guild.bans.remove(member);
               if (ready)
-                onBanRemove.add(new BanRemoveEvent(member));
+                onBanRemove.add(new GuildBanRemoveEvent(member));
+              break;
+            case "GUILD_MEMBER_ADD":
+              final guild = await Guild.fromDynamic(packet.data["guild_id"], this);
+              final member = await Member.fromDynamic(packet.data, this, guild);
+
+              member.guild.members.add(member);
+              onMemberAdd.add(new GuildMemberAddEvent(member, guild));
+              break;
+            case "GUILD_MEMBER_REMOVE":
+              final guild = await Guild.fromDynamic(packet.data["guild_id"], this);
+              final member = await Member.fromDynamic(packet.data, this, guild);
+
+              member.guild.members.remove(member);
+              onMemberRemove.add(new GuildMemberRemoveEvent(member, guild));
               break;
             case "CHANNEL_CREATE":
               final channel = await Channel.fromDynamic(packet.data, this);
