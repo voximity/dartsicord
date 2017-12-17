@@ -17,6 +17,7 @@ class User extends DiscordObject {
 
   int id;
 
+  /// Creates a direct message channel with this user.
   Future<TextChannel> createDirectMessage() async => await client.createDirectMessage(this);
 
   User(this.username, this.discriminator, this.id);
@@ -44,9 +45,16 @@ class Member extends DiscordObject {
   /// Whether or not the user is muted by the guild.
   bool muted;
 
+  /// Kicks this member from the parent guild.
   Future kick() => guild.kickMember(this);
+
+  /// Bans this member from the parent guild.
   Future ban({int deleteMessagesCount}) => guild.banMember(this, deleteMessagesCount: deleteMessagesCount);
+  
+  /// Adds a role to this member.
   Future addRole(Role role) => guild.addMemberRole(this, role);
+
+  /// Removes a role from this member.
   Future removeRole(Role role) => guild.removeMemberRole(this, role);
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});

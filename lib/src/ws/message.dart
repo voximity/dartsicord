@@ -32,14 +32,16 @@ class Message extends DiscordObject {
   // Methods
   //
 
+  /// React to the message using [emoji].
   Future react(String emoji) async {
     final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString() + "reactions" + emoji + "@me";
     await route.put({}, client: client);
   }
 
+  /// Edit the message, given it is yours.
   Future edit(String content, {Embed embed}) async {
     if (!isAuthor)
-      throw new NotAuthorException();
+      throw new ForbiddenException();
 
     final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
     this.content = content;
@@ -48,11 +50,13 @@ class Message extends DiscordObject {
     await route.patch({"content": content, "embed": embed.toDynamic()});
   }
 
+  /// Delete the message.
   Future delete() async {
     final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
     await route.delete();
   }
 
+  /// Reply to the message. See [DiscordClient.sendMessage] for full documentation.
   Future<Message> reply(String text, {Embed embed}) async => await this.channel.sendMessage(text, embed: embed);
 
   //

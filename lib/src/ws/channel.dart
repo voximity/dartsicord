@@ -54,7 +54,7 @@ class TextChannel extends DiscordObject implements Channel {
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
   List<User> recipients;
 
-  /// Send a message to the channel.
+  /// Send a message to the channel. See [DiscordClient.sendMessage] for full documentation.
   Future<Message> sendMessage(String content, {Embed embed}) async => await client.sendMessage(content, this, embed: embed);
 
   TextChannel(this.name, this.id, this.type, {this.guild, this.recipients});

@@ -24,20 +24,46 @@ class DiscordClient extends EventExhibitor {
   WebSocket _socket;
   int _lastSeq = null;
 
+  /// The shard of the current client.
   int shard;
+
+  /// The total number of shards that this bot is using.
   int shardCount;
 
+  
+
+  /// The token of this client.
   String token;
+
+  /// The token type of this client.
   TokenType tokenType;
 
+
+
+  /// A list of Guilds this client is in.
   List<Guild> guilds;
+
+  /// Whether or not this client has recieved the [READY] payload yet.
   bool ready = false;
 
+
+
+  /// The [User] representing this guild.
   User user;
 
+
+
+  //
+  // Events
+  //
+
+  /// Fired when the client receives the [READY] payload.
   EventStream<ReadyEvent> onReady;
+  /// Fired when the client sees a guild created. Not fired before [ready] is reached.
   EventStream<GuildCreateEvent> onGuildCreate;
+  /// Fired when the client sees a message created.
   EventStream<MessageCreateEvent> onMessage;
+  /// Fired when the client sees a message delete.
   EventStream<MessageDeleteEvent> onMessageDelete;
 
   // Internal methods
@@ -61,23 +87,33 @@ class DiscordClient extends EventExhibitor {
 
   // External methods
 
+  /// Modify the client's user.
   Future modify({String username}) async {
     final route = User.endpoint + "@me";
     final response = await route.patch({"username": username}, client: this);
     return User.fromDynamic(JSON.decode(response.body), this);
   }
 
+  /// Get a guild from the client's cache.
   Guild getGuild(int id) =>
     guilds.firstWhere((g) => g.id == id);
   
+  /// Get a channel given its [id].
   Future<Channel> getChannel(int id) async {
     final route = Channel.endpoint + id.toString();
     final response = await route.get(client: this);
     return Channel.fromDynamic(JSON.decode(response.body), this);
   }
+
+  /// Get a text channel given its [id].
   Future<TextChannel> getTextChannel(int id) async =>
     await getChannel(id) as TextChannel;
 
+  /// Send a message to the given [channel].
+  /// 
+  /// Content is required. If you wish to send an embed, you must leave it blank ("").
+  /// If you want to specify an embed, you first need to build an embed using the [Embed] object.
+  /// Documentation for embed building is within the [Embed] object.
   Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) async {
     final route = Channel.endpoint + channel.id.toString() + "messages";
     final response = await route.post({
@@ -88,6 +124,7 @@ class DiscordClient extends EventExhibitor {
     return Message.fromDynamic(parsed, this);
   }
 
+  /// Creates a direct message channel with the given [recipient].
   Future<TextChannel> createDirectMessage(User recipient) async {
     final route = User.endpoint + "@me" + "channels";
     final response = await route.post({
@@ -106,7 +143,7 @@ class DiscordClient extends EventExhibitor {
   }
 
   
-
+  /// Connects to Discord's API.
   Future connect(String token, {TokenType tokenType = TokenType.Bot}) async {
     this.token = token;
     this.tokenType = tokenType;

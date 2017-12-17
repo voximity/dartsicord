@@ -16,6 +16,9 @@ class Guild extends DiscordObject {
 
   int id;
 
+  /// Whether or not this guild class is partial.
+  bool partial;
+
   /// A list of [Channel] objects that the guild has.
   List<Channel> channels = [];
 
@@ -25,6 +28,7 @@ class Guild extends DiscordObject {
   /// A list of [Role] objects that the guild has.
   List<Role> roles = [];
 
+  /// Leave this guild.
   Future leave() async {
     final route = User.endpoint + "@me" + "guilds" + id.toString();
     await route.delete(client: client);
@@ -37,19 +41,25 @@ class Guild extends DiscordObject {
     return Member.fromDynamic(JSON.decode(response.body), client, this);
   }
 
+  /// Kick a member from this guild.
   Future kickMember(Member member) async {
     final route = Guild.endpoint + id.toString() + "members" + member.id.toString();
     await route.delete(client: client);
   }
+
+  /// Ban a member from this guild.
   Future banMember(Member member, {int deleteMessagesCount}) async {
     final route = Guild.endpoint + id.toString() + "bans" + member.id.toString();
     await route.put({"delete-message-days": deleteMessagesCount}, client: client);
   }
 
+  /// Give a member a role.
   Future addMemberRole(Member member, Role role) async {
     final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
     await route.put({}, client: client);
   }
+
+  /// Remove a role from a member.
   Future removeMemberRole(Member member, Role role) async {
     final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
     await route.delete(client: client);
@@ -59,29 +69,57 @@ class Guild extends DiscordObject {
   // Constructors
   //
 
-  Guild(this.name, this.id);
+  Guild(this.name, this.id, {this.partial});
+
+  Future download() async {
+    if (!partial)
+      return;
+
+    final route = endpoint + id.toString();
+    final response = await route.get(client: client);
+
+    final obj = JSON.decode(response.body);
+    if (obj["channels"] != null) {
+        for(int i = 0; i < obj["channels"].length; i++) {
+          if (obj["channels"][i]["type"] != 0)
+            continue;
+          final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: this);
+          channels.add(channel);
+        }
+      }
+      if (obj["roles"] != null) {
+        for(int i = 0; i < obj["roles"].length; i++) {
+          final role = Role.fromDynamic(obj["roles"][i], client);
+          role.guild = this;
+          roles.add(role);
+        }
+      }
+  }
 
   static Future<Guild> fromDynamic(dynamic obj, DiscordClient client) async {
-    final g = new Guild(obj["name"], obj["id"]);
-    g.client = client;
+    if (obj["unavailable"]) {
+      final g = new Guild(obj["name"], obj["id"]);
+      g.client = client;
 
-    if (obj["channels"] != null) {
-      for(int i = 0; i < obj["channels"].length; i++) {
-        if (obj["channels"][i]["type"] != 0)
-          continue;
-        final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
-        g.channels.add(channel);
+      if (obj["channels"] != null) {
+        for(int i = 0; i < obj["channels"].length; i++) {
+          if (obj["channels"][i]["type"] != 0)
+            continue;
+          final channel = await TextChannel.fromDynamic(obj["channels"][i], client, guild: g);
+          g.channels.add(channel);
+        }
       }
-    }
-    if (obj["roles"] != null) {
-      for(int i = 0; i < obj["roles"].length; i++) {
-        final role = Role.fromDynamic(obj["roles"][i], client);
-        role.guild = g;
-        g.roles.add(role);
+      if (obj["roles"] != null) {
+        for(int i = 0; i < obj["roles"].length; i++) {
+          final role = Role.fromDynamic(obj["roles"][i], client);
+          role.guild = g;
+          g.roles.add(role);
+        }
       }
+      return g;
+    } else { // This is a partial guild. A lot of features will be missing and must be [download]'ed.
+      return new Guild(null, obj["id"], partial: true);
     }
-
-    return g;
   }
 }
 
