@@ -175,7 +175,6 @@ class DiscordClient extends EventExhibitor {
               if (ready)
                 onBanAdd.add(new BanAddEvent(member));
               break;
-
             case "GUILD_BAN_REMOVE":
               final member = await Member.fromDynamic(packet.data, this, await Guild.fromDynamic(packet.data["guild"], this));
 
