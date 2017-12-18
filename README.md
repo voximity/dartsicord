@@ -21,7 +21,7 @@ void main() {
 
 	client.onMessage.listen((event) async {
 		if (event.message.content.toLowerCase() == "ping")
-		await event.message.reply("pong");
+			await event.message.reply("pong");
 	});
 
 	client.connect("YOUR-TOKEN");
