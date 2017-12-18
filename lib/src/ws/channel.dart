@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:async";
 import "../internals.dart";
 import "../client.dart";
@@ -40,7 +41,6 @@ abstract class Channel extends DiscordObject {
 }
 
 class TextChannel extends DiscordObject implements Channel {
-
   String name;
   int id;
   ChannelType type;
@@ -54,8 +54,20 @@ class TextChannel extends DiscordObject implements Channel {
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
   List<User> recipients;
 
-  /// Send a message to the channel. See [DiscordClient.sendMessage] for full documentation.
-  Future<Message> sendMessage(String content, {Embed embed}) async => await client.sendMessage(content, this, embed: embed);
+  /// Send a message to the given [channel].
+  /// 
+  /// Content is required. If you wish to send an embed, you must leave it blank ("").
+  /// If you want to specify an embed, you first need to build an embed using the [Embed] object.
+  /// Documentation for embed building is within the [Embed] object.
+  Future<Message> sendMessage(String content, {Embed embed}) async {
+    final route = Channel.endpoint + id.toString() + "messages";
+    final response = await route.post({
+      "content": content,
+      "embed": embed != null ? embed.toMap() : null
+    }, client: client);
+    final parsed = JSON.decode(response.body);
+    return (await Message.fromMap(parsed, client))..author = client.user;
+  }
 
   TextChannel(this.name, this.id, this.type, {this.guild, this.recipients});
 

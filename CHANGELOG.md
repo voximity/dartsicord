@@ -2,7 +2,9 @@
 
 ## 0.0.5
 
-- TBA
+- Add more guild events
+- More documentation for events and stuff
+- Move around some client methods for internal organization
 
 ## 0.0.4
 

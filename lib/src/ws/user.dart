@@ -5,6 +5,7 @@ import "channel.dart";
 import "message.dart";
 
 import "dart:async";
+import "dart:convert";
 
 class User extends DiscordObject {
   static Route endpoint = new Route() + "users";
@@ -18,7 +19,14 @@ class User extends DiscordObject {
   int id;
 
   /// Creates a direct message channel with this user.
-  Future<TextChannel> createDirectMessage() async => await client.createDirectMessage(this);
+  Future<TextChannel> createDirectMessage() async {
+    final route = User.endpoint + "@me" + "channels";
+    final response = await route.post({
+      "recipient_id": id
+    }, client: client);
+    final channel = TextChannel.fromMap(JSON.decode(response.body), client);
+    return channel;
+  }
 
   User(this.username, this.discriminator, this.id);
 

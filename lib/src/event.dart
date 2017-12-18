@@ -57,6 +57,7 @@ class ReadyEvent {
 }
 
 class ChannelCreateEvent {
+  /// The created channel.
   Channel channel;
   ChannelCreateEvent(this.channel);
 
@@ -70,6 +71,7 @@ class ChannelCreateEvent {
   }
 }
 class ChannelUpdateEvent {
+  /// The updated channel.
   Channel channel;
   ChannelUpdateEvent(this.channel);
 
@@ -85,6 +87,7 @@ class ChannelUpdateEvent {
   }
 }
 class ChannelDeleteEvent {
+  /// The deleted channel. Methods will not work on this instance.
   Channel channel;
   ChannelDeleteEvent(this.channel);
 
@@ -99,6 +102,7 @@ class ChannelDeleteEvent {
 }
 
 class GuildCreateEvent {
+  /// The created guild.
   Guild guild;
   GuildCreateEvent(this.guild);
 
@@ -110,12 +114,58 @@ class GuildCreateEvent {
       packet.client.onGuildCreate.add(new GuildCreateEvent(guild));
   }
 }
+class GuildUpdateEvent {
+  /// The updated guild.
+  Guild guild;
+  GuildUpdateEvent(this.guild);
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = await Guild.fromMap(packet.data, packet.client);
+    packet.client.guilds.removeWhere((g) => g.id == guild.id);
+    packet.client.guilds.add(guild);
+
+    packet.client.onGuildUpdate.add(new GuildUpdateEvent(guild));
+  }
+}
+class GuildUnavailableEvent {
+  /// The partial guild.
+  Guild guild;
+
+  GuildUnavailableEvent(this.guild);
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = await Guild.fromMap(packet.data, packet.client);
+
+    packet.client.onGuildUnavailable.add(new GuildUnavailableEvent(guild));
+  }
+}
+class GuildRemoveEvent {
+  /// The guild the client was removed from.
+  Guild guild;
+
+  GuildRemoveEvent(this.guild);
+
+  static Future<Null> construct(Packet packet) async {
+    if (packet.data["unavailable"] != null)
+      return await GuildUpdateEvent.construct(packet);
+    
+    packet.data["unavailable"] = true;
+    final guild = await Guild.fromMap(packet.data, packet.client);
+
+    packet.client.onGuildRemove.add(new GuildRemoveEvent(guild));
+  }
+}
 
 class MessageCreateEvent {
+  /// The channel the message was created in.
   Channel channel;
+  /// The guild of the channel that the message was created in. This may be null as this may be a non-guild message.
   Guild guild;
+  /// The user that created this message. May be null due to webhooks.
   User author;
+  /// The message that was created.
   Message message;
+
   MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 
   static Future<Null> construct(Packet packet) async {
@@ -128,8 +178,11 @@ class MessageCreateEvent {
   }
 }
 class MessageDeleteEvent {
+  /// The [TextChannel] this message was deleted in.
   TextChannel channel;
+  /// A snowflake ID of the message that was deleted.
   int messageId;
+
   MessageDeleteEvent(this.channel, this.messageId);
 
   static Future<Null> construct(Packet packet) async {

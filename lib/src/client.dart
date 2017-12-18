@@ -59,12 +59,21 @@ class DiscordClient extends EventExhibitor {
 
   /// Fired when the client receives the [READY] payload.
   EventStream<ReadyEvent> onReady;
+
   /// Fired when the client sees a guild created. Not fired before [ready] is reached.
   EventStream<GuildCreateEvent> onGuildCreate;
+  /// Fired when the client sees a guild update.
+  EventStream<GuildUpdateEvent> onGuildUpdate;
+  /// Fired when the client is removed from a guild.
+  EventStream<GuildRemoveEvent> onGuildRemove;
+  /// Fired when the client sees a guild become unavailable.
+  EventStream<GuildUnavailableEvent> onGuildUnavailable;
+
   /// Fired when the client sees a message created.
   EventStream<MessageCreateEvent> onMessage;
   /// Fired when the client sees a message delete.
   EventStream<MessageDeleteEvent> onMessageDelete;
+
   /// Fired when the client sees a channel created.
   EventStream<ChannelCreateEvent> onChannelCreate;
   /// Fired when the client sees a channel updated.
@@ -88,6 +97,9 @@ class DiscordClient extends EventExhibitor {
     onReady = createEvent();
 
     onGuildCreate = createEvent();
+    onGuildUpdate = createEvent();
+    onGuildRemove = createEvent();
+    onGuildUnavailable = createEvent();
 
     onMessage = createEvent();
     onMessageDelete = createEvent();
@@ -96,6 +108,8 @@ class DiscordClient extends EventExhibitor {
     onChannelUpdate = createEvent();
     onChannelDelete = createEvent();
   }
+
+
 
   // External methods
 
@@ -121,30 +135,19 @@ class DiscordClient extends EventExhibitor {
   Future<TextChannel> getTextChannel(int id) async =>
     await getChannel(id) as TextChannel;
 
-  /// Send a message to the given [channel].
-  /// 
-  /// Content is required. If you wish to send an embed, you must leave it blank ("").
-  /// If you want to specify an embed, you first need to build an embed using the [Embed] object.
-  /// Documentation for embed building is within the [Embed] object.
-  Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) async {
-    final route = Channel.endpoint + channel.id.toString() + "messages";
-    final response = await route.post({
-      "content": content,
-      "embed": embed != null ? embed.toMap() : null
-    }, client: this);
-    final parsed = JSON.decode(response.body);
-    return (await Message.fromMap(parsed, this))..author = user;
-  }
+
+
+  // External method references
+
+  /// Sends a message to a text channel. See [TextChannel.sendMessage]
+  Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) =>
+    channel.sendMessage(content, embed: embed);
 
   /// Creates a direct message channel with the given [recipient].
-  Future<TextChannel> createDirectMessage(User recipient) async {
-    final route = User.endpoint + "@me" + "channels";
-    final response = await route.post({
-      "recipient_id": recipient.id
-    }, client: this);
-    final channel = TextChannel.fromMap(JSON.decode(response.body), this);
-    return channel;
-  }
+  Future<TextChannel> createDirectMessage(User recipient) =>
+    recipient.createDirectMessage();
+
+
 
   // Constructor
 
@@ -196,6 +199,12 @@ class DiscordClient extends EventExhibitor {
 
             case "GUILD_CREATE":
               await GuildCreateEvent.construct(packet);
+              break;
+            case "GUILD_UPDATE":
+              await GuildUpdateEvent.construct(packet);
+              break;
+            case "GUILD_DELETE":
+              await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
               break;
 
             case "MESSAGE_CREATE":
