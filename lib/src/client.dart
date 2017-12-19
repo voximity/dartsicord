@@ -65,7 +65,7 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a guild update its emojis.
   EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
   /// Fired when the client sees a guild update its integrations.
-  EventStream<GuildIntegrationsUpdatedEvent> onGuildIntegrationsUpdated;
+  EventStream<GuildIntegrationsUpdateEvent> onGuildIntegrationsUpdated;
   /// Fired when the client sees a user join a guild.
   EventStream<UserAddedEvent> onUserAdded;
   /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
