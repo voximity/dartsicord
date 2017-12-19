@@ -60,7 +60,7 @@ class TextChannel extends DiscordObject implements Channel {
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
   List<User> recipients;
 
-  /// Send a message to the given [channel].
+  /// Send a message to this channel.
   /// 
   /// Content is required. If you wish to send an embed, you must leave it blank ("").
   /// If you want to specify an embed, you first need to build an embed using the [Embed] object.

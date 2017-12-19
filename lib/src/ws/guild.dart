@@ -12,7 +12,7 @@ import "dart:convert";
 
 class Guild extends DiscordObject {
   static Route endpoint = new Route() + "guilds";
-  Route get localEndpoint => Guild.endpoint + id.toString();
+  Route get localEndpoint => Guild.endpoint + id;
 
   /// Name of guild.
   String name;
@@ -82,11 +82,13 @@ class Guild extends DiscordObject {
     final roleList = [];
     roles.forEach((r) => roleList.add(r));
 
-    final route = localEndpoint + "emojis" + emoji.id.toString();
+    final route = localEndpoint + "emojis" + emoji.id;
+    await route.patch({"name": name, "roles": roleList}, client: client);
   }
 
-  Future deleteEmoji() async {
-
+  Future deleteEmoji(Emoji emoji) async {
+    final route = localEndpoint + "emojis" + emoji.id;
+    await route.delete(client: client);
   }
 
   //

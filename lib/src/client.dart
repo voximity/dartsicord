@@ -12,6 +12,10 @@ import "ws/message.dart";
 import "ws/user.dart";
 import "ws/embed.dart";
 
+import "events/channel.dart";
+import "events/guild.dart";
+import "events/message.dart";
+
 class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
   WebSocket _socket;
@@ -23,15 +27,11 @@ class DiscordClient extends EventExhibitor {
   /// The total number of shards that this bot is using.
   int shardCount;
 
-  
-
   /// The token of this client.
   String token;
 
   /// The token type of this client.
   TokenType tokenType;
-
-
 
   /// A list of Guilds this client is in.
   List<Guild> guilds;
@@ -39,12 +39,8 @@ class DiscordClient extends EventExhibitor {
   /// Whether or not this client has recieved the [READY] payload yet.
   bool ready = false;
 
-
-
   /// The [User] representing this guild.
   User user;
-
-
 
   //
   // Events
@@ -66,6 +62,14 @@ class DiscordClient extends EventExhibitor {
   EventStream<UserBannedEvent> onUserBanned;
   /// Fired when the client sees a user unbanned.
   EventStream<UserUnbannedEvent> onUserUnbanned;
+  /// Fired when the client sees a guild update its emojis.
+  EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
+  /// Fired when the client sees a guild update its integrations.
+  EventStream<GuildIntegrationsUpdatedEvent> onGuildIntegrationsUpdated;
+  /// Fired when the client sees a user join a guild.
+  EventStream<UserAddedEvent> onUserAdded;
+  /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
+  EventStream<UserRemovedEvent> onUserRemoved;
 
   /// Fired when the client sees a message created.
   EventStream<MessageCreateEvent> onMessage;
@@ -78,6 +82,8 @@ class DiscordClient extends EventExhibitor {
   EventStream<ChannelUpdateEvent> onChannelUpdate;
   /// Fired when the client sees a channel deleted.
   EventStream<ChannelDeleteEvent> onChannelDelete;
+  /// Fired when the client sees a channel update its pins.
+  EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
 
   // Internal methods
 
@@ -99,6 +105,11 @@ class DiscordClient extends EventExhibitor {
     onGuildRemove = createEvent();
     onGuildUnavailable = createEvent();
 
+    onGuildEmojisUpdated = createEvent();
+    onGuildIntegrationsUpdated = createEvent();
+    onUserAdded = createEvent();
+    onUserRemoved = createEvent();
+
     onUserBanned = createEvent();
     onUserUnbanned = createEvent();
 
@@ -108,6 +119,7 @@ class DiscordClient extends EventExhibitor {
     onChannelCreate = createEvent();
     onChannelUpdate = createEvent();
     onChannelDelete = createEvent();
+    onChannelPinsUpdate = createEvent();
   }
 
 
@@ -130,7 +142,7 @@ class DiscordClient extends EventExhibitor {
   
   /// Get a channel given its [id].
   Future<Channel> getChannel(dynamic id) async {
-    final route = Channel.endpoint + id.toString();
+    final route = Channel.endpoint + id;
     final response = await route.get(client: this);
     return Channel.fromMap(JSON.decode(response.body), this);
   }
@@ -200,6 +212,9 @@ class DiscordClient extends EventExhibitor {
             case "CHANNEL_DELETE":
               await ChannelDeleteEvent.construct(packet);
               break;
+            case "CHANNEL_PINS_UPDATE":
+              await ChannelPinsUpdateEvent.construct(packet);
+              break;
 
             case "GUILD_CREATE":
               await GuildCreateEvent.construct(packet);
@@ -209,6 +224,19 @@ class DiscordClient extends EventExhibitor {
               break;
             case "GUILD_DELETE":
               await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
+              break;
+            
+            case "GUILD_EMOJIS_UPDATE":
+              await GuildEmojisUpdateEvent.construct(packet);
+              break;
+            case "GUILD_INTEGRATIONS_UPDATE":
+              await GuildIntegrationsUpdateEvent.construct(packet);
+              break;
+            case "GUILD_MEMBER_ADD":
+              await UserAddedEvent.construct(packet);
+              break;
+            case "GUILD_MEMBER_REMOVE":
+              await UserRemovedEvent.construct(packet);
               break;
 
             case "USER_BANNED":

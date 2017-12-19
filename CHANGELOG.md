@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.7
+
+- Add a lot more events
+- Move events from event.dart to events directory
+- Fix up some fromDynamic to fromMap parameter types
+- More REST methods
+- More work on Snowflake usage
+
 ## 0.0.6
 
 - Replace int-based id with Snowflake class
@@ -28,4 +36,4 @@
 
 ## 0.0.1-0.0.2
 
-- I don't know, I wasn't keeping track of it here
+- See GitHub

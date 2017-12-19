@@ -31,7 +31,7 @@ class User extends DiscordObject {
 
   User(this.username, this.discriminator, this.id);
 
-  static Future<User> fromMap(dynamic obj, DiscordClient client) async =>
+  static Future<User> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
     new User(obj["username"], obj["discriminator"], new Snowflake(obj["id"]))..client = client;
 }
 
@@ -70,7 +70,7 @@ class Member extends DiscordObject {
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 
-  static Future<Member> fromMap(dynamic obj, DiscordClient client, Guild guild) async {
+  static Future<Member> fromMap(Map<String, dynamic> obj, DiscordClient client, Guild guild) async {
     List<Role> roleList = [];
     for (int i = 0; i < obj["roles"].length; i++) {
       int roleId = obj["roles"][i];

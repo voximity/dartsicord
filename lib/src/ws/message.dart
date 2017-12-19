@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 import "../internals.dart";
 import "../client.dart";
 import "../exception.dart";
@@ -24,6 +25,18 @@ class Message extends DiscordObject {
   /// Guild the message was sent in, if any.
   Guild guild = null;
 
+  /// When the message was created.
+  DateTime createdAt;
+
+  /// When the message was edited.
+  DateTime editedAt;
+
+  /// The users that are being mentioned in this message.
+  List<User> mentions = [];
+
+  /// The roles that are being mentioned in this message.
+  List<Role> roleMentions = [];
+
   /// Whether or not the message was created by the client user.
   bool get isAuthor => author.id == client.user.id;
 
@@ -48,7 +61,9 @@ class Message extends DiscordObject {
     this.content = content;
     this.embed ??= embed;
 
-    await route.patch({"content": content, "embed": embed.toMap()});
+    final newMessage = await route.patch({"content": content, "embed": embed.toMap()});
+    
+    this.editedAt = DateTime.parse(JSON.decode(newMessage.body)["edited_timestamp"]);
   }
 
   /// Delete the message.
@@ -66,9 +81,29 @@ class Message extends DiscordObject {
 
   Message(this.content, this.id, {this.author, this.channel, this.guild});
   
-  static Future<Message> fromMap(dynamic obj, DiscordClient client) async =>
-    new Message(obj["content"], new Snowflake(obj["id"]),
-    author: obj["author"] != null ? await User.fromMap(obj["author"], client) : null,
-    channel: await client.getChannel(obj["channel_id"]),
-    guild: (await client.getTextChannel(obj["channel_id"])).guild)..client = client;
+  static Future<Message> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
+    final message = new Message(obj["content"], new Snowflake(obj["id"]),
+      author: obj["author"] != null ? await User.fromMap(obj["author"], client) : null,
+      channel: await client.getChannel(obj["channel_id"]),
+      guild: (await client.getTextChannel(obj["channel_id"])).guild)
+
+      ..createdAt = DateTime.parse(obj["timestamp"])
+      ..editedAt = obj["edited_timestamp"] != null ? DateTime.parse(obj["edited_timestamp"]) : null
+      ..client = client;
+
+    obj["mentions"]?.forEach((m) async {
+      final user = await User.fromMap(m, client);
+
+      message.mentions.add(user);
+    });
+
+    obj["role_mentions"]?.forEach((m) async {
+      final role = await Role.fromMap(m, client)
+        ..guild = message.guild;
+
+      message.roleMentions.add(role);
+    });
+
+    return message;
+  }
 }
