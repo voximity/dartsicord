@@ -1,8 +1,11 @@
 import "dart:convert";
 import "dart:async";
+
 import "../internals.dart";
 import "../client.dart";
 import "../enums.dart";
+import "../object.dart";
+
 import "guild.dart";
 import "message.dart";
 import "user.dart";
@@ -10,6 +13,7 @@ import "embed.dart";
 
 abstract class Channel extends DiscordObject {
   static Route endpoint = new Route() + "channels";
+  Route get localEndpoint => Channel.endpoint + id.toString();
   
   /// Name of the channel.
   String name;
@@ -20,7 +24,7 @@ abstract class Channel extends DiscordObject {
   /// Type of the channel.
   ChannelType type;
 
-  int id;
+  Snowflake id;
 
   /// A list of Channel types, by their API ID.
   static Map<int, ChannelType> types = {
@@ -42,7 +46,9 @@ abstract class Channel extends DiscordObject {
 
 class TextChannel extends DiscordObject implements Channel {
   String name;
-  int id;
+  Snowflake id;
+  Route get localEndpoint => Channel.endpoint + id;
+
   ChannelType type;
 
   /// Guild of the channel, if any. Refer to the [type] property and check for [GuildText].
@@ -60,7 +66,7 @@ class TextChannel extends DiscordObject implements Channel {
   /// If you want to specify an embed, you first need to build an embed using the [Embed] object.
   /// Documentation for embed building is within the [Embed] object.
   Future<Message> sendMessage(String content, {Embed embed}) async {
-    final route = Channel.endpoint + id.toString() + "messages";
+    final route = localEndpoint + "messages";
     final response = await route.post({
       "content": content,
       "embed": embed != null ? embed.toMap() : null
@@ -75,7 +81,7 @@ class TextChannel extends DiscordObject implements Channel {
     final channelType = Channel.types[obj["type"]];
     switch (channelType) {
       case ChannelType.GuildText:
-        final channel = new TextChannel(obj["name"], obj["id"], channelType,
+        final channel = new TextChannel(obj["name"], new Snowflake(obj["id"]), channelType,
           guild: guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null))
           ..client = client;
         return channel;
@@ -84,7 +90,7 @@ class TextChannel extends DiscordObject implements Channel {
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromMap(obj["recipients"][i], client));
-        final channel = new TextChannel("DM", obj["id"], channelType, recipients: users)
+        final channel = new TextChannel("DM", new Snowflake(obj["id"]), channelType, recipients: users)
           ..client = client;
         return channel;
 
@@ -92,7 +98,7 @@ class TextChannel extends DiscordObject implements Channel {
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromMap(obj["recipients"][i], client));
-        final channel = new TextChannel("GroupDM", obj["id"], channelType, recipients: users)
+        final channel = new TextChannel("GroupDM", new Snowflake(obj["id"]), channelType, recipients: users)
           ..client = client;
         return channel;
 
@@ -104,9 +110,13 @@ class TextChannel extends DiscordObject implements Channel {
 
 class VoiceChannel extends DiscordObject implements Channel {
   String name;
-  int id;
   Guild guild;
+
+  Route get localEndpoint => Channel.endpoint + id;
+
   ChannelType type;
+
+  Snowflake id;
 
   VoiceChannel(this.name, this.id);
 

@@ -2,6 +2,7 @@ import "dart:async";
 import "../internals.dart";
 import "../client.dart";
 import "../exception.dart";
+import "../object.dart";
 import "user.dart";
 import "guild.dart";
 import "channel.dart";
@@ -26,7 +27,7 @@ class Message extends DiscordObject {
   /// Whether or not the message was created by the client user.
   bool get isAuthor => author.id == client.user.id;
 
-  int id;
+  Snowflake id;
 
   //
   // Methods
@@ -34,7 +35,7 @@ class Message extends DiscordObject {
 
   /// React to the message using [emoji].
   Future react(String emoji) async {
-    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString() + "reactions" + emoji + "@me";
+    final route = Channel.endpoint + channel.id + "messages" + id + "reactions" + emoji + "@me";
     await route.put({}, client: client);
   }
 
@@ -43,7 +44,7 @@ class Message extends DiscordObject {
     if (!isAuthor)
       throw new ForbiddenException();
 
-    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
+    final route = Channel.endpoint + channel.id + "messages" + id;
     this.content = content;
     this.embed ??= embed;
 
@@ -52,7 +53,7 @@ class Message extends DiscordObject {
 
   /// Delete the message.
   Future delete() async {
-    final route = Channel.endpoint + channel.id.toString() + "messages" + id.toString();
+    final route = Channel.endpoint + channel.id + "messages" + id;
     await route.delete();
   }
 
@@ -66,7 +67,7 @@ class Message extends DiscordObject {
   Message(this.content, this.id, {this.author, this.channel, this.guild});
   
   static Future<Message> fromMap(dynamic obj, DiscordClient client) async =>
-    new Message(obj["content"], obj["id"],
+    new Message(obj["content"], new Snowflake(obj["id"]),
     author: obj["author"] != null ? await User.fromMap(obj["author"], client) : null,
     channel: await client.getChannel(obj["channel_id"]),
     guild: (await client.getTextChannel(obj["channel_id"])).guild)..client = client;

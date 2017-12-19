@@ -1,20 +1,23 @@
 import "../internals.dart";
 import "../client.dart";
+import "../object.dart";
 
 import "channel.dart";
 import "user.dart";
 import "permission.dart";
+import "emoji.dart";
 
 import "dart:async";
 import "dart:convert";
 
 class Guild extends DiscordObject {
   static Route endpoint = new Route() + "guilds";
+  Route get localEndpoint => Guild.endpoint + id.toString();
 
   /// Name of guild.
   String name;
 
-  int id;
+  Snowflake id;
 
   /// Whether or not this guild class is partial.
   bool partial;
@@ -28,47 +31,62 @@ class Guild extends DiscordObject {
   /// A list of [Role] objects that the guild has.
   List<Role> roles = [];
 
+  /// A list of [Emoji] objects that the guild has.
+  List<Emoji> emojis = [];
+
   /// Leave this guild.
   Future leave() async {
-    final route = User.endpoint + "@me" + "guilds" + id.toString();
+    final route = User.endpoint + "@me" + "guilds" + id;
     await route.delete(client: client);
   }
 
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
-    final route = Guild.endpoint + id.toString() + "members" + user.id.toString();
+    final route = localEndpoint + "members" + user.id;
     final response = await route.get(client: client);
     return Member.fromMap(JSON.decode(response.body), client, this);
   }
 
   /// Kick a member from this guild.
   Future kickMember(Member member) async {
-    final route = Guild.endpoint + id.toString() + "members" + member.id.toString();
+    final route = localEndpoint + "members" + member.id;
     await route.delete(client: client);
   }
 
   /// Ban a member from this guild.
   Future banMember(Member member, {int deleteMessagesCount}) async {
-    final route = Guild.endpoint + id.toString() + "bans" + member.id.toString();
+    final route = localEndpoint + "bans" + member.id;
     await route.put({"delete-message-days": deleteMessagesCount}, client: client);
   }
 
   /// Ban a user's ID from this guild.
   Future banId(int userId) async {
-    final route = Guild.endpoint + id.toString() + "bans" + userId.toString();
+    final route = localEndpoint + "bans" + userId;
     await route.put({}, client: client);
   }
 
   /// Give a member a role.
   Future addMemberRole(Member member, Role role) async {
-    final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
+    final route = localEndpoint + "members" + member.id + "roles" + role.id;
     await route.put({}, client: client);
   }
 
   /// Remove a role from a member.
   Future removeMemberRole(Member member, Role role) async {
-    final route = Guild.endpoint + id.toString() + "members" + member.id.toString() + "roles" + role.id.toString();
+    final route = localEndpoint + "members" + member.id + "roles" + role.id;
     await route.delete(client: client);
+  }
+
+  /// Modify an existing emoji.
+  Future modifyEmoji(Emoji emoji, {String name, List<Role> roles}) async {
+    final roleList = [];
+    roles.forEach((r) => roleList.add(r));
+
+    final route = localEndpoint + "emojis" + emoji.id.toString();
+  }
+
+  Future deleteEmoji() async {
+
   }
 
   //
@@ -81,7 +99,7 @@ class Guild extends DiscordObject {
     if (!partial)
       return;
 
-    final route = endpoint + id.toString();
+    final route = endpoint + id;
     final response = await route.get(client: client);
 
     final obj = JSON.decode(response.body);
@@ -103,10 +121,16 @@ class Guild extends DiscordObject {
   }
 
   static Future<Guild> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
-    if (obj["unavailable"]) {
-      final g = new Guild(obj["name"], obj["id"]);
+    if (obj["unavailable"] == null || obj["unavailable"] == false) {
+      final g = new Guild(obj["name"], new Snowflake(obj["id"]));
       g.client = client;
 
+      if (obj["emojis"] != null) {
+        for (int i = 0; i < obj["emojis"].length; i++) {
+          final emoji = await Emoji.fromMap(obj["emojis"][i], client, guild: g);
+          g.emojis.add(emoji);
+        }
+      }
       if (obj["channels"] != null) {
         for(int i = 0; i < obj["channels"].length; i++) {
           if (obj["channels"][i]["type"] != 0)
@@ -124,13 +148,13 @@ class Guild extends DiscordObject {
       }
       return g;
     } else { // This is a partial guild. A lot of features will be missing and must be [download]'ed.
-      return new Guild(null, obj["id"], partial: true);
+      return new Guild(null, new Snowflake(obj["id"]), partial: true);
     }
   }
 }
 
 class Role extends DiscordObject {
-  int id;
+  Snowflake id;
 
   /// The guild that this role is in.
   Guild guild;
@@ -163,7 +187,7 @@ class Role extends DiscordObject {
 
   static Role fromMap(Map<String, dynamic> obj, DiscordClient client) {
     return new Role(
-      obj["name"], obj["id"],
+      obj["name"], new Snowflake(obj["id"]),
       hoisted: obj["hoist"],
       position: obj["position"],
       permissionsRaw: obj["permissions"],

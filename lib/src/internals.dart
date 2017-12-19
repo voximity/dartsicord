@@ -12,8 +12,8 @@ class Route {
 
   Route();
 
-  Route operator +(String other) =>
-    new Route()..url = url + "/$other";
+  Route operator +(dynamic other) =>
+    new Route()..url = url + "/" + other.toString();
 
   Map<String, String> authHeader({Map<String, String> header, DiscordClient client}) {
     if (header == null)

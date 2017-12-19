@@ -5,19 +5,12 @@ import "dart:io";
 import "internals.dart";
 import "event.dart";
 import "enums.dart";
+import "object.dart";
 import "ws/guild.dart";
 import "ws/channel.dart";
 import "ws/message.dart";
 import "ws/user.dart";
 import "ws/embed.dart";
-
-class DiscordObject {
-  /// ID of the object.
-  int id;
-
-  /// The Client the object was instantiated by.
-  DiscordClient client;
-}
 
 class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
@@ -69,6 +62,11 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a guild become unavailable.
   EventStream<GuildUnavailableEvent> onGuildUnavailable;
 
+  /// Fired when the client sees a user banned.
+  EventStream<UserBannedEvent> onUserBanned;
+  /// Fired when the client sees a user unbanned.
+  EventStream<UserUnbannedEvent> onUserUnbanned;
+
   /// Fired when the client sees a message created.
   EventStream<MessageCreateEvent> onMessage;
   /// Fired when the client sees a message delete.
@@ -101,6 +99,9 @@ class DiscordClient extends EventExhibitor {
     onGuildRemove = createEvent();
     onGuildUnavailable = createEvent();
 
+    onUserBanned = createEvent();
+    onUserUnbanned = createEvent();
+
     onMessage = createEvent();
     onMessageDelete = createEvent();
 
@@ -121,18 +122,21 @@ class DiscordClient extends EventExhibitor {
   }
 
   /// Get a guild from the client's cache.
-  Guild getGuild(int id) =>
-    guilds.firstWhere((g) => g.id == id);
+  Guild getGuild(dynamic id) {
+    return guilds.firstWhere((g) {
+      return g.id.toString() == id.toString();
+    });
+  }
   
   /// Get a channel given its [id].
-  Future<Channel> getChannel(int id) async {
+  Future<Channel> getChannel(dynamic id) async {
     final route = Channel.endpoint + id.toString();
     final response = await route.get(client: this);
     return Channel.fromMap(JSON.decode(response.body), this);
   }
 
   /// Get a text channel given its [id].
-  Future<TextChannel> getTextChannel(int id) async =>
+  Future<TextChannel> getTextChannel(dynamic id) async =>
     await getChannel(id) as TextChannel;
 
 
@@ -205,6 +209,13 @@ class DiscordClient extends EventExhibitor {
               break;
             case "GUILD_DELETE":
               await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
+              break;
+
+            case "USER_BANNED":
+              await UserBannedEvent.construct(packet);
+              break;
+            case "USER_UNBANNED":
+              await UserUnbannedEvent.construct(packet);
               break;
 
             case "MESSAGE_CREATE":

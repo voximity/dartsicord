@@ -63,7 +63,7 @@ class ChannelCreateEvent {
 
   static Future<Null> construct(Packet packet) async {
     final channel = await Channel.fromMap(packet.data, packet.client);
-    if (channel.guild != null)
+    if (channel.guild != null && !channel.guild.channels.any((c) => c.id == channel.id))
       channel.guild.channels.add(channel);
     
     final event = new ChannelCreateEvent(channel);
@@ -108,7 +108,8 @@ class GuildCreateEvent {
 
   static Future<Null> construct(Packet packet) async {
     final guild = await Guild.fromMap(packet.data, packet.client);
-    packet.client.guilds.add(guild);
+    if (!packet.client.guilds.any((g) => g.id == guild.id))
+      packet.client.guilds.add(guild);
 
     if (packet.client.ready)
       packet.client.onGuildCreate.add(new GuildCreateEvent(guild));
@@ -153,6 +154,36 @@ class GuildRemoveEvent {
     final guild = await Guild.fromMap(packet.data, packet.client);
 
     packet.client.onGuildRemove.add(new GuildRemoveEvent(guild));
+  }
+}
+class UserBannedEvent {
+  /// The guild the user was banned from.
+  Guild guild;
+  /// The user that was banned.
+  User user;
+
+  UserBannedEvent({this.guild, this.user});
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = await packet.client.getGuild(packet.data["guild_id"]);
+    final user = await User.fromMap(packet.data, packet.client);
+
+    packet.client.onUserBanned.add(new UserBannedEvent(guild: guild, user: user));
+  }
+}
+class UserUnbannedEvent {
+  /// The guild the user was unbanned from.
+  Guild guild;
+  /// The user that was banned.
+  User user;
+
+  UserUnbannedEvent({this.guild, this.user});
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = await packet.client.getGuild(packet.data["guild_id"]);
+    final user = await User.fromMap(packet.data, packet.client);
+
+    packet.client.onUserUnbanned.add(new UserBannedEvent(guild: guild, user: user));
   }
 }
 

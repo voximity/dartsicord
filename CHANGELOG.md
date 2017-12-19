@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.6
+
+- Replace int-based id with Snowflake class
+- Add Emoji class
+- Add Emoji events
+- Add Emoji methods
+- Add User banned and unbanned events
+- Use localEndpoint instead of endpoint + id
+
 ## 0.0.5
 
 - Add more guild events

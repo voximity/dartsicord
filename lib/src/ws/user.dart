@@ -1,5 +1,6 @@
 import "../internals.dart";
 import "../client.dart";
+import "../object.dart";
 import "guild.dart";
 import "channel.dart";
 import "message.dart";
@@ -16,7 +17,7 @@ class User extends DiscordObject {
   /// Discriminator of the user.
   String discriminator;
 
-  int id;
+  Snowflake id;
 
   /// Creates a direct message channel with this user.
   Future<TextChannel> createDirectMessage() async {
@@ -31,10 +32,12 @@ class User extends DiscordObject {
   User(this.username, this.discriminator, this.id);
 
   static Future<User> fromMap(dynamic obj, DiscordClient client) async =>
-    new User(obj["username"], obj["discriminator"], obj["id"])..client = client;
+    new User(obj["username"], obj["discriminator"], new Snowflake(obj["id"]))..client = client;
 }
 
 class Member extends DiscordObject {
+  Snowflake id;
+
   /// The guild that this Member is in.
   Guild guild;
 
@@ -71,7 +74,7 @@ class Member extends DiscordObject {
     List<Role> roleList = [];
     for (int i = 0; i < obj["roles"].length; i++) {
       int roleId = obj["roles"][i];
-      Role role = guild.roles.firstWhere((r) => r.id == roleId);
+      Role role = guild.roles.firstWhere((r) => r.id.toString() == roleId.toString());
       roleList.add(role);
     }
     return new Member(await User.fromMap(obj["user"], client), guild,
