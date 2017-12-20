@@ -67,10 +67,19 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
   /// Fired when the client sees a guild update its integrations.
   EventStream<GuildIntegrationsUpdateEvent> onGuildIntegrationsUpdated;
+  /// Fired when the client sees a member updated on its guild.
+  EventStream<MemberUpdatedEvent> onMemberUpdated;
   /// Fired when the client sees a user join a guild.
   EventStream<UserAddedEvent> onUserAdded;
   /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
   EventStream<UserRemovedEvent> onUserRemoved;
+
+  /// Fired when the client sees a role created in a guild.
+  EventStream<RoleCreatedEvent> onRoleCreated;
+  /// Fired when the client sees a role updated in a guild.
+  EventStream<RoleUpdatedEvent> onRoleUpdated;
+  /// Fired when the client sees a role deleted in a guild.
+  EventStream<RoleDeletedEvent> onRoleDeleted;
 
   /// Fired when the client sees a message created.
   EventStream<MessageCreateEvent> onMessage;
@@ -108,6 +117,7 @@ class DiscordClient extends EventExhibitor {
 
     onGuildEmojisUpdated = createEvent();
     onGuildIntegrationsUpdated = createEvent();
+    onMemberUpdated = createEvent();
     onUserAdded = createEvent();
     onUserRemoved = createEvent();
 
@@ -135,11 +145,10 @@ class DiscordClient extends EventExhibitor {
   }
 
   /// Get a guild from the client's cache.
-  Guild getGuild(dynamic id) {
-    return guilds.firstWhere((g) {
-      return g.id.toString() == id.toString();
-    });
-  }
+  Guild getGuild(dynamic id) => 
+    guilds.firstWhere((g) =>
+      g.id.toString() == id.toString()
+    );
   
   /// Get a channel given its [id].
   Future<Channel> getChannel(dynamic id) async {
@@ -255,6 +264,9 @@ class DiscordClient extends EventExhibitor {
             case "GUILD_INTEGRATIONS_UPDATE":
               await GuildIntegrationsUpdateEvent.construct(packet);
               break;
+            case "GUILD_MEMBER_UPDATE":
+              await MemberUpdatedEvent.construct(packet);
+              break;
             case "GUILD_MEMBER_ADD":
               await UserAddedEvent.construct(packet);
               break;
@@ -267,6 +279,16 @@ class DiscordClient extends EventExhibitor {
               break;
             case "USER_UNBANNED":
               await UserUnbannedEvent.construct(packet);
+              break;
+            
+            case "GUILD_ROLE_CREATED":
+              await RoleCreatedEvent.construct(packet);
+              break;
+            case "GUILD_ROLE_UPDATED":
+              await RoleUpdatedEvent.construct(packet);
+              break;
+            case "GUILD_ROLE_DELETED":
+              await RoleDeletedEvent.construct(packet);
               break;
 
             case "MESSAGE_CREATE":

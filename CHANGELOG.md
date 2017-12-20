@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.9
+
+- More guild events
+- Kind of just a test update from a different machine
+
 ## 0.0.8
 
 - Add status updating support

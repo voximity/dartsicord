@@ -7,6 +7,7 @@ import "../resources/message.dart";
 import "../resources/emoji.dart";
 
 import "../internals.dart";
+import "../object.dart";
 
 class GuildCreateEvent {
   /// The created guild.
@@ -128,6 +129,26 @@ class GuildIntegrationsUpdateEvent {
   }
 }
 
+class MemberUpdatedEvent {
+  /// The guild in which the user has been updated.
+  Guild guild;
+  /// The user that has been updated in the guild.
+  User user;
+  /// The member that has been updated in the guild.
+  Member member;
+
+  MemberUpdatedEvent(this.guild, this.user, {this.member});
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = packet.client.getGuild(packet.data["guild_id"]);
+    final user = await User.fromMap(packet.data["user"], packet.client);
+    final member = await guild.getMember(user);
+
+    final event = new MemberUpdatedEvent(guild, user, member: member);
+    packet.client.onMemberUpdated.add(event);
+  }
+}
+
 class UserAddedEvent {
   /// The guild in which the user has joined.
   Guild guild;
@@ -163,5 +184,59 @@ class UserRemovedEvent {
     final event = new UserRemovedEvent(guild, user);
 
     packet.client.onUserRemoved.add(event);
+  }
+}
+
+class RoleCreatedEvent {
+  Guild guild;
+  Role role;
+
+  RoleCreatedEvent(this.guild, this.role);
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = packet.client.getGuild(packet.data["guild_id"]);
+    final role = await Role.fromMap(packet.data["role"], packet.client)
+      ..guild = guild;
+    
+    if (!guild.roles.any((r) => r.id == role.id))
+      guild.roles.add(role);
+
+    final event = new RoleCreatedEvent(guild, role);
+    packet.client.onRoleCreated.add(event);
+  }
+}
+class RoleUpdatedEvent {
+  Guild guild;
+  Role role;
+
+  RoleUpdatedEvent(this.guild, this.role);
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = packet.client.getGuild(packet.data["guild_id"]);
+    final role = await Role.fromMap(packet.data["role"], packet.client)
+      ..guild = guild;
+    
+    guild.roles
+      ..removeWhere((r) => r.id == role.id)
+      ..add(role);
+
+    final event = new RoleUpdatedEvent(guild, role);
+    packet.client.onRoleUpdated.add(event);
+  }
+}
+class RoleDeletedEvent {
+  Guild guild;
+  Snowflake roleId;
+
+  RoleDeletedEvent(this.guild, {this.roleId});
+
+  static Future<Null> construct(Packet packet) async {
+    final guild = packet.client.getGuild(packet.data["guild_id"]);
+    final roleId = new Snowflake(packet.data["role_id"]);
+
+    guild.roles.removeWhere((r) => r.id == roleId);
+
+    final event = new RoleDeletedEvent(guild, roleId: roleId);
+    packet.client.onRoleDeleted.add(event);
   }
 }
