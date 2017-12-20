@@ -15,16 +15,10 @@ class Permission {
   }
 
   /// Takes raw permission bitfield and converts into a [List] of [Permission] objects given a [preset].
-  static List<Permission> fromRaw(int raw, List<Permission> preset) {
-    final permissionList = [];
-    preset.forEach((p) {
-      if ((raw & p.raw) != 0)
-        permissionList.add(p);
-    });
-    return permissionList;
-  }
+  static List<Permission> fromRaw(int raw, List<Permission> preset) =>
+    preset.where((p) => raw & p.raw != 0);
 
-  static List<Permission> RolePermissions = [
+  static List<Permission> rolePermissions = [
     new Permission("CreateInstantInvite", raw: 1 << 0),
     new Permission("KickMembers", raw: 1 << 1),
     new Permission("BanMembers", raw: 1 << 2),

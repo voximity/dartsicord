@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import "ws/guild.dart";
-import "ws/user.dart";
-import "ws/channel.dart";
-import "ws/message.dart";
-import "ws/emoji.dart";
+import "resources/guild.dart";
+import "resources/user.dart";
+import "resources/channel.dart";
+import "resources/message.dart";
+import "resources/emoji.dart";
 
 import "internals.dart";
 
@@ -45,8 +45,9 @@ class ReadyEvent {
   ReadyEvent();
 
   static Future<Null> construct(Packet packet) async {
-    packet.client.ready = true;
-    packet.client.user = await User.fromMap(packet.data, packet.client);
+    packet.client
+      ..ready = true
+      ..user = await User.fromMap(packet.data, packet.client);
 
     final event = new ReadyEvent();
     packet.client.onReady.add(event);

@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import "../ws/guild.dart";
-import "../ws/user.dart";
-import "../ws/channel.dart";
-import "../ws/message.dart";
-import "../ws/emoji.dart";
+import "../resources/guild.dart";
+import "../resources/user.dart";
+import "../resources/channel.dart";
+import "../resources/message.dart";
+import "../resources/emoji.dart";
 
 import "../internals.dart";
 
@@ -29,8 +29,9 @@ class GuildUpdateEvent {
 
   static Future<Null> construct(Packet packet) async {
     final guild = await Guild.fromMap(packet.data, packet.client);
-    packet.client.guilds.removeWhere((g) => g.id == guild.id);
-    packet.client.guilds.add(guild);
+    packet.client.guilds
+      ..removeWhere((g) => g.id == guild.id)
+      ..add(guild);
 
     packet.client.onGuildUpdate.add(new GuildUpdateEvent(guild));
   }

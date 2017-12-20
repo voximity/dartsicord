@@ -1,4 +1,4 @@
-# dartsicord
+# dartsicord [![Pub](https://img.shields.io/pub/v/dartsicord.svg)](https://pub.dartlang.org/packages/dartsicord)
 
 This is a basic Dart library intending to provide fundamental functionality to Discord's API.
 Many features are missing from this library. It is expandable, so I am open to modification.

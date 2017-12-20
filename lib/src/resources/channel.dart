@@ -36,7 +36,7 @@ abstract class Channel extends DiscordObject {
   };
 
   static Future<Channel> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
-    int type = obj["type"];
+    final type = obj["type"];
     if (type == 2)
       return VoiceChannel.fromMap(obj, client);
     else

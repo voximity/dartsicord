@@ -6,11 +6,12 @@ import "internals.dart";
 import "event.dart";
 import "enums.dart";
 import "object.dart";
-import "ws/guild.dart";
-import "ws/channel.dart";
-import "ws/message.dart";
-import "ws/user.dart";
-import "ws/embed.dart";
+import "resources/guild.dart";
+import "resources/channel.dart";
+import "resources/message.dart";
+import "resources/user.dart";
+import "resources/embed.dart";
+import "resources/game.dart";
 
 import "events/channel.dart";
 import "events/guild.dart";
@@ -19,7 +20,7 @@ import "events/message.dart";
 class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
   WebSocket _socket;
-  int _lastSeq = null;
+  int _lastSeq;
 
   /// The shard of the current client.
   int shard;
@@ -148,8 +149,8 @@ class DiscordClient extends EventExhibitor {
   }
 
   /// Get a text channel given its [id].
-  Future<TextChannel> getTextChannel(dynamic id) async =>
-    await getChannel(id) as TextChannel;
+  Future<TextChannel> getTextChannel(dynamic id) =>
+    getChannel(id);
 
 
 
@@ -162,6 +163,27 @@ class DiscordClient extends EventExhibitor {
   /// Creates a direct message channel with the given [recipient].
   Future<TextChannel> createDirectMessage(User recipient) =>
     recipient.createDirectMessage();
+  
+  void updateStatus(StatusType status, {Game game, bool afk = false}) {
+
+    final query = {
+      "status": EnumMaps.statusMapReverse[status],
+      "afk": afk,
+      "game": game?.toMap(),
+      "since": null
+    };
+
+    final packet = new Packet(
+      opcode: 3,
+      data: query,
+      seq: _lastSeq,
+
+      client: this
+    );
+    
+    _socket.add(packet.toString());
+
+  }
 
 
 
@@ -183,6 +205,7 @@ class DiscordClient extends EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
+      print(payloadRaw);
       final payload = JSON.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
@@ -261,6 +284,9 @@ class DiscordClient extends EventExhibitor {
         case 1: // Heartbeat
           _sendHeartbeat(_heartbeat);
           break;
+        case 3: // Update Status
+          print("found op 3 lol");
+          break;
         case 7: // Reconnect
           break;
         case 9: // Invalid Session
@@ -287,7 +313,10 @@ class DiscordClient extends EventExhibitor {
     }, onError: (e) {
       print(e.toString());
     }, onDone: () {
-      print("ended");
+      print(_socket.closeCode);
+      print(_socket.closeReason);
+      _socket.close();
+      _heartbeat.cancel();
     }, cancelOnError: true);
   }
 }

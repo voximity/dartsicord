@@ -63,7 +63,7 @@ class Message extends DiscordObject {
 
     final newMessage = await route.patch({"content": content, "embed": embed.toMap()});
     
-    this.editedAt = DateTime.parse(JSON.decode(newMessage.body)["edited_timestamp"]);
+    editedAt = DateTime.parse(JSON.decode(newMessage.body)["edited_timestamp"]);
   }
 
   /// Delete the message.
@@ -73,7 +73,7 @@ class Message extends DiscordObject {
   }
 
   /// Reply to the message. See [DiscordClient.sendMessage] for full documentation.
-  Future<Message> reply(String text, {Embed embed}) async => await this.channel.sendMessage(text, embed: embed);
+  Future<Message> reply(String text, {Embed embed}) async => await channel.sendMessage(text, embed: embed);
 
   //
   // Constructors

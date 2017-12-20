@@ -1,11 +1,12 @@
 library dartsicord;
 
-export "src/ws/channel.dart";
-export "src/ws/embed.dart";
-export "src/ws/guild.dart";
-export "src/ws/message.dart";
-export "src/ws/permission.dart";
-export "src/ws/user.dart";
+export "src/resources/channel.dart";
+export "src/resources/embed.dart";
+export "src/resources/guild.dart";
+export "src/resources/message.dart";
+export "src/resources/permission.dart";
+export "src/resources/user.dart";
+export "src/resources/game.dart";
 
 export "src/client.dart";
 export "src/enums.dart";

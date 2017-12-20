@@ -16,9 +16,6 @@ class Embed {
   List<EmbedField> fields = [];
 
   Map<String, dynamic> toMap() {
-    final fieldsMap = [];
-    fields.forEach((f) => fieldsMap.add(f.toDynamic()));
-    
     final finalMap = {
       "title": title,
       "type": type,
@@ -27,13 +24,13 @@ class Embed {
 
       "color": color,
 
-      "footer": footer?.toDynamic(),
-      "image": image?.toDynamic(),
-      "thumbnail": thumbnail?.toDynamic(),
-      "video": video?.toDynamic(),
-      "provider": provider?.toDynamic(),
-      "author": author?.toDynamic(),
-      "fields": fieldsMap
+      "footer": footer?.toMap(),
+      "image": image?.toMap(),
+      "thumbnail": thumbnail?.toMap(),
+      "video": video?.toMap(),
+      "provider": provider?.toMap(),
+      "author": author?.toMap(),
+      "fields": fields.map((f) => f.toMap())
     };
     return finalMap;
   }
@@ -45,7 +42,7 @@ class EmbedFooter {
 
   EmbedFooter(this.text, {this.iconUrl, this.proxyIconUrl});
 
-  dynamic toDynamic() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  dynamic toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedImage {
   String url;
@@ -55,7 +52,7 @@ class EmbedImage {
 
   EmbedImage(this.url, this.height, this.width, {this.proxyUrl});
 
-  dynamic toDynamic() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  dynamic toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedThumbnail {
   String url;
@@ -65,7 +62,7 @@ class EmbedThumbnail {
 
   EmbedThumbnail(this.url, this.height, this.width, {this.proxyUrl});
   
-  dynamic toDynamic() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  dynamic toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedVideo {
   String url;
@@ -74,7 +71,7 @@ class EmbedVideo {
 
   EmbedVideo(this.url, this.height, this.width);
 
-  dynamic toDynamic() => {"url": url, "height": height, "width": width};
+  dynamic toMap() => {"url": url, "height": height, "width": width};
 }
 class EmbedProvider {
   String name;
@@ -82,7 +79,7 @@ class EmbedProvider {
 
   EmbedProvider(this.name, this.url);
 
-  dynamic toDynamic() => {"name": url, "url": url};
+  dynamic toMap() => {"name": url, "url": url};
 }
 class EmbedAuthor {
   String name;
@@ -92,7 +89,7 @@ class EmbedAuthor {
 
   EmbedAuthor(this.name, this.url, {this.iconUrl, this.proxyIconUrl});
 
-  dynamic toDynamic() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  dynamic toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedField {
   String name;
@@ -101,5 +98,5 @@ class EmbedField {
 
   EmbedField(this.name, this.value, {this.inline});
 
-  dynamic toDynamic() => {"name": name, "value": value, "inline": inline};
+  dynamic toMap() => {"name": name, "value": value, "inline": inline};
 }

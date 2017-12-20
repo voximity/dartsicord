@@ -71,10 +71,10 @@ class Member extends DiscordObject {
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 
   static Future<Member> fromMap(Map<String, dynamic> obj, DiscordClient client, Guild guild) async {
-    List<Role> roleList = [];
+    final roleList = [];
     for (int i = 0; i < obj["roles"].length; i++) {
-      int roleId = obj["roles"][i];
-      Role role = guild.roles.firstWhere((r) => r.id.toString() == roleId.toString());
+      final roleId = obj["roles"][i];
+      final role = guild.roles.firstWhere((r) => r.id.toString() == roleId.toString());
       roleList.add(role);
     }
     return new Member(await User.fromMap(obj["user"], client), guild,

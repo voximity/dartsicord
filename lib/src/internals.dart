@@ -16,14 +16,14 @@ class Route {
     new Route()..url = url + "/" + other.toString();
 
   Map<String, String> authHeader({Map<String, String> header, DiscordClient client}) {
-    if (header == null)
-      header = {};
+    header ??= {};
 
     if (client != null)
       header["Authorization"] = (client.tokenType == TokenType.Bot ? "Bot " : "") + "${client.token}";
     header["Content-Type"] = "application/json";
     return header;
   }
+
   void handleStatusCode(http.Response response) {
     switch (response.statusCode) {
       case 200: // OK
@@ -87,7 +87,7 @@ class Packet {
   dynamic data;
   String event;
 
-  Packet({this.opcode = 1, this.data, this.seq = null, this.event, this.client});
+  Packet({this.opcode, this.data, this.seq, this.event, this.client});
 
   String toString() => JSON.encode({"op": opcode, "d": data, "s": seq, "t": event});
 }

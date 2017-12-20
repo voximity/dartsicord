@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import "../ws/guild.dart";
-import "../ws/user.dart";
-import "../ws/channel.dart";
-import "../ws/message.dart";
-import "../ws/emoji.dart";
+import "../resources/guild.dart";
+import "../resources/user.dart";
+import "../resources/channel.dart";
+import "../resources/message.dart";
+import "../resources/emoji.dart";
 
 import "../internals.dart";
 

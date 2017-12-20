@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.8
+
+- Add status updating support
+- Add game class
+- Add enums for status and activity types
+- Change linter preferences and abide by them (for the most part)
+
 ## 0.0.7
 
 - Add a lot more events
