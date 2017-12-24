@@ -9,6 +9,8 @@ This update focuses mostly on user experience rather than new features. I have r
 - Abide to more linter preferences
 - Organize code a bit better
 - Add more guild methods
+- Add more channel methods
+- Add more message methods
 - Add more documentation to most things that don't already have documentation
 
 ## 0.0.9

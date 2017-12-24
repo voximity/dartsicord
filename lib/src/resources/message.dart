@@ -54,6 +54,18 @@ class Message extends DiscordObject {
     await route.put({}, client: client);
   }
 
+  /// Pin a message to its [channel].
+  Future pin() async {
+    final route = channel.localEndpoint + "pins" + id;
+    await route.put({}, client: client);
+  }
+
+  /// Unpins a message from its [channel].
+  Future unpin() async {
+    final route = channel.localEndpoint + "pins" + id;
+    await route.delete(client: client);
+  }
+
   /// Edit the message, given it is yours.
   Future edit(String content, {Embed embed}) async {
     if (!isAuthor)
@@ -70,7 +82,7 @@ class Message extends DiscordObject {
 
   /// Delete the message.
   Future delete() async {
-    final route = Channel.endpoint + channel.id + "messages" + id;
+    final route = channel.localEndpoint + "messages" + id;
     await route.delete();
   }
 

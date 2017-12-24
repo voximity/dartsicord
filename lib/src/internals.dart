@@ -19,7 +19,7 @@ class Route {
     header ??= {};
 
     if (client != null)
-      header["Authorization"] = (client.tokenType == TokenType.Bot ? "Bot " : "") + "${client.token}";
+      header["Authorization"] = (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}";
     header["Content-Type"] = "application/json";
     return header;
   }

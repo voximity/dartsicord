@@ -21,7 +21,7 @@ abstract class Channel extends DiscordObject {
   /// Guild of the channel, if any.
   Guild guild;
 
-  /// Type of the channel.
+  /// The type of the channel.
   ChannelType type;
 
   Snowflake id;
@@ -50,25 +50,29 @@ class TextChannel extends Channel {
 
   ChannelType type;
 
-  /// Guild of the channel, if any. Refer to the [type] property and check for [GuildText].
+  /// Guild of the channel, if any. Refer to the [type] property and check for [ChannelType.guildText].
   Guild guild;
   
-  /// Position of the channel. Refer to the [type] property and check for [GuildText].
+  /// Position of the channel. Refer to the [type] property and check for [ChannelType.guildText].
   int position;
 
+  /// The topic of this channel.
   String topic;
 
+  /// Whether or not this channel should be marked as NSFW.
   bool nsfw;
 
-  /// The recipient of this DM, if any. Refer to [type] property and check for [Dm].
+  /// The recipient of this DM, if any. Refer to [type] property and check for [ChannelType.dm].
   User get recipient => type == ChannelType.dm ? recipients.first : null;
 
-  /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
+  /// A list of recipients of this group DM, if any. Refer to [type] property and check for [ChannelType.groupDm] or [ChannelType.dm].
   List<User> recipients;
 
+  /// Deletes this channel.
   Future<Null> delete() async =>
     await localEndpoint.delete(client: client);
 
+  /// Modifies this channel using the given positional parameters [name], [position], [topic], and [nsfw].
   Future<Null> modify({String name, int position, String topic, bool nsfw}) async {
     final query = {
       "name": name,
@@ -86,14 +90,61 @@ class TextChannel extends Channel {
     this.nsfw = map["nsfw"];
   }
 
-  Future<Null> getMessages({int limit = 50, int before, int after, int around}) async {
+  /// Fire a typing request to this channel.
+  Future<Null> startTyping() async {
+    final route = localEndpoint + "typing";
+    await route.post({}, client: client);
+  }
 
+  /// Gets a [List] of [Message] objects that represent the pins in this channel.
+  Future<List<Message>> getPins() async {
+    final route = localEndpoint + "pins";
+    final response = await route.get(client: client);
+    return JSON.decode(response.body).map((m) => Message.fromMap(m, client));
+  }
+
+  /// Gets a [List] of [Message] objects given the [limit].
+  /// 
+  /// Optionally, you can specify [downloadType] which is a [MessageDownloadType]
+  /// to specify where messages should be searched. To use this feature, the
+  /// positional parameter [base] must be given.
+  Future<List<Message>> getMessages({int limit = 50, MessageDownloadType downloadType = MessageDownloadType.after, Message base}) async {
+    var query = "?limit=$limit";
+
+    if (base != null) {
+      final id = base.id.toString();
+      switch (downloadType) {
+        case MessageDownloadType.after:
+          query += "&after=$id";
+          break;
+        case MessageDownloadType.before:
+          query += "&before=$id";
+          break;
+        case MessageDownloadType.around:
+          query += "&around=$id";
+          break;
+      }
+    }
+    
+    final route = localEndpoint + "messages"
+     ..url += query;
+    final response = await route.get(client: client);
+    return JSON.decode(response.body).map((m) => Message.fromMap(m, client));
+  }
+
+  /// Bulk-deletes a [List] of [Message] objects from this channel.
+  /// 
+  /// 2-100 messages may be specified. Messages older than 2 weeks are unaffected.
+  Future<Null> bulkDeleteMessages(List<Message> messages) async {
+    final query = messages.map((m) => m.id.id);
+    final route = localEndpoint + "messages" + "bulk-delete";
+    await route.post(query, client: client);
   }
 
   /// Send a message to this channel.
   /// 
-  /// Content is required. If you wish to send an embed, you must leave it blank ("").
-  /// If you want to specify an embed, you first need to build an embed using the [Embed] object.
+  /// [content] is required. If you wish to send an [Embed], you must leave it blank ("").
+  /// If you want to specify an [Embed], you first need to build an embed using the [Embed] object.
   /// Documentation for embed building is within the [Embed] object.
   Future<Message> sendMessage(String content, {Embed embed}) async {
     final route = localEndpoint + "messages";
