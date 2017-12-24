@@ -11,7 +11,7 @@ import "guild.dart";
 import "role.dart";
 import "user.dart";
 
-class Message extends DiscordObject {
+class Message extends Resource {
   /// Content of the message.
   String content;
 

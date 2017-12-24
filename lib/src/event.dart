@@ -1,8 +1,9 @@
 import 'dart:async';
 
+import "enums.dart";
 import "internals.dart";
-
-import "resources/user.dart";
+import "objects/game.dart";
+import "objects/user.dart";
 
 
 //
@@ -38,6 +39,8 @@ abstract class EventExhibitor {
   Future<List> destroyEvents() => Future.wait(_events.map((event) => event.close()));
 }
 
+
+
 class ReadyEvent {
   ReadyEvent();
 
@@ -48,5 +51,24 @@ class ReadyEvent {
 
     final event = new ReadyEvent();
     packet.client.onReady.add(event);
+  }
+}
+class PresenceUpdateEvent {
+  /// The user in which presence has been updated.
+  User user;
+  /// The [Game] object representing the game the user is playing, if any.
+  Game game;
+  /// The status of the user, based on the [StatusType] enum.
+  StatusType status;
+
+  PresenceUpdateEvent(this.user, this.status, {this.game});
+
+  static Future<Null> construct(Packet packet) async {
+    final user = await User.fromMap(packet.data["user"], packet.client);
+    final game = packet.data["game"] != null ? await Game.fromMap(packet.data["game"], packet.client) : null;
+    final status = Game.statuses[packet.data["status"]];
+
+    final event = new PresenceUpdateEvent(user, status, game: game);
+    packet.client.onPresenceUpdate.add(event);
   }
 }

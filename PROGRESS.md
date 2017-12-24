@@ -3,6 +3,8 @@
 Here lies a checklist of the events/methods that Dartsicord is capable of.
 If something is missing, please let me know or contribute to this file.
 
+\* This method/event has been considered to be partially or completely useless for implementation.
+
 ## WebSocket Events
 
 - [x] Hello
@@ -39,13 +41,13 @@ If something is missing, please let me know or contribute to this file.
 - [ ] User Update
 - [ ] Voice State Update
 - [ ] Voice Server Update
-- [ ] Webhooks Update
+- [x] Webhooks Update
 
 ## REST Methods
 
 ### Audit Log
 
-- [ ] Get Guild Audit Log
+- [ ] Get Guild Audit Log \*
 
 ### Channel
 
@@ -71,8 +73,8 @@ If something is missing, please let me know or contribute to this file.
 - [x] Get Pinned Messages
 - [x] Add Pinned Channel Message
 - [x] Delete Pinned Channel Message
-- [ ] Group DM Add Recipient
-- [ ] Group DM Remove Recipient
+- [ ] Group DM Add Recipient \*
+- [ ] Group DM Remove Recipient \*
 
 ### Emoji
 
@@ -92,7 +94,7 @@ If something is missing, please let me know or contribute to this file.
 - [ ] Create Guild Channel
 - [ ] Modify Guild Channel Positions
 - [x] Get Guild Member
-- [ ] List Guild Members
+- [ ] List Guild Members \*
 - [ ] Add Guild Member
 - [ ] Modify Guild Member
 - [ ] Modify Current User's Nick
@@ -110,12 +112,12 @@ If something is missing, please let me know or contribute to this file.
 - [ ] Get Guild Prune Count
 - [ ] Begin Guild Prune
 - [ ] Get Guild Voice Regions
-- [ ] Get Guild Invites
-- [ ] Get Guild Integrations
-- [ ] Create Guild Integration
-- [ ] Modify Guild Integration
-- [ ] Delete Guild Integration
-- [ ] Sync Guild Integration
+- [ ] Get Guild Invites \*
+- [ ] Get Guild Integrations \*
+- [ ] Create Guild Integration \*
+- [ ] Modify Guild Integration \*
+- [ ] Delete Guild Integration \*
+- [ ] Sync Guild Integration \*
 - [ ] Get Guild Embed
 - [ ] Modify Guild Embed
 
@@ -144,15 +146,15 @@ If something is missing, please let me know or contribute to this file.
 
 ### Webhook
 
-- [ ] Create Webhook
-- [ ] Get Channel Webhooks
-- [ ] Get Guild Webhooks
-- [ ] Get Webhook
-- [ ] Get Webhook with Token
-- [ ] Modify Webhook
-- [ ] Modify Webhook with Token
-- [ ] Delete Webhook
-- [ ] Delete Webhook with Token
-- [ ] Execute Webhook
-- [ ] Execute Slack-Compatible Webhook
-- [ ] Execute GitHub-Compatible Webhook
+- [x] Create Webhook
+- [x] Get Channel Webhooks
+- [ ] Get Guild Webhooks \*
+- [ ] Get Webhook \*
+- [ ] Get Webhook with Token \*
+- [*] Modify Webhook
+- [ ] Modify Webhook with Token \*
+- [*] Delete Webhook
+- [ ] Delete Webhook with Token \*
+- [*] Execute Webhook
+- [ ] Execute Slack-Compatible Webhook \*
+- [ ] Execute GitHub-Compatible Webhook \*

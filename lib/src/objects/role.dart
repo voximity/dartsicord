@@ -4,7 +4,7 @@ import "../object.dart";
 import "guild.dart";
 import "permission.dart";
 
-class Role extends DiscordObject {
+class Role extends Resource {
   Snowflake id;
 
   /// The guild that this role is in.

@@ -12,7 +12,7 @@ import "role.dart";
 import "user.dart";
 import "webhook.dart";
 
-class Guild extends DiscordObject {
+class Guild extends Resource {
   static Route endpoint = new Route() + "guilds";
   Route get localEndpoint => Guild.endpoint + id;
 
@@ -35,6 +35,9 @@ class Guild extends DiscordObject {
 
   /// A list of [Emoji] objects that the guild has.
   List<Emoji> emojis = [];
+
+  /// A list of [Webhook] objects that the guild has.
+  List<Webhook> get webhooks => textChannels.fold([], (p, c) => p..addAll(c.webhooks));
 
   /// Leave this guild.
   Future leave() async {
@@ -67,6 +70,7 @@ class Guild extends DiscordObject {
     await route.put({}, client: client);
   }
 
+  /// Creates a role for this guild using the given positional parameters [name], [permissions], [color], [hoisted], and [mentionable].
   Future<Role> createRole({
     String name = "new role",
     List<Permission> permissions,
@@ -114,16 +118,9 @@ class Guild extends DiscordObject {
     await route.delete(client: client);
   }
 
-  Future<Webhook> createWebhook(TextChannel channel, String name, {String avatar}) async {
-    final query = {
-      "name": name,
-      "avatar": avatar
-    };
-
-    final route = Channel.endpoint + channel.id + "webhooks";
-    final response = await route.post(query, client: client);
-    return Webhook.fromMap(JSON.decode(response.body));
-  }
+  /// Creates a webhook. See [TextChannel.createWebhook] for further documentation.
+  Future<Webhook> createWebhook(TextChannel channel, String name, {String avatar}) =>
+    channel.createWebhook(name, avatar: avatar);
 
   //
   // Constructors

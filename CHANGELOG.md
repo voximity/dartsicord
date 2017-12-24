@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.11
+
+24 Dec 2017
+
+This update focuses on more UX changes. I've added an in-depth PROGRESS file showing the progress of the library with its events and methods. I've also focused on completely implementing Websockets as well as trying to make some cacheing systems more efficient. I've also renamed the resources directory to objects because some of the objects were not considered resources. Additionally, I've renamed DiscordObject to simply Resource, as a resource is any object that has a Snowflake. Typically, these objects could be referred to as instantiated classes, while non-resource objects such as Game could be simply referred to as a struct.
+
+- Abide to more linter preferences
+- Add Webhook support
+- Rename resources to objects
+- Rename DiscordObject to Resource
+- Add Webhook Update event
+- Add Presence Update event
+- Add PROGRESS.md indicating library progress
+
 ## 0.0.10
 
 23 Dec 2017

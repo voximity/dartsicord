@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import "../internals.dart";
-import "../resources/channel.dart";
+import "../objects/channel.dart";
+import "../objects/guild.dart";
+import "../objects/webhook.dart";
 
 class ChannelCreateEvent {
   /// The created channel.
@@ -65,5 +68,24 @@ class ChannelPinsUpdateEvent {
 
     final event = new ChannelPinsUpdateEvent(channel, lastPinAt: lastPinAt);
     packet.client.onChannelPinsUpdate.add(event);
+  }
+}
+class WebhooksUpdateEvent {
+  /// The channel in which webhooks have been updated.
+  TextChannel channel;
+  /// The guild that contains the channel that webhooks have been updated.
+  Guild guild;
+
+  WebhooksUpdateEvent(this.channel, {this.guild});
+
+  static Future<Null> construct(Packet packet) async {
+    final channel = await packet.client.getTextChannel(packet.data["channel_id"]);
+    final route = channel.localEndpoint + "webhooks";
+    final response = await route.get(client: packet.client);
+    final webhooks = JSON.decode(response.body);
+    channel.webhooks = webhooks.map((w) async => await Webhook.fromMap(w, packet.client));
+
+    final event = new WebhooksUpdateEvent(channel, guild: channel.guild);
+    packet.client.onWebhooksUpdate.add(event);
   }
 }

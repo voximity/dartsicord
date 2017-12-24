@@ -2,20 +2,21 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 
-import "internals.dart";
-import "event.dart";
 import "enums.dart";
-import "object.dart";
-import "resources/guild.dart";
-import "resources/channel.dart";
-import "resources/message.dart";
-import "resources/user.dart";
-import "resources/embed.dart";
-import "resources/game.dart";
+import "event.dart";
 
 import "events/channel.dart";
 import "events/guild.dart";
 import "events/message.dart";
+
+import "internals.dart";
+
+import "objects/channel.dart";
+import "objects/embed.dart";
+import "objects/game.dart";
+import "objects/guild.dart";
+import "objects/message.dart";
+import "objects/user.dart";
 
 class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
@@ -37,7 +38,7 @@ class DiscordClient extends EventExhibitor {
   /// A list of Guilds this client is in.
   List<Guild> guilds;
 
-  /// Whether or not this client has recieved the [READY] payload yet.
+  /// Whether or not this client has recieved the `READY` payload yet.
   bool ready = false;
 
   /// The [User] representing this guild.
@@ -95,6 +96,12 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a channel update its pins.
   EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
 
+  /// Fired when the client sees a channel update its webhooks.
+  EventStream<WebhooksUpdateEvent> onWebhooksUpdate;
+
+  /// Fired when the client sees a user update their presence.
+  EventStream<PresenceUpdateEvent> onPresenceUpdate;
+
   // Internal methods
 
   Future _getGateway() async {
@@ -131,6 +138,10 @@ class DiscordClient extends EventExhibitor {
     onChannelUpdate = createEvent();
     onChannelDelete = createEvent();
     onChannelPinsUpdate = createEvent();
+
+    onWebhooksUpdate = createEvent();
+
+    onPresenceUpdate = createEvent();
   }
 
 
@@ -173,15 +184,17 @@ class DiscordClient extends EventExhibitor {
   Future<TextChannel> createDirectMessage(User recipient) =>
     recipient.createDirectMessage();
   
+  /// Updates the client's status using a [StatusType] status enum.
+  /// 
+  /// Optionally, you can include a self-made [Game] object and whether
+  /// or not the client should be considered AFK.
   void updateStatus(StatusType status, {Game game, bool afk = false}) {
-
     final query = {
       "status": Game.statusesR[status],
       "afk": afk,
       "game": game?.toMap(),
       "since": null
     };
-
     final packet = new Packet(
       opcode: 3,
       data: query,
@@ -191,7 +204,6 @@ class DiscordClient extends EventExhibitor {
     );
     
     _socket.add(packet.toString());
-
   }
 
 
@@ -214,7 +226,6 @@ class DiscordClient extends EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
-      print(payloadRaw);
       final payload = JSON.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
@@ -296,6 +307,14 @@ class DiscordClient extends EventExhibitor {
               break;
             case "MESSAGE_DELETE":
               await MessageDeleteEvent.construct(packet);
+              break;
+            
+            case "WEBHOOKS_UPDATE":
+              await WebhooksUpdateEvent.construct(packet);
+              break;
+
+            case "PRESENCE_UPDATE":
+              await PresenceUpdateEvent.construct(packet);
               break;
 
             default:

@@ -10,8 +10,9 @@ import "embed.dart";
 import "guild.dart";
 import "message.dart";
 import "user.dart";
+import "webhook.dart";
 
-abstract class Channel extends DiscordObject {
+abstract class Channel extends Resource {
   static Route endpoint = new Route() + "channels";
   Route get localEndpoint => Channel.endpoint + id.toString();
   
@@ -68,6 +69,9 @@ class TextChannel extends Channel {
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [ChannelType.groupDm] or [ChannelType.dm].
   List<User> recipients;
 
+  /// A list of [Webhook] objects, if any. Refer to the [type] property and check for [ChannelType.guildText].
+  List<Webhook> webhooks;
+
   /// Deletes this channel.
   Future<Null> delete() async =>
     await localEndpoint.delete(client: client);
@@ -88,6 +92,18 @@ class TextChannel extends Channel {
     this.position = map["position"];
     this.topic = map["topic"];
     this.nsfw = map["nsfw"];
+  }
+
+  /// Creates a webhook for this channel named [name] using the given positional parameter [avatar].
+  Future<Webhook> createWebhook(String name, {String avatar}) async {
+    final query = {
+      "name": name,
+      "avatar": avatar
+    };
+
+    final route = localEndpoint + "webhooks";
+    final response = await route.post(query, client: client);
+    return Webhook.fromMap(JSON.decode(response.body), client);
   }
 
   /// Fire a typing request to this channel.
@@ -150,7 +166,7 @@ class TextChannel extends Channel {
     final route = localEndpoint + "messages";
     final response = await route.post({
       "content": content,
-      "embed": embed != null ? embed.toMap() : null
+      "embed": embed?.toMap()
     }, client: client);
     final parsed = JSON.decode(response.body);
     return (await Message.fromMap(parsed, client))..author = client.user;
@@ -201,7 +217,6 @@ class VoiceChannel extends Channel {
 
   VoiceChannel(this.name, this.id);
 
-  static Future<VoiceChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
-    return null;
-  }
+  static Future<VoiceChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) =>
+    null;
 }

@@ -1,6 +1,6 @@
 import "client.dart";
 
-abstract class DiscordObject {
+abstract class Resource {
   /// ID of the object.
   Snowflake id;
 

@@ -5,7 +5,7 @@ import "guild.dart";
 import "role.dart";
 import "user.dart";
 
-class Emoji extends DiscordObject {
+class Emoji extends Resource {
   Snowflake id;
 
   /// The guild this emoji was created in.

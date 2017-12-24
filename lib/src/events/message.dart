@@ -2,10 +2,10 @@ import 'dart:async';
 
 import "../internals.dart";
 
-import "../resources/channel.dart";
-import "../resources/guild.dart";
-import "../resources/message.dart";
-import "../resources/user.dart";
+import "../objects/channel.dart";
+import "../objects/guild.dart";
+import "../objects/message.dart";
+import "../objects/user.dart";
 
 class MessageCreateEvent {
   /// The channel the message was created in.

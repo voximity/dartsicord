@@ -4,7 +4,7 @@ import "../client.dart";
 import "../enums.dart";
 import "../object.dart";
 
-class Game extends DiscordObject {
+class Game extends Resource {
   static Map<String, StatusType> statuses = {
     "online": StatusType.online,
     "dnd": StatusType.doNotDisturb,
@@ -22,17 +22,16 @@ class Game extends DiscordObject {
     new Map.fromIterables(activities.values, activities.keys);
   static Map<StatusType, String> get statusesR =>
     new Map.fromIterables(statuses.values, statuses.keys);
+  static Future<Game> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
+    new Game(obj["name"], Game.activities[obj["type"]],
+      streamUrl: obj["url"] != null ? Uri.parse(obj["url"]) : null)
+      ..client = client;
 
   String name;
   Uri streamUrl;
   ActivityType type;
 
   Game(this.name, this.type, {this.streamUrl});
-
-  Future<Game> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
-    new Game(obj["name"], Game.activities[obj["type"]],
-      streamUrl: obj["url"] != null ? Uri.parse(obj["url"]) : null)
-      ..client = client;
   
   Map<String, dynamic> toMap() =>
     {

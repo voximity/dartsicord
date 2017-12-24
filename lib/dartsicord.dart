@@ -4,10 +4,10 @@ export "src/client.dart";
 export "src/enums.dart";
 export "src/exception.dart";
 
-export "src/resources/channel.dart";
-export "src/resources/embed.dart";
-export "src/resources/game.dart";
-export "src/resources/guild.dart";
-export "src/resources/message.dart";
-export "src/resources/permission.dart";
-export "src/resources/user.dart";
+export "src/objects/channel.dart";
+export "src/objects/embed.dart";
+export "src/objects/game.dart";
+export "src/objects/guild.dart";
+export "src/objects/message.dart";
+export "src/objects/permission.dart";
+export "src/objects/user.dart";

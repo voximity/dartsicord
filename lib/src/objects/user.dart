@@ -9,7 +9,7 @@ import "channel.dart";
 import "guild.dart";
 import "role.dart";
 
-class User extends DiscordObject {
+class User extends Resource {
   static Route endpoint = new Route() + "users";
 
   /// Username of the user.
@@ -17,6 +17,9 @@ class User extends DiscordObject {
 
   /// Discriminator of the user.
   String discriminator;
+
+  /// Whether or not this user object is partial.
+  bool get partial => username == null;
 
   Snowflake id;
 
@@ -32,11 +35,17 @@ class User extends DiscordObject {
 
   User(this.username, this.discriminator, this.id);
 
+  static Future<User> get(dynamic id, DiscordClient client) async {
+    final route = endpoint + id.toString();
+    final response = await route.get(client: client);
+    return await fromMap(JSON.decode(response.body), client);
+  }
+
   static Future<User> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
     new User(obj["username"], obj["discriminator"], new Snowflake(obj["id"]))..client = client;
 }
 
-class Member extends DiscordObject {
+class Member extends Resource {
   Snowflake id;
 
   /// The guild that this Member is in.

@@ -10,7 +10,7 @@ import "embed.dart";
 import "guild.dart";
 import "user.dart";
 
-class Webhook extends DiscordObject {
+class Webhook extends Resource {
   static Route get endpoint => new Route() + "webhooks";
   Route get localEndpoint => endpoint + id;
 
@@ -26,7 +26,7 @@ class Webhook extends DiscordObject {
   /// The Webhook's creator.
   User author;
   /// The Webhook's channel.
-  Channel channel;
+  TextChannel channel;
   /// The Webhook's guild.
   Guild guild;
 
@@ -71,5 +71,8 @@ class Webhook extends DiscordObject {
   Webhook(this.id, this.name, this.token, {this.avatar, this.channel, this.guild});
 
   static Future<Webhook> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
-    new Webhook();
+    new Webhook(new Snowflake(obj["id"]), obj["name"], obj["token"],
+      avatar: obj["avatar"],
+      channel: await client.getTextChannel(obj["channel_id"]),
+      guild: obj["guild_id"] != null ? client.getGuild(obj["guild"]) : null);
 }

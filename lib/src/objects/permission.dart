@@ -15,6 +15,10 @@ class Permission {
   static List<Permission> fromRaw(int raw, List<Permission> preset) =>
     preset.where((p) => raw & p.raw != 0);
 
+  /// Takes a list of [Permission] names and finds the [Permission] objects from the [staticList] provided.
+  static List<Permission> fromStaticList(List<String> names, List<Permission> staticList) =>
+    staticList.where((p) => names.contains(p.name));
+
   static List<Permission> rolePermissions = [
     new Permission("CreateInstantInvite", raw: 1 << 0),
     new Permission("KickMembers", raw: 1 << 1),
