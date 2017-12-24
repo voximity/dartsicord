@@ -1,13 +1,15 @@
 import "dart:async";
 import "dart:convert";
-import "../internals.dart";
+
 import "../client.dart";
 import "../exception.dart";
 import "../object.dart";
-import "user.dart";
-import "guild.dart";
+
 import "channel.dart";
 import "embed.dart";
+import "guild.dart";
+import "role.dart";
+import "user.dart";
 
 class Message extends DiscordObject {
   /// Content of the message.
@@ -23,7 +25,7 @@ class Message extends DiscordObject {
   TextChannel channel;
 
   /// Guild the message was sent in, if any.
-  Guild guild = null;
+  Guild guild;
 
   /// When the message was created.
   DateTime createdAt;

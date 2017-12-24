@@ -1,13 +1,12 @@
-import 'dart:async';
-
-import "../resources/guild.dart";
-import "../resources/user.dart";
-import "../resources/channel.dart";
-import "../resources/message.dart";
-import "../resources/emoji.dart";
+import "dart:async";
 
 import "../internals.dart";
 import "../object.dart";
+
+import "../resources/emoji.dart";
+import "../resources/guild.dart";
+import "../resources/role.dart";
+import "../resources/user.dart";
 
 class GuildCreateEvent {
   /// The created guild.

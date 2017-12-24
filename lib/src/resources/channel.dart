@@ -1,15 +1,15 @@
-import "dart:convert";
 import "dart:async";
+import "dart:convert";
 
-import "../internals.dart";
 import "../client.dart";
 import "../enums.dart";
+import "../internals.dart";
 import "../object.dart";
 
+import "embed.dart";
 import "guild.dart";
 import "message.dart";
 import "user.dart";
-import "embed.dart";
 
 abstract class Channel extends DiscordObject {
   static Route endpoint = new Route() + "channels";
@@ -28,11 +28,11 @@ abstract class Channel extends DiscordObject {
 
   /// A list of Channel types, by their API ID.
   static Map<int, ChannelType> types = {
-    0: ChannelType.GuildText,
-    1: ChannelType.Dm,
-    2: ChannelType.GuildVoice,
-    3: ChannelType.GroupDm,
-    4: ChannelType.GuildCategory
+    0: ChannelType.guildText,
+    1: ChannelType.dm,
+    2: ChannelType.guildVoice,
+    3: ChannelType.groupDm,
+    4: ChannelType.guildCategory
   };
 
   static Future<Channel> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
@@ -44,21 +44,51 @@ abstract class Channel extends DiscordObject {
   }
 }
 
-class TextChannel extends DiscordObject implements Channel {
+class TextChannel extends Channel {
   String name;
   Snowflake id;
-  Route get localEndpoint => Channel.endpoint + id;
 
   ChannelType type;
 
   /// Guild of the channel, if any. Refer to the [type] property and check for [GuildText].
   Guild guild;
+  
+  /// Position of the channel. Refer to the [type] property and check for [GuildText].
+  int position;
+
+  String topic;
+
+  bool nsfw;
 
   /// The recipient of this DM, if any. Refer to [type] property and check for [Dm].
-  User get recipient => type == ChannelType.Dm ? recipients.first : null;
+  User get recipient => type == ChannelType.dm ? recipients.first : null;
 
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [GroupDm] or [Dm].
   List<User> recipients;
+
+  Future<Null> delete() async =>
+    await localEndpoint.delete(client: client);
+
+  Future<Null> modify({String name, int position, String topic, bool nsfw}) async {
+    final query = {
+      "name": name,
+      "position": position,
+      "topic": topic,
+      "nsfw": nsfw
+    };
+    
+    final response = await localEndpoint.patch(query, client: client);
+    final map = JSON.decode(response.body);
+
+    this.name = map["name"];
+    this.position = map["position"];
+    this.topic = map["topic"];
+    this.nsfw = map["nsfw"];
+  }
+
+  Future<Null> getMessages({int limit = 50, int before, int after, int around}) async {
+
+  }
 
   /// Send a message to this channel.
   /// 
@@ -80,13 +110,13 @@ class TextChannel extends DiscordObject implements Channel {
   static Future<TextChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
     final channelType = Channel.types[obj["type"]];
     switch (channelType) {
-      case ChannelType.GuildText:
+      case ChannelType.guildText:
         final channel = new TextChannel(obj["name"], new Snowflake(obj["id"]), channelType,
           guild: guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null))
           ..client = client;
         return channel;
 
-      case ChannelType.Dm:
+      case ChannelType.dm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromMap(obj["recipients"][i], client));
@@ -94,7 +124,7 @@ class TextChannel extends DiscordObject implements Channel {
           ..client = client;
         return channel;
 
-      case ChannelType.GroupDm:
+      case ChannelType.groupDm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
           users.add(await User.fromMap(obj["recipients"][i], client));
@@ -108,7 +138,7 @@ class TextChannel extends DiscordObject implements Channel {
   }
 }
 
-class VoiceChannel extends DiscordObject implements Channel {
+class VoiceChannel extends Channel {
   String name;
   Guild guild;
 

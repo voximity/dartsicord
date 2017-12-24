@@ -7,6 +7,7 @@ abstract class DiscordObject {
   /// The Client the object was instantiated by.
   DiscordClient client;
 }
+
 class Snowflake {
   int id;
 

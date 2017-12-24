@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10
+
+23 Dec 2017
+
+This update focuses mostly on user experience rather than new features. I have recently been on vacation, so I apologize for the few updates! If you haven't already noticed, I'm going to start adding more detail into the CHANGELOG like this short paragraph as well as a date in which the update was released. Additionally, I'm planning on making dartsicord a little more serious than I planned it to be.
+
+- Abide to more linter preferences
+- Organize code a bit better
+- Add more guild methods
+- Add more documentation to most things that don't already have documentation
+
 ## 0.0.9
 
 - More guild events

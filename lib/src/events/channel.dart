@@ -1,12 +1,7 @@
 import 'dart:async';
 
-import "../resources/guild.dart";
-import "../resources/user.dart";
-import "../resources/channel.dart";
-import "../resources/message.dart";
-import "../resources/emoji.dart";
-
 import "../internals.dart";
+import "../resources/channel.dart";
 
 class ChannelCreateEvent {
   /// The created channel.
@@ -14,12 +9,15 @@ class ChannelCreateEvent {
   ChannelCreateEvent(this.channel);
 
   static Future<Null> construct(Packet packet) async {
+
     final channel = await Channel.fromMap(packet.data, packet.client);
+
     if (channel.guild != null && !channel.guild.channels.any((c) => c.id == channel.id))
       channel.guild.channels.add(channel);
     
     final event = new ChannelCreateEvent(channel);
     packet.client.onChannelCreate.add(event);
+
   }
 }
 class ChannelUpdateEvent {
@@ -30,8 +28,9 @@ class ChannelUpdateEvent {
   static Future<Null> construct(Packet packet) async {
     final channel = await Channel.fromMap(packet.data, packet.client);
     if (channel.guild != null) {
-      channel.guild.channels.removeWhere((c) => c.id == channel.id);
-      channel.guild.channels.add(channel);
+      channel.guild.channels
+        ..removeWhere((c) => c.id == channel.id)
+        ..add(channel);
     }
     
     final event = new ChannelUpdateEvent(channel);

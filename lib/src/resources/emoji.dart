@@ -1,10 +1,9 @@
-import "guild.dart";
-import "user.dart";
-
+import "dart:async";
 import "../client.dart";
 import "../object.dart";
-
-import "dart:async";
+import "guild.dart";
+import "role.dart";
+import "user.dart";
 
 class Emoji extends DiscordObject {
   Snowflake id;

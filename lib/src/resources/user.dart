@@ -1,12 +1,13 @@
-import "../internals.dart";
-import "../client.dart";
-import "../object.dart";
-import "guild.dart";
-import "channel.dart";
-import "message.dart";
-
 import "dart:async";
 import "dart:convert";
+
+import "../client.dart";
+import "../internals.dart";
+import "../object.dart";
+
+import "channel.dart";
+import "guild.dart";
+import "role.dart";
 
 class User extends DiscordObject {
   static Route endpoint = new Route() + "users";
@@ -60,13 +61,16 @@ class Member extends DiscordObject {
   Future kick() => guild.kickMember(this);
 
   /// Bans this member from the parent guild.
-  Future ban({int deleteMessagesCount}) => guild.banMember(this, deleteMessagesCount: deleteMessagesCount);
+  Future ban({int deleteMessagesCount}) =>
+    guild.banMember(this, deleteMessagesCount: deleteMessagesCount);
   
   /// Adds a role to this member.
-  Future addRole(Role role) => guild.addMemberRole(this, role);
+  Future addRole(Role role) =>
+    guild.addMemberRole(this, role);
 
   /// Removes a role from this member.
-  Future removeRole(Role role) => guild.removeMemberRole(this, role);
+  Future removeRole(Role role) =>
+    guild.removeMemberRole(this, role);
 
   Member(this.user, this.guild, {this.nickname, this.roles, this.deafened, this.muted});
 

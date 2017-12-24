@@ -1,14 +1,15 @@
-import "../internals.dart";
+import "dart:async";
+import "dart:convert";
+
 import "../client.dart";
+import "../internals.dart";
 import "../object.dart";
 
 import "channel.dart";
-import "user.dart";
-import "permission.dart";
 import "emoji.dart";
-
-import "dart:async";
-import "dart:convert";
+import "permission.dart";
+import "role.dart";
+import "user.dart";
 
 class Guild extends DiscordObject {
   static Route endpoint = new Route() + "guilds";
@@ -65,6 +66,29 @@ class Guild extends DiscordObject {
     await route.put({}, client: client);
   }
 
+  Future<Role> createRole({
+    String name = "new role",
+    List<Permission> permissions,
+    int color = 0,
+    bool hoisted = false,
+    bool mentionable = false
+  }) async {
+    permissions ??= [];
+
+    final query = {
+      "name": name,
+      "permissions": Permission.toRaw(permissions),
+      "color": color,
+      "hoist": hoisted,
+      "mentionable": mentionable
+    };
+
+    final route = localEndpoint + "roles";
+    final response = await route.post(query, client: client);
+    return Role.fromMap(JSON.decode(response.body), client);
+
+  }
+
   /// Give a member a role.
   Future addMemberRole(Member member, Role role) async {
     final route = localEndpoint + "members" + member.id + "roles" + role.id;
@@ -79,11 +103,8 @@ class Guild extends DiscordObject {
 
   /// Modify an existing emoji.
   Future modifyEmoji(Emoji emoji, {String name, List<Role> roles}) async {
-    final roleList = [];
-    roles.forEach((r) => roleList.add(r));
-
     final route = localEndpoint + "emojis" + emoji.id;
-    await route.patch({"name": name, "roles": roleList}, client: client);
+    await route.patch({"name": name, "roles": roles.map((r) => r)}, client: client);
   }
 
   Future deleteEmoji(Emoji emoji) async {
@@ -115,8 +136,8 @@ class Guild extends DiscordObject {
       }
       if (obj["roles"] != null) {
         for(int i = 0; i < obj["roles"].length; i++) {
-          final role = Role.fromMap(obj["roles"][i], client);
-          role.guild = this;
+          final role = Role.fromMap(obj["roles"][i], client)
+            ..guild = this;
           roles.add(role);
         }
       }
@@ -124,8 +145,8 @@ class Guild extends DiscordObject {
 
   static Future<Guild> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
     if (obj["unavailable"] == null || obj["unavailable"] == false) {
-      final g = new Guild(obj["name"], new Snowflake(obj["id"]));
-      g.client = client;
+      final g = new Guild(obj["name"], new Snowflake(obj["id"]))
+        ..client = client;
 
       if (obj["emojis"] != null) {
         for (int i = 0; i < obj["emojis"].length; i++) {
@@ -143,8 +164,8 @@ class Guild extends DiscordObject {
       }
       if (obj["roles"] != null) {
         for(int i = 0; i < obj["roles"].length; i++) {
-          final role = Role.fromMap(obj["roles"][i], client);
-          role.guild = g;
+          final role = Role.fromMap(obj["roles"][i], client)
+            ..guild = g;
           g.roles.add(role);
         }
       }
@@ -152,49 +173,5 @@ class Guild extends DiscordObject {
     } else { // This is a partial guild. A lot of features will be missing and must be [download]'ed.
       return new Guild(null, new Snowflake(obj["id"]), partial: true);
     }
-  }
-}
-
-class Role extends DiscordObject {
-  Snowflake id;
-
-  /// The guild that this role is in.
-  Guild guild;
-
-  /// The name of the role.
-  String name;
-
-  /// The color of the role. Can be set using hexadecimal, e.g. 0x00AAFF.
-  int color;
-
-  /// Whether or not the role is hoisted, meaning it appears separately in the user list.
-  bool hoisted;
-
-  /// The position of the role in the role list.
-  int position;
-
-  /// The raw permissions of the role.
-  int permissionsRaw;
-
-  /// A list of [Permission] objects generated from the [permissionsRaw] variable.
-  List<Permission> get permissions => Permission.fromRaw(permissionsRaw, Permission.RolePermissions);
-
-  /// Whether or not this role is created and managed by a bot user.
-  bool managed;
-
-  /// Whether or not this role is mentionable.
-  bool mentionable;
-
-  Role(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});
-
-  static Role fromMap(Map<String, dynamic> obj, DiscordClient client) {
-    return new Role(
-      obj["name"], new Snowflake(obj["id"]),
-      hoisted: obj["hoist"],
-      position: obj["position"],
-      permissionsRaw: obj["permissions"],
-      managed: obj["managed"],
-      mentionable: obj["mentionable"]
-    )..client = client;
   }
 }

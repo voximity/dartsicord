@@ -47,7 +47,7 @@ class DiscordClient extends EventExhibitor {
   // Events
   //
 
-  /// Fired when the client receives the [READY] payload.
+  /// Fired when the client receives the `READY` payload.
   EventStream<ReadyEvent> onReady;
 
   /// Fired when the client sees a guild created. Not fired before [ready] is reached.
@@ -176,7 +176,7 @@ class DiscordClient extends EventExhibitor {
   void updateStatus(StatusType status, {Game game, bool afk = false}) {
 
     final query = {
-      "status": EnumMaps.statusMapReverse[status],
+      "status": Game.statusesR[status],
       "afk": afk,
       "game": game?.toMap(),
       "since": null
@@ -206,7 +206,7 @@ class DiscordClient extends EventExhibitor {
 
   
   /// Connects to Discord's API.
-  Future connect(String token, {TokenType tokenType = TokenType.Bot}) async {
+  Future connect(String token, {TokenType tokenType = TokenType.bot}) async {
     this.token = token;
     this.tokenType = tokenType;
 

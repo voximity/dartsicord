@@ -8,11 +8,8 @@ class Permission {
   int raw;
 
   /// Takes a list of [Permission] objects and converts it to a raw bitfield.
-  static int toRaw(List<Permission> permissions) {
-    int totalRaw = 0;
-    permissions.forEach((p) => totalRaw += p.raw);
-    return totalRaw;
-  }
+  static int toRaw(List<Permission> permissions) =>
+    permissions.fold(0, (p, c) => p + c.raw);
 
   /// Takes raw permission bitfield and converts into a [List] of [Permission] objects given a [preset].
   static List<Permission> fromRaw(int raw, List<Permission> preset) =>
