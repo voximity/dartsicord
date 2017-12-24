@@ -151,10 +151,10 @@ If something is missing, please let me know or contribute to this file.
 - [ ] Get Guild Webhooks \*
 - [ ] Get Webhook \*
 - [ ] Get Webhook with Token \*
-- [*] Modify Webhook
+- [x] Modify Webhook
 - [ ] Modify Webhook with Token \*
-- [*] Delete Webhook
+- [x] Delete Webhook
 - [ ] Delete Webhook with Token \*
-- [*] Execute Webhook
+- [x] Execute Webhook
 - [ ] Execute Slack-Compatible Webhook \*
 - [ ] Execute GitHub-Compatible Webhook \*
