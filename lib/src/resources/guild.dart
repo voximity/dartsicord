@@ -10,6 +10,7 @@ import "emoji.dart";
 import "permission.dart";
 import "role.dart";
 import "user.dart";
+import "webhook.dart";
 
 class Guild extends DiscordObject {
   static Route endpoint = new Route() + "guilds";
@@ -107,9 +108,21 @@ class Guild extends DiscordObject {
     await route.patch({"name": name, "roles": roles.map((r) => r)}, client: client);
   }
 
+  /// Delete an existing emoji.
   Future deleteEmoji(Emoji emoji) async {
     final route = localEndpoint + "emojis" + emoji.id;
     await route.delete(client: client);
+  }
+
+  Future<Webhook> createWebhook(TextChannel channel, String name, {String avatar}) async {
+    final query = {
+      "name": name,
+      "avatar": avatar
+    };
+
+    final route = Channel.endpoint + channel.id + "webhooks";
+    final response = await route.post(query, client: client);
+    return Webhook.fromMap(JSON.decode(response.body));
   }
 
   //
