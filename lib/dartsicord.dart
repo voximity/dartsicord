@@ -6,6 +6,7 @@ export "src/exception.dart";
 
 export "src/objects/channel.dart";
 export "src/objects/embed.dart";
+export "src/objects/emoji.dart";
 export "src/objects/game.dart";
 export "src/objects/guild.dart";
 export "src/objects/message.dart";

@@ -33,10 +33,10 @@ If something is missing, please let me know or contribute to this file.
 - [x] Message Update
 - [x] Message Delete
 - [ ] Message Delete Bulk
-- [ ] Message Reaction Add
-- [ ] Message Reaction Remove
-- [ ] Message Reaction Remove All
-- [ ] Presence Update
+- [x] Message Reaction Add
+- [x] Message Reaction Remove
+- [x] Message Reaction Remove All
+- [x] Presence Update
 - [ ] Typing Start
 - [ ] User Update
 - [ ] Voice State Update
@@ -58,10 +58,10 @@ If something is missing, please let me know or contribute to this file.
 - [x] Get Channel Message
 - [x] Create Message
 - [x] Create Reaction
-- [ ] Delete Own Reaction
-- [ ] Delete User Reaction
-- [ ] Get Reactions
-- [ ] Delete All Reactions
+- [x] Delete Own Reaction
+- [x] Delete User Reaction
+- [x] Get Reactions
+- [x] Delete All Reactions
 - [x] Edit Message
 - [x] Delete Message
 - [x] Bulk Delete Messages
@@ -78,7 +78,7 @@ If something is missing, please let me know or contribute to this file.
 
 ### Emoji
 
-- [ ] List Guild Emojis
+- [x] List Guild Emojis
 - [ ] Get Guild Emoji
 - [x] Create Guild Emoji
 - [x] Modify Guild Emoji

@@ -2,7 +2,14 @@
 
 ## 0.0.13
 
-TBA
+25 Dec 2017 (Merry Christmas)
+
+In 0.0.13, I added some more core concepts, such as invites, reactions, and more. I've added more events and methods as well. Additionally, I've made a lot of fixes to untested features. Probably the most exciting of all is the new example, `giveaway`. Check out the example directory for the new example. Comments are included to show how the library works and processes reactions. I plan to soon have most, if not all, events/methods required implemented. From there, I will be adding more unit tests. If you think this is a cool library, tell some of your friends. I need others to help contribute and find bugs!
+
+- Add reaction support
+- Add invite support
+- Many fixes (like a lot of fixes)
+- internals -> networking
 
 ## 0.0.12
 

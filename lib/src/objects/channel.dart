@@ -172,7 +172,7 @@ class TextChannel extends Channel {
     final route = localEndpoint + "messages"
      ..url += query;
     final response = await route.get(client: client);
-    return JSON.decode(response.body).map((m) => Message.fromMap(m, client));
+    return Future.wait(JSON.decode(response.body).map((m) async => await Message.fromMap(m, client)));
   }
 
   /// Gets a [Message] object given the [id].
@@ -198,10 +198,11 @@ class TextChannel extends Channel {
   /// Documentation for embed building is within the [Embed] object.
   Future<Message> sendMessage(String content, {Embed embed}) async {
     final route = localEndpoint + "messages";
-    final response = await route.post({
+    final query = {
       "content": content,
       "embed": embed?.toMap()
-    }, client: client);
+    };
+    final response = await route.post(query, client: client);
     final parsed = JSON.decode(response.body);
     return (await Message.fromMap(parsed, client))..author = client.user;
   }

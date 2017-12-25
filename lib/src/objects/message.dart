@@ -3,15 +3,19 @@ import "dart:convert";
 
 import "../client.dart";
 import "../exception.dart";
+import "../networking.dart";
 import "../object.dart";
 
 import "channel.dart";
 import "embed.dart";
+import "emoji.dart";
 import "guild.dart";
 import "role.dart";
 import "user.dart";
 
 class Message extends Resource {
+  Route get localEndpoint => channel.localEndpoint + "messages" + id;
+
   /// Content of the message.
   String content;
 
@@ -48,40 +52,68 @@ class Message extends Resource {
   // Methods
   //
 
+
+
   /// React to the message using [emoji].
-  Future react(String emoji) async {
-    final route = Channel.endpoint + channel.id + "messages" + id + "reactions" + emoji + "@me";
+  /// 
+  /// You can use [Guild.emojis] to find the emoji you'd like to use,
+  /// or you can instantiate an Emoji object yourself given the name,
+  /// which can be raw emoji unicode. For example, `new Emoji("🎊")`
+  Future<Null> react(Emoji emoji) async {
+    final route = localEndpoint + "reactions" + emoji + "@me";
     await route.put({}, client: client);
   }
 
+  /// Removes a previously created reaction from the message using [emoji].
+  /// 
+  /// See [Message.react] for more information on how to use this method.
+  Future<Null> removeReact(Emoji emoji) async {
+    final route = localEndpoint + "reactions" + emoji + "@me";
+    await route.delete(client: client);
+  }
+
+  /// Gets all users who reacted to the message using [emoji] given the [limit], if any.
+  /// 
+  /// [limit] will default to 100. Positional retrieval will be implemented some time soon.
+  Future<List<User>> getReactions(Emoji emoji, {int limit = 100}) async {
+    final route = localEndpoint + "reactions" + emoji
+      ..url += "?limit=$limit";
+    final response = await route.get(client: client);
+    return Future.wait(JSON.decode(response.body).map((u) async => await User.fromMap(u, client)));
+  }
+
+  /// Deletes all reactions created on this message.
+  Future<Null> deleteReactions() async =>
+    await (localEndpoint + "reactions").delete(client: client);
+
   /// Pin a message to its [channel].
-  Future pin() async {
+  Future<Null> pin() async {
     final route = channel.localEndpoint + "pins" + id;
     await route.put({}, client: client);
   }
 
   /// Unpins a message from its [channel].
-  Future unpin() async {
+  Future<Null> unpin() async {
     final route = channel.localEndpoint + "pins" + id;
     await route.delete(client: client);
   }
 
   /// Edit the message, given it is yours.
-  Future edit(String content, {Embed embed}) async {
+  Future<Null> edit(String content, {Embed embed}) async {
     if (!isAuthor)
       throw new ForbiddenException();
 
     final route = Channel.endpoint + channel.id + "messages" + id;
+
+    final newMessage = await route.patch({"content": content, "embed": embed?.toMap()}, client: client);
     this.content = content;
     this.embed ??= embed;
-
-    final newMessage = await route.patch({"content": content, "embed": embed.toMap()});
     
     editedAt = DateTime.parse(JSON.decode(newMessage.body)["edited_timestamp"]);
   }
 
   /// Delete the message.
-  Future delete() async {
+  Future<Null> delete() async {
     final route = channel.localEndpoint + "messages" + id;
     await route.delete(client: client);
   }

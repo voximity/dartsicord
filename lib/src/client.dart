@@ -90,6 +90,13 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a message delete.
   EventStream<MessageDeleteEvent> onMessageDelete;
 
+  /// Fired when the client sees a reaction created on a message.
+  EventStream<ReactionAddEvent> onReactionAdd;
+  /// Fired when the client sees a reaction removed from a message.
+  EventStream<ReactionRemoveEvent> onReactionRemove;
+  /// Fired when the client sees all reactions removed from a message.
+  EventStream<ReactionRemoveAllEvent> onReactionRemoveAll;
+
   /// Fired when the client sees a channel created.
   EventStream<ChannelCreateEvent> onChannelCreate;
   /// Fired when the client sees a channel updated.
@@ -133,6 +140,10 @@ class DiscordClient extends EventExhibitor {
 
     onUserBanned = createEvent();
     onUserUnbanned = createEvent();
+
+    onReactionAdd = createEvent();
+    onReactionRemove = createEvent();
+    onReactionRemoveAll = createEvent();
 
     onMessage = createEvent();
     onMessageDelete = createEvent();
@@ -262,85 +273,91 @@ class DiscordClient extends EventExhibitor {
       switch (packet.opcode) {
         case 0: // Dispatch
           final event = payload["t"];
-          
-          switch (event) {
-            case "READY":
+          if (ready) {
+            switch (event) {
+              case "READY":
+                await ReadyEvent.construct(packet);
+                break;
+
+              case "CHANNEL_CREATE":
+                await ChannelCreateEvent.construct(packet);
+                break;
+              case "CHANNEL_UPDATE":
+                await ChannelUpdateEvent.construct(packet);
+                break;
+              case "CHANNEL_DELETE":
+                await ChannelDeleteEvent.construct(packet);
+                break;
+              case "CHANNEL_PINS_UPDATE":
+                await ChannelPinsUpdateEvent.construct(packet);
+                break;
+
+              case "GUILD_CREATE":
+                await GuildCreateEvent.construct(packet);
+                break;
+              case "GUILD_UPDATE":
+                await GuildUpdateEvent.construct(packet);
+                break;
+              case "GUILD_DELETE":
+                await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
+                break;
+              
+              case "GUILD_EMOJIS_UPDATE":
+                await GuildEmojisUpdateEvent.construct(packet);
+                break;
+              case "GUILD_INTEGRATIONS_UPDATE":
+                await GuildIntegrationsUpdateEvent.construct(packet);
+                break;
+              case "GUILD_MEMBER_UPDATE":
+                await MemberUpdatedEvent.construct(packet);
+                break;
+              case "GUILD_MEMBER_ADD":
+                await UserAddedEvent.construct(packet);
+                break;
+              case "GUILD_MEMBER_REMOVE":
+                await UserRemovedEvent.construct(packet);
+                break;
+
+              case "USER_BANNED":
+                await UserBannedEvent.construct(packet);
+                break;
+              case "USER_UNBANNED":
+                await UserUnbannedEvent.construct(packet);
+                break;
+              
+              case "GUILD_ROLE_CREATED":
+                await RoleCreatedEvent.construct(packet);
+                break;
+              case "GUILD_ROLE_UPDATED":
+                await RoleUpdatedEvent.construct(packet);
+                break;
+              case "GUILD_ROLE_DELETED":
+                await RoleDeletedEvent.construct(packet);
+                break;
+
+              case "MESSAGE_CREATE":
+                await MessageCreateEvent.construct(packet);
+                break;
+              case "MESSAGE_DELETE":
+                await MessageDeleteEvent.construct(packet);
+                break;
+              
+              case "WEBHOOKS_UPDATE":
+                await WebhooksUpdateEvent.construct(packet);
+                break;
+
+              case "PRESENCE_UPDATE":
+                await PresenceUpdateEvent.construct(packet);
+                break;
+
+              default:
+                break;
+            }
+          } else {
+            if (event == "READY")
               await ReadyEvent.construct(packet);
-              break;
-
-            case "CHANNEL_CREATE":
-              await ChannelCreateEvent.construct(packet);
-              break;
-            case "CHANNEL_UPDATE":
-              await ChannelUpdateEvent.construct(packet);
-              break;
-            case "CHANNEL_DELETE":
-              await ChannelDeleteEvent.construct(packet);
-              break;
-            case "CHANNEL_PINS_UPDATE":
-              await ChannelPinsUpdateEvent.construct(packet);
-              break;
-
-            case "GUILD_CREATE":
+            else if(event == "GUILD_CREATE")
               await GuildCreateEvent.construct(packet);
-              break;
-            case "GUILD_UPDATE":
-              await GuildUpdateEvent.construct(packet);
-              break;
-            case "GUILD_DELETE":
-              await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
-              break;
-            
-            case "GUILD_EMOJIS_UPDATE":
-              await GuildEmojisUpdateEvent.construct(packet);
-              break;
-            case "GUILD_INTEGRATIONS_UPDATE":
-              await GuildIntegrationsUpdateEvent.construct(packet);
-              break;
-            case "GUILD_MEMBER_UPDATE":
-              await MemberUpdatedEvent.construct(packet);
-              break;
-            case "GUILD_MEMBER_ADD":
-              await UserAddedEvent.construct(packet);
-              break;
-            case "GUILD_MEMBER_REMOVE":
-              await UserRemovedEvent.construct(packet);
-              break;
-
-            case "USER_BANNED":
-              await UserBannedEvent.construct(packet);
-              break;
-            case "USER_UNBANNED":
-              await UserUnbannedEvent.construct(packet);
-              break;
-            
-            case "GUILD_ROLE_CREATED":
-              await RoleCreatedEvent.construct(packet);
-              break;
-            case "GUILD_ROLE_UPDATED":
-              await RoleUpdatedEvent.construct(packet);
-              break;
-            case "GUILD_ROLE_DELETED":
-              await RoleDeletedEvent.construct(packet);
-              break;
-
-            case "MESSAGE_CREATE":
-              await MessageCreateEvent.construct(packet);
-              break;
-            case "MESSAGE_DELETE":
-              await MessageDeleteEvent.construct(packet);
-              break;
-            
-            case "WEBHOOKS_UPDATE":
-              await WebhooksUpdateEvent.construct(packet);
-              break;
-
-            case "PRESENCE_UPDATE":
-              await PresenceUpdateEvent.construct(packet);
-              break;
-
-            default:
-              break;
           }
 
           break;

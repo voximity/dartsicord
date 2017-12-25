@@ -27,7 +27,8 @@ class Embed {
 
   /// Converts the object-based embed definition to an internal API-usable JSON-encodable map.
   Map<String, dynamic> toMap() {
-    final finalMap = {
+    final fieldsList = fields.fold([], (p, c) => p..add(c.toMap()));
+    final response = {
       "title": title,
       "type": type,
       "description": description,
@@ -41,9 +42,10 @@ class Embed {
       "video": video?.toMap(),
       "provider": provider?.toMap(),
       "author": author?.toMap(),
-      "fields": fields.map((f) => f.toMap())
+      "fields": fieldsList
     };
-    return finalMap;
+    
+    return response;
   }
 }
 class EmbedFooter {
@@ -54,7 +56,7 @@ class EmbedFooter {
   /// The footer of the embed. [text] is required. You may specify [iconUrl] and [proxyIconUrl].
   EmbedFooter(this.text, {this.iconUrl, this.proxyIconUrl});
 
-  dynamic toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  Map<String, dynamic> toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedImage {
   String url;
@@ -65,7 +67,7 @@ class EmbedImage {
   /// The image of the embed. [url], [height] and [width] are required. You may specify the [proxyUrl].
   EmbedImage(this.url, this.height, this.width, {this.proxyUrl});
 
-  dynamic toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  Map<String, dynamic> toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedThumbnail {
   String url;
@@ -76,7 +78,7 @@ class EmbedThumbnail {
   /// The thumbnail of the embed. [url], [height] and [width] are required. You may specify the [proxyUrl].
   EmbedThumbnail(this.url, this.height, this.width, {this.proxyUrl});
   
-  dynamic toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  Map<String, dynamic> toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedVideo {
   String url;
@@ -86,7 +88,7 @@ class EmbedVideo {
   /// The video of the embed. [url], [height] and [width] are required.
   EmbedVideo(this.url, this.height, this.width);
 
-  dynamic toMap() => {"url": url, "height": height, "width": width};
+  Map<String, dynamic> toMap() => {"url": url, "height": height, "width": width};
 }
 class EmbedProvider {
   String name;
@@ -95,7 +97,7 @@ class EmbedProvider {
   /// The provider of the embed. [name] and [url] are required.
   EmbedProvider(this.name, this.url);
 
-  dynamic toMap() => {"name": url, "url": url};
+  Map<String, dynamic> toMap() => {"name": url, "url": url};
 }
 class EmbedAuthor {
   String name;
@@ -106,7 +108,7 @@ class EmbedAuthor {
   /// The author of the embed. [name] and [url] are required. You may specify [iconUrl] and [proxyIconUrl].
   EmbedAuthor(this.name, this.url, {this.iconUrl, this.proxyIconUrl});
 
-  dynamic toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  Map<String, dynamic> toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedField {
   String name;
@@ -114,7 +116,7 @@ class EmbedField {
   bool inline = false;
 
   /// A field (of many) in the embed. [name] and [value] are required. You may specify [inline].
-  EmbedField(this.name, this.value, {this.inline});
+  EmbedField(this.name, this.value, {this.inline = false});
 
-  dynamic toMap() => {"name": name, "value": value, "inline": inline};
+  Map<String, dynamic> toMap() => {"name": name, "value": value, "inline": inline};
 }

@@ -84,7 +84,7 @@ packages:
       name: html
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.2"
+    version: "0.13.2+1"
   http:
     description:
       name: http
@@ -252,7 +252,7 @@ packages:
       name: stream_channel
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.2"
+    version: "1.6.3"
   string_scanner:
     description:
       name: string_scanner
@@ -270,7 +270,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.29"
+    version: "0.12.29+1"
   typed_data:
     description:
       name: typed_data

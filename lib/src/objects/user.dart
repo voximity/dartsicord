@@ -18,6 +18,9 @@ class User extends Resource {
   /// Discriminator of the user.
   String discriminator;
 
+  /// A pre-made formatted mention for this user.
+  String get mention => "<@" + id.toString() + ">";
+
   /// Whether or not this user object is partial.
   bool get partial => username == null;
 
