@@ -11,7 +11,7 @@ void main() {
 
   setUpAll(() async {
     client = new DiscordClient();
-    await client.connect(env["TOKEN"]);
+    await client.connect(env["token"]);
     await client.onReady.first;
   });
 
