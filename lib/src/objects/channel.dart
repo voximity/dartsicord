@@ -10,12 +10,13 @@ import "embed.dart";
 import "guild.dart";
 import "invite.dart";
 import "message.dart";
+import "overwrite.dart";
+import "role.dart";
 import "user.dart";
 import "webhook.dart";
 
 abstract class Channel extends Resource {
-  static Route endpoint = new Route() + "channels";
-  Route get localEndpoint => Channel.endpoint + id.toString();
+  Route get endpoint => client.api + "channels" + id;
   
   /// Name of the channel.
   String name;
@@ -76,26 +77,31 @@ class TextChannel extends Channel {
   /// A list of [Webhook] objects, if any. Refer to the [type] property and check for [ChannelType.guildText].
   List<Webhook> webhooks;
 
-  /// Deletes this channel.
-  Future<Null> delete() async =>
-    await localEndpoint.delete(client: client);
+  /// A list of [Overwrite] objects, if any. Refer to the [type] property and check for [ChannelType.guildText].
+  List<Overwrite> overwrites;
 
-  /// Modifies this channel using the given positional parameters [name], [position], [topic], and [nsfw].
-  Future<Null> modify({String name, int position, String topic, bool nsfw}) async {
+  /// Deletes this channel.
+  Future<Null> delete() =>
+    endpoint.delete();
+
+  /// Modifies this channel using the given positional parameters [name], [position], [topic], [newOverwrites], and [nsfw].
+  Future<Null> modify({String name, int position, String topic, List<Overwrite> newOverwrites, bool nsfw}) async {
     final query = {
       "name": name,
       "position": position,
       "topic": topic,
-      "nsfw": nsfw
+      "nsfw": nsfw,
+      "permission_overwrites": newOverwrites.map((o) => o.toMap())
     };
     
-    final response = await localEndpoint.patch(query, client: client);
+    final response = await endpoint.patch(query);
     final map = JSON.decode(response.body);
 
     this.name = map["name"];
     this.position = map["position"];
     this.topic = map["topic"];
     this.nsfw = map["nsfw"];
+    overwrites = map["permission_overwrites"].map(Overwrite.fromMap);
   }
 
   /// Creates a [Webhook] for this channel named [name] using the given positional parameter [avatar].
@@ -105,21 +111,29 @@ class TextChannel extends Channel {
       "avatar": avatar
     };
 
-    final route = localEndpoint + "webhooks";
-    final response = await route.post(query, client: client);
+    final route = endpoint + "webhooks";
+    final response = await route.post(query);
     return Webhook.fromMap(JSON.decode(response.body), client);
   }
 
-  /// Fire a typing request to this channel.
-  Future<Null> startTyping() async {
-    final route = localEndpoint + "typing";
-    await route.post({}, client: client);
+  /// Modify [existingOverwrite]. If either [newAllow] or [newDeny] are specified, they will completely overwrite
+  /// the old allow/deny, so do not rely on this to add new permissions.
+  Future<Null> modifyPermission({Overwrite existingOverwrite, List<RolePermission> newAllow, List<RolePermission> newDeny, OverwriteType type}) async {
+    final query = {
+      "allow": Role.permissionToRaw(newAllow),
+      "deny": Role.permissionToRaw(newDeny),
+      "type": (new Map.fromIterables(Overwrite.internalMap.values, Overwrite.internalMap.keys))[type]
+    };
+    await (endpoint + "permissions" + existingOverwrite.targetId).put(query);
   }
+
+  /// Fire a typing request to this channel.
+  Future<Null> startTyping() =>
+    (endpoint + "typing").post({});
 
   /// Gets a [List] of [Invite] objects that this channel possesses.
   Future<List<Invite>> getInvites() async {
-    final route = localEndpoint + "invites";
-    final response = await route.get(client: client);
+    final response = await (endpoint + "invites").get();
     return JSON.decode(response.body).map((i) => Invite.fromMap(i, client));
   }
 
@@ -133,17 +147,15 @@ class TextChannel extends Channel {
       "temporary": temporary,
       "unique": unique
     };
-    
-    final route = localEndpoint + "invites";
-    final response = await route.post(query, client: client);
+
+    final response = await (endpoint + "invites").post(query);
     return Invite.fromMap(JSON.decode(response.body), client);
   }
 
   /// Gets a [List] of [Message] objects that represent the pins in this channel.
   Future<List<Message>> getPins() async {
-    final route = localEndpoint + "pins";
-    final response = await route.get(client: client);
-    return JSON.decode(response.body).map((m) => Message.fromMap(m, client));
+    final response = await (endpoint + "pins").get();
+    return Future.wait(JSON.decode(response.body).map((m) async => await Message.fromMap(m, client)));
   }
 
   /// Gets a [List] of [Message] objects given the [limit].
@@ -169,16 +181,15 @@ class TextChannel extends Channel {
       }
     }
     
-    final route = localEndpoint + "messages"
+    final route = endpoint + "messages"
      ..url += query;
-    final response = await route.get(client: client);
+    final response = await route.get();
     return Future.wait(JSON.decode(response.body).map((m) async => await Message.fromMap(m, client)));
   }
 
   /// Gets a [Message] object given the [id].
   Future<Message> getMessage(dynamic id) async {
-    final route = localEndpoint + "messages" + id.toString();
-    final response = await route.get(client: client);
+    final response = await (endpoint + "messages" + id).get();
     return await Message.fromMap(JSON.decode(response.body), client);
   }
 
@@ -187,8 +198,7 @@ class TextChannel extends Channel {
   /// 2-100 messages may be specified. Messages older than 2 weeks are unaffected.
   Future<Null> bulkDeleteMessages(List<Message> messages) async {
     final query = messages.map((m) => m.id.id);
-    final route = localEndpoint + "messages" + "bulk-delete";
-    await route.post(query, client: client);
+    await (endpoint + "messages" + "bulk-delete").post(query);
   }
 
   /// Send a message to this channel.
@@ -197,12 +207,11 @@ class TextChannel extends Channel {
   /// If you want to specify an [Embed], you first need to build an embed using the [Embed] object.
   /// Documentation for embed building is within the [Embed] object.
   Future<Message> sendMessage(String content, {Embed embed}) async {
-    final route = localEndpoint + "messages";
     final query = {
       "content": content,
       "embed": embed?.toMap()
     };
-    final response = await route.post(query, client: client);
+    final response = await (endpoint + "messages").post(query);
     final parsed = JSON.decode(response.body);
     return (await Message.fromMap(parsed, client))..author = client.user;
   }
@@ -215,6 +224,7 @@ class TextChannel extends Channel {
       case ChannelType.guildText:
         final channel = new TextChannel(obj["name"], new Snowflake(obj["id"]), channelType,
           guild: guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null))
+          ..overwrites = obj["permission_overwrites"]?.map((o) => Overwrite.fromMap(o, client))
           ..client = client;
         return channel;
 
@@ -244,7 +254,7 @@ class VoiceChannel extends Channel {
   String name;
   Guild guild;
 
-  Route get localEndpoint => Channel.endpoint + id;
+  Route get endpoint => client.api + "channels" + id;
 
   ChannelType type;
 

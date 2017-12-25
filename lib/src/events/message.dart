@@ -46,6 +46,22 @@ class MessageDeleteEvent {
     packet.client.onMessageDelete.add(event);
   }
 }
+class MessageDeleteBulkEvent {
+  /// The [TextChannel] these messages were deleted in.
+  TextChannel channel;
+  /// A list of [Snowflake] objects representing the deleted messages.
+  List<Snowflake> messages;
+
+  MessageDeleteBulkEvent(this.messages, this.channel);
+
+  static Future<Null> construct(Packet packet) async {
+    final channel = await packet.client.getTextChannel(packet.data["channel_id"]);
+    final ids = packet.data["ids"].map((i) => new Snowflake(i));
+
+    final event = new MessageDeleteBulkEvent(ids, channel);
+    packet.client.onMessageBulkDelete.add(event);
+  }
+}
 class ReactionAddEvent {
   /// The user id of the reactor. You will need to fetch this user through client methods if absolutely necessary.
   Snowflake userId;

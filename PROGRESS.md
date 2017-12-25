@@ -7,6 +7,8 @@ If something is missing, please let me know or contribute to this file.
 
 ## WebSocket Events
 
+This group is complete.
+
 - [x] Hello
 - [x] Ready
 - [x] Resumed
@@ -25,31 +27,35 @@ If something is missing, please let me know or contribute to this file.
 - [x] Guild Member Add
 - [x] Guild Member Remove
 - [x] Guild Member Update
-- [ ] Guild Members Chunk
+- [ ] Guild Members Chunk \*
 - [x] Guild Role Create
 - [x] Guild Role Update
 - [x] Guild Role Delete
 - [x] Message Create
 - [x] Message Update
 - [x] Message Delete
-- [ ] Message Delete Bulk
+- [x] Message Delete Bulk
 - [x] Message Reaction Add
 - [x] Message Reaction Remove
 - [x] Message Reaction Remove All
 - [x] Presence Update
-- [ ] Typing Start
-- [ ] User Update
-- [ ] Voice State Update
-- [ ] Voice Server Update
+- [x] Typing Start
+- [x] User Update
+- [ ] Voice State Update \*
+- [ ] Voice Server Update \*
 - [x] Webhooks Update
 
 ## REST Methods
 
 ### Audit Log
 
+This group is complete.
+
 - [ ] Get Guild Audit Log \*
 
 ### Channel
+
+This group is complete.
 
 - [x] Get Channel
 - [x] Modify Channel
@@ -65,10 +71,10 @@ If something is missing, please let me know or contribute to this file.
 - [x] Edit Message
 - [x] Delete Message
 - [x] Bulk Delete Messages
-- [ ] Edit Channel Permissions
+- [x] Edit Channel Permissions
 - [x] Get Channel Invites
 - [x] Create Channel Invite
-- [ ] Delete Channel Permission
+- [x] Delete Channel Permission
 - [x] Trigger Typing Indicator
 - [x] Get Pinned Messages
 - [x] Add Pinned Channel Message
@@ -78,18 +84,20 @@ If something is missing, please let me know or contribute to this file.
 
 ### Emoji
 
+This group is complete.
+
 - [x] List Guild Emojis
-- [ ] Get Guild Emoji
+- [ ] Get Guild Emoji /*
 - [x] Create Guild Emoji
 - [x] Modify Guild Emoji
 - [x] Delete Guild Emoji
 
 ### Guild
 
-- [ ] Create Guild
+- [ ] Create Guild \*
 - [x] Get Guild
 - [ ] Modify Guild
-- [ ] Delete Guild
+- [ ] Delete Guild \*
 - [x] Get Guild Channels
 - [ ] Create Guild Channel
 - [ ] Modify Guild Channel Positions
@@ -111,17 +119,19 @@ If something is missing, please let me know or contribute to this file.
 - [ ] Delete Guild Role
 - [ ] Get Guild Prune Count
 - [ ] Begin Guild Prune
-- [ ] Get Guild Voice Regions
+- [ ] Get Guild Voice Regions \*
 - [ ] Get Guild Invites \*
 - [ ] Get Guild Integrations \*
 - [ ] Create Guild Integration \*
 - [ ] Modify Guild Integration \*
 - [ ] Delete Guild Integration \*
 - [ ] Sync Guild Integration \*
-- [ ] Get Guild Embed
-- [ ] Modify Guild Embed
+- [ ] Get Guild Embed \*
+- [ ] Modify Guild Embed \*
 
 ### Invite
+
+This group is complete.
 
 - [ ] Get Invite \*
 - [x] Delete Invite
@@ -136,15 +146,19 @@ If something is missing, please let me know or contribute to this file.
 - [x] Leave Guild
 - [ ] Get User DMs
 - [x] Create DM
-- [ ] Create Group DM
-- [ ] Get User Connections
+- [ ] Create Group DM \*
+- [ ] Get User Connections \*
 
 ### Voice
+
+This group is not planned.
 
 - [ ] Implemented
 - [ ] List Voice Regions
 
 ### Webhook
+
+This group is complete.
 
 - [x] Create Webhook
 - [x] Get Channel Webhooks

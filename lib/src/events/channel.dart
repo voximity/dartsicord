@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import "../networking.dart";
+import "../object.dart";
 import "../objects/channel.dart";
 import "../objects/guild.dart";
 import "../objects/webhook.dart";
@@ -29,11 +30,22 @@ class ChannelUpdateEvent {
   ChannelUpdateEvent(this.channel);
 
   static Future<Null> construct(Packet packet) async {
-    final channel = await Channel.fromMap(packet.data, packet.client);
+    var channel = await Channel.fromMap(packet.data, packet.client);
     if (channel.guild != null) {
-      channel.guild.channels
-        ..removeWhere((c) => c.id == channel.id)
-        ..add(channel);
+      final existing = channel.guild.channels.firstWhere((c) => c.id == channel.id)
+        ..name = channel.name;
+      
+
+      if (existing is TextChannel && channel is TextChannel)
+        existing
+          ..nsfw = channel.nsfw
+          ..overwrites = channel.overwrites
+          ..position = channel.position
+          ..topic = channel.topic
+          ..webhooks = channel.webhooks
+          ..recipients = channel.recipients;
+
+      channel = existing;
     }
     
     final event = new ChannelUpdateEvent(channel);
@@ -80,12 +92,28 @@ class WebhooksUpdateEvent {
 
   static Future<Null> construct(Packet packet) async {
     final channel = await packet.client.getTextChannel(packet.data["channel_id"]);
-    final route = channel.localEndpoint + "webhooks";
-    final response = await route.get(client: packet.client);
+    final route = packet.client.api + "channels" + channel.id + "webhooks";
+    final response = await route.get();
     final webhooks = JSON.decode(response.body);
     channel.webhooks = webhooks.map((w) async => await Webhook.fromMap(w, packet.client));
 
     final event = new WebhooksUpdateEvent(channel, guild: channel.guild);
     packet.client.onWebhooksUpdate.add(event);
+  }
+}
+class TypingStartEvent {
+  /// The channel in which someone is typing.
+  TextChannel channel;
+  /// A [Snowflake] object representing the user that was typing. If you need this object, see `User.get`.
+  Snowflake userId;
+
+  TypingStartEvent(this.channel, this.userId);
+
+  static Future<Null> construct(Packet packet) async {
+    final channel = await packet.client.getTextChannel(packet.data["channel_id"]);
+    final userId = new Snowflake(packet.data["user_id"]);
+
+    final event = new TypingStartEvent(channel, userId);
+    packet.client.onTypingStart.add(event);
   }
 }

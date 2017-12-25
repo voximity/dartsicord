@@ -54,6 +54,16 @@ class ReadyEvent {
     packet.client.onReady.add(event);
   }
 }
+class UserUpdateEvent {
+  UserUpdateEvent();
+
+  static Future<Null> construct(Packet packet) async {
+    packet.client.user = await User.fromMap(packet.data, packet.client);
+
+    final event = new UserUpdateEvent();
+    packet.client.onUserUpdate.add(event);
+  }
+}
 class PresenceUpdateEvent {
   /// The user in which presence has been updated.
   User user;

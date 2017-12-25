@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.0
+
+25 Dec 2017 (Merry Christmas again)
+
+Woohoo! 0.1.0 is the first major pre-1.0 version. This version attempts to complete all events, most REST methods, and adds some missing features I've forgotten to add in the past. I've also reworked the networking system (again), and made everything a bit more user friendly. In some coming updates, I'll be going through documentation and making everything very specific and easy to use.
+
+- Add author support
+- Add channel overwrites
+- Rework permission system
+- Rework Route system
+- Rework a few update events
+- Finish channel events and methods
+- Finish client events
+
 ## 0.0.13
 
 25 Dec 2017 (Merry Christmas)

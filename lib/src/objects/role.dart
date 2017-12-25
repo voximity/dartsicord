@@ -1,10 +1,53 @@
 import "../client.dart";
+import "../enums.dart";
 import "../object.dart";
 
 import "guild.dart";
-import "permission.dart";
 
 class Role extends Resource {
+  /// Takes a list of [RolePermission] enums and converts it to a raw bitfield.
+  static int permissionToRaw(List<RolePermission> permissions) =>
+    permissions.fold(0, (p, c) => p + _permissionMap[c]);
+
+  /// Takes raw permission bitfield and converts into a [List] of [RolePermission] enums given a [preset].
+  /// 
+  /// Typically, for [preset], you will want to use RolePermission.values. 
+  static List<RolePermission> permissionFromRaw(int raw, {List<RolePermission> preset = RolePermission.values}) =>
+    preset.where((p) => raw & _permissionMap[p] != 0);
+  
+  static final Map<RolePermission, int> _permissionMap = {
+    RolePermission.createInstantInvite: 1 << 0,
+    RolePermission.kickMembers: 1 << 1,
+    RolePermission.banMembers: 1 << 2,
+    RolePermission.administrator: 1 << 3,
+    RolePermission.manageChannels: 1 << 4,
+    RolePermission.manageGuild: 1 << 5,
+    RolePermission.addReactions: 1 << 6,
+    RolePermission.viewAuditLog: 1 << 7,
+
+    RolePermission.readMessages: 1 << 10,
+    RolePermission.sendMessages: 1 << 11,
+    RolePermission.sendTtsMessages: 1 << 12,
+    RolePermission.manageMessages: 1 << 13,
+    RolePermission.embedLinks: 1 << 14,
+    RolePermission.attachFiles: 1 << 15,
+    RolePermission.readMessageHistory: 1 << 16,
+    RolePermission.mentionEveryone: 1 << 17,
+    RolePermission.useExternalEmojis: 1 << 18,
+
+    RolePermission.connect: 1 << 20,
+    RolePermission.speak: 1 << 21,
+    RolePermission.muteMembers: 1 << 22,
+    RolePermission.deafenMembers: 1 << 23,
+    RolePermission.moveMembers: 1 << 24,
+    RolePermission.useVoiceActivation: 1 << 25,
+    RolePermission.changeNickname: 1 << 26,
+    RolePermission.manageNicknames: 1 << 27,
+    RolePermission.manageRoles: 1 << 28,
+    RolePermission.manageWebhooks: 1 << 29,
+    RolePermission.manageEmojis: 1 << 30
+  };
+
   Snowflake id;
 
   /// The guild that this role is in.
@@ -25,8 +68,8 @@ class Role extends Resource {
   /// The raw permissions of the role.
   int permissionsRaw;
 
-  /// A list of [Permission] objects generated from the [permissionsRaw] variable.
-  List<Permission> get permissions => Permission.fromRaw(permissionsRaw, Permission.rolePermissions);
+  /// A list of [RolePermission] enums generated from the [permissionsRaw] variable.
+  List<RolePermission> get permissions => permissionFromRaw(permissionsRaw);
 
   /// Whether or not this role is created and managed by a bot user.
   bool managed;

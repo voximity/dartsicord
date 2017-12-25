@@ -10,7 +10,7 @@ import "guild.dart";
 import "role.dart";
 
 class User extends Resource {
-  static Route endpoint = new Route() + "users";
+  Route get endpoint => client.api + "users" + (id == client.user.id ? "@me" : id);
 
   /// Username of the user.
   String username;
@@ -21,6 +21,10 @@ class User extends Resource {
   /// A pre-made formatted mention for this user.
   String get mention => "<@" + id.toString() + ">";
 
+  String avatar;
+
+  String get avatarUrl => "https://cdn.discordapp.com/avatars/$id/$avatar.png";
+
   /// Whether or not this user object is partial.
   bool get partial => username == null;
 
@@ -28,24 +32,21 @@ class User extends Resource {
 
   /// Creates a direct message channel with this user.
   Future<TextChannel> createDirectMessage() async {
-    final route = User.endpoint + "@me" + "channels";
-    final response = await route.post({
-      "recipient_id": id
-    }, client: client);
+    final response = await (endpoint + "channels").post({"recipient_id": id});
     final channel = TextChannel.fromMap(JSON.decode(response.body), client);
     return channel;
   }
 
-  User(this.username, this.discriminator, this.id);
+  User(this.username, this.discriminator, this.id, {this.avatar});
 
   static Future<User> get(dynamic id, DiscordClient client) async {
-    final route = endpoint + id.toString();
-    final response = await route.get(client: client);
+    final response = await (new Route(client: client) + "users" + id.toString()).get();
     return await fromMap(JSON.decode(response.body), client);
   }
 
   static Future<User> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
-    new User(obj["username"], obj["discriminator"], new Snowflake(obj["id"]))..client = client;
+    new User(obj["username"], obj["discriminator"], new Snowflake(obj["id"]),
+      avatar: obj["avatar"])..client = client;
 }
 
 class Member extends Resource {
@@ -70,11 +71,12 @@ class Member extends Resource {
   bool muted;
 
   /// Kicks this member from the parent guild.
-  Future kick() => guild.kickMember(this);
+  Future kick() =>
+    guild.kickMember(this);
 
   /// Bans this member from the parent guild.
-  Future ban({int deleteMessagesCount}) =>
-    guild.banMember(this, deleteMessagesCount: deleteMessagesCount);
+  Future ban({int deleteMessageDays}) =>
+    guild.banMember(this, deleteMessageDays: deleteMessageDays);
   
   /// Adds a role to this member.
   Future addRole(Role role) =>

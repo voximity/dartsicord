@@ -24,6 +24,8 @@ class DiscordClient extends EventExhibitor {
   int _lastSeq;
   bool _closed = false;
 
+  Route get api => new Route(client: this);
+
   String sessionId;
 
   /// The shard of the current client.
@@ -53,6 +55,8 @@ class DiscordClient extends EventExhibitor {
 
   /// Fired when the client receives the `READY` payload.
   EventStream<ReadyEvent> onReady;
+  /// Fired when the client's user updates.
+  EventStream<UserUpdateEvent> onUserUpdate;
 
   /// Fired when the client sees a guild created. Not fired before [ready] is reached.
   EventStream<GuildCreateEvent> onGuildCreate;
@@ -89,6 +93,8 @@ class DiscordClient extends EventExhibitor {
   EventStream<MessageCreateEvent> onMessage;
   /// Fired when the client sees a message delete.
   EventStream<MessageDeleteEvent> onMessageDelete;
+  /// Fired when the client sees messages bulk-deleted.
+  EventStream<MessageDeleteBulkEvent> onMessageBulkDelete;
 
   /// Fired when the client sees a reaction created on a message.
   EventStream<ReactionAddEvent> onReactionAdd;
@@ -106,6 +112,9 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a channel update its pins.
   EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
 
+  /// Fired when the client sees a user start typing in a channel.
+  EventStream<TypingStartEvent> onTypingStart;
+
   /// Fired when the client sees a channel update its webhooks.
   EventStream<WebhooksUpdateEvent> onWebhooksUpdate;
 
@@ -115,8 +124,7 @@ class DiscordClient extends EventExhibitor {
   // Internal methods
 
   Future _getGateway() async {
-    final route = new Route() + "gateway";
-    final response = await route.get(client: this);
+    final response = await (api + "gateway").get();
     return JSON.decode(response.body)["url"];
   }
 
@@ -126,6 +134,7 @@ class DiscordClient extends EventExhibitor {
 
   void _defineEvents() {
     onReady = createEvent();
+    onUserUpdate = createEvent();
 
     onGuildCreate = createEvent();
     onGuildUpdate = createEvent();
@@ -147,25 +156,40 @@ class DiscordClient extends EventExhibitor {
 
     onMessage = createEvent();
     onMessageDelete = createEvent();
+    onMessageBulkDelete = createEvent();
 
     onChannelCreate = createEvent();
     onChannelUpdate = createEvent();
     onChannelDelete = createEvent();
     onChannelPinsUpdate = createEvent();
 
+    onTypingStart = createEvent();
+
     onWebhooksUpdate = createEvent();
 
     onPresenceUpdate = createEvent();
   }
 
+  Future<String> _avatarData(File avatar, String headerType) async {
+    final bytes = await avatar.readAsBytes();
+    final encoded = BASE64.encode(bytes);
+    return "data:image/$headerType;base64,$encoded";
+  }
 
 
   // External methods
 
-  /// Modify the client's user.
-  Future modify({String username}) async {
-    final route = User.endpoint + "@me";
-    final response = await route.patch({"username": username}, client: this);
+  /// Modify the client's user. Note that the [avatar] parameter is currently experimental.
+  Future modify({String username, File avatar, String avatarFileType = "jpeg"}) async {
+    final query = {"username": username};
+
+    if (avatar != null) {
+      final data = await _avatarData(avatar, avatarFileType);
+      print(data);
+      query["avatar"] = data;
+    }
+
+    final response = await (api + "users" + "@me").patch(query);
     return User.fromMap(JSON.decode(response.body), this);
   }
 
@@ -177,8 +201,10 @@ class DiscordClient extends EventExhibitor {
   
   /// Get a channel given its [id].
   Future<Channel> getChannel(dynamic id) async {
-    final route = Channel.endpoint + id;
-    final response = await route.get(client: this);
+    if (!guilds.any((g) => g.channels.any((c) => c.id == id))) // Check if this channel is already cached.
+      return guilds.firstWhere((c) => c.id == id).channels.firstWhere((c) => c.id == id);
+
+    final response = await (api + "channels" + id).get();
     return Channel.fromMap(JSON.decode(response.body), this);
   }
 
@@ -340,6 +366,9 @@ class DiscordClient extends EventExhibitor {
                 break;
               case "MESSAGE_DELETE":
                 await MessageDeleteEvent.construct(packet);
+                break;
+              case "MESSAGE_DELETE_BULK":
+                await MessageDeleteBulkEvent.construct(packet);
                 break;
               
               case "WEBHOOKS_UPDATE":

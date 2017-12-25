@@ -27,10 +27,14 @@ class GuildUpdateEvent {
   GuildUpdateEvent(this.guild);
 
   static Future<Null> construct(Packet packet) async {
-    final guild = await Guild.fromMap(packet.data, packet.client);
-    packet.client.guilds
-      ..removeWhere((g) => g.id == guild.id)
-      ..add(guild);
+    var guild = await Guild.fromMap(packet.data, packet.client);
+    
+    final existing = packet.client.guilds.firstWhere((g) => g.id == guild.id)
+      ..name = guild.name
+      ..channels = guild.channels
+      ..emojis = guild.emojis
+      ..roles = guild.roles;
+    guild = existing;
 
     packet.client.onGuildUpdate.add(new GuildUpdateEvent(guild));
   }

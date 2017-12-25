@@ -11,8 +11,7 @@ import "guild.dart";
 import "user.dart";
 
 class Webhook extends Resource {
-  static Route get endpoint => new Route() + "webhooks";
-  Route get localEndpoint => endpoint + id;
+  Route get endpoint => client.api + "webhooks" + id;
 
   Snowflake id;
 
@@ -31,10 +30,8 @@ class Webhook extends Resource {
   Guild guild;
 
   /// Delete this webhook.
-  Future<Null> delete() async {
-    final route = localEndpoint;
-    await route.delete(client: client);
-  }
+  Future<Null> delete() =>
+    endpoint.delete();
 
   /// Modify this webhook using the given positional parameters [name], [avatar], and [channel].
   Future<Null> modify({String name, String avatar, Channel channel}) async {
@@ -45,9 +42,8 @@ class Webhook extends Resource {
       query["avatar"] = avatar;
     if (channel != null)
       query["channel_id"] = channel.id.id;
-    
-    final route = localEndpoint;
-    final response = await route.patch(query, client: client);
+
+    final response = await endpoint.patch(query);
     final object = JSON.decode(response.body);
 
     this.name = object["name"];
@@ -63,9 +59,7 @@ class Webhook extends Resource {
       "tts": tts,
       "embeds": embeds.map((e) => e.toMap())
     };
-
-    final route = localEndpoint + token;
-    await route.post(query, client: client);
+    await (endpoint + token).post(query);
   }
 
   Webhook(this.id, this.name, this.token, {this.avatar, this.channel, this.guild});

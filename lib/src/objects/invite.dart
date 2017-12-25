@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert";
 
 import "../client.dart";
 import "../networking.dart";
@@ -8,8 +7,7 @@ import "guild.dart";
 import "user.dart";
 
 class Invite {
-  static Route endpoint = new Route() + "invites";
-  Route get localEndpoint => Invite.endpoint + code;
+  Route get endpoint => client.api + "invites" + code;
 
   /// The code of the invite.
   String code;
@@ -39,11 +37,11 @@ class Invite {
   Invite(this.code, {this.guild, this.channel,
     this.uses, this.maxUses, this.temporary, this.revoked, this.createdAt, this.maxAge, this.inviter});
 
-  Future<Null> accept() async =>
-    await localEndpoint.post({}, client: client);
+  Future<Null> accept() =>
+    endpoint.post({});
   
-  Future<Null> delete() async =>
-    await localEndpoint.delete(client: client);
+  Future<Null> delete() =>
+    endpoint.delete();
 
   static Future<Invite> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
     final inv = new Invite(obj["code"],

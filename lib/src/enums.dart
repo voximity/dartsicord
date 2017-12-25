@@ -31,3 +31,41 @@ enum ActivityType {
   listen,
   watch
 }
+
+enum OverwriteType {
+  role,
+  member
+}
+
+enum RolePermission {
+  createInstantInvite,
+  kickMembers,
+  banMembers,
+  administrator,
+  manageChannels,
+  manageGuild,
+  addReactions,
+  viewAuditLog,
+
+  readMessages,
+  sendMessages,
+  sendTtsMessages,
+  manageMessages,
+  embedLinks,
+  attachFiles,
+  readMessageHistory,
+  mentionEveryone,
+  useExternalEmojis,
+
+  connect,
+  speak,
+  muteMembers,
+  deafenMembers,
+  moveMembers,
+  useVoiceActivation,
+  changeNickname,
+  manageNicknames,
+  manageRoles,
+  manageWebhooks,
+  manageEmojis
+}

@@ -2,19 +2,18 @@ import "dart:async";
 import "dart:convert";
 
 import "../client.dart";
+import "../enums.dart";
 import "../networking.dart";
 import "../object.dart";
 
 import "channel.dart";
 import "emoji.dart";
-import "permission.dart";
 import "role.dart";
 import "user.dart";
 import "webhook.dart";
 
 class Guild extends Resource {
-  static Route endpoint = new Route() + "guilds";
-  Route get localEndpoint => Guild.endpoint + id;
+  Route get endpoint => client.api + "guilds" + id;
 
   /// Name of guild.
   String name;
@@ -40,40 +39,31 @@ class Guild extends Resource {
   List<Webhook> get webhooks => textChannels.fold([], (p, c) => p..addAll(c.webhooks));
 
   /// Leave this guild.
-  Future leave() async {
-    final route = User.endpoint + "@me" + "guilds" + id;
-    await route.delete(client: client);
-  }
+  Future<Null> leave() =>
+    (client.api + "users" + "@me" + "guilds" + id).delete();
 
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
-    final route = localEndpoint + "members" + user.id;
-    final response = await route.get(client: client);
+    final response = await (endpoint + "members" + user.id).get();
     return Member.fromMap(JSON.decode(response.body), client, this);
   }
 
   /// Kick a member from this guild.
-  Future kickMember(Member member) async {
-    final route = localEndpoint + "members" + member.id;
-    await route.delete(client: client);
-  }
+  Future<Null> kickMember(Member member) =>
+    (endpoint + "members" + member.id).delete();
 
   /// Ban a member from this guild.
-  Future banMember(Member member, {int deleteMessagesCount}) async {
-    final route = localEndpoint + "bans" + member.id;
-    await route.put({"delete-message-days": deleteMessagesCount}, client: client);
-  }
+  Future<Null> banMember(Member member, {int deleteMessageDays}) =>
+    (endpoint + "bans" + member.id).put({"delete-message-days": deleteMessageDays});
 
   /// Ban a user's ID from this guild.
-  Future banId(int userId) async {
-    final route = localEndpoint + "bans" + userId;
-    await route.put({}, client: client);
-  }
+  Future<Null> banId(int userId) =>
+    (endpoint + "bans" + userId).put({});
 
   /// Creates a role for this guild using the given positional parameters [name], [permissions], [color], [hoisted], and [mentionable].
   Future<Role> createRole({
     String name = "new role",
-    List<Permission> permissions,
+    List<RolePermission> permissions,
     int color = 0,
     bool hoisted = false,
     bool mentionable = false
@@ -82,41 +72,34 @@ class Guild extends Resource {
 
     final query = {
       "name": name,
-      "permissions": Permission.toRaw(permissions),
+      "permissions": Role.permissionToRaw(permissions),
       "color": color,
       "hoist": hoisted,
       "mentionable": mentionable
     };
 
-    final route = localEndpoint + "roles";
-    final response = await route.post(query, client: client);
+    final response = await (endpoint + "roles").post(query);
     return Role.fromMap(JSON.decode(response.body), client);
-
   }
 
   /// Give a member a role.
-  Future addMemberRole(Member member, Role role) async {
-    final route = localEndpoint + "members" + member.id + "roles" + role.id;
-    await route.put({}, client: client);
-  }
+  Future<Null> addMemberRole(Member member, Role role) =>
+    (endpoint + "members" + member.id + "roles" + role.id).put({});
 
   /// Remove a role from a member.
-  Future removeMemberRole(Member member, Role role) async {
-    final route = localEndpoint + "members" + member.id + "roles" + role.id;
-    await route.delete(client: client);
-  }
+  Future<Null> removeMemberRole(Member member, Role role) =>
+    (endpoint + "members" + member.id + "roles" + role.id).delete();
 
   /// Modify an existing emoji.
-  Future modifyEmoji(Emoji emoji, {String name, List<Role> roles}) async {
-    final route = localEndpoint + "emojis" + emoji.id;
-    await route.patch({"name": name, "roles": roles.map((r) => r)}, client: client);
-  }
+  Future<Null> modifyEmoji(Emoji emoji, {String name, List<Role> roles}) =>
+    (endpoint + "emojis" + emoji.id).patch({
+      "name": name,
+      "roles": roles
+    });
 
   /// Delete an existing emoji.
-  Future deleteEmoji(Emoji emoji) async {
-    final route = localEndpoint + "emojis" + emoji.id;
-    await route.delete(client: client);
-  }
+  Future<Null> deleteEmoji(Emoji emoji) =>
+    (endpoint + "emojis" + emoji.id).delete();
 
   /// Creates a webhook. See [TextChannel.createWebhook] for further documentation.
   Future<Webhook> createWebhook(TextChannel channel, String name, {String avatar}) =>
@@ -128,12 +111,11 @@ class Guild extends Resource {
 
   Guild(this.name, this.id, {this.partial});
 
-  Future download() async {
+  Future<Null> download() async {
     if (!partial)
       return;
 
-    final route = endpoint + id;
-    final response = await route.get(client: client);
+    final response = await endpoint.get();
 
     final obj = JSON.decode(response.body);
     if (obj["channels"] != null) {
