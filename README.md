@@ -1,4 +1,7 @@
-# dartsicord [![Build Status](https://travis-ci.org/voximity/dartsicord.svg?branch=master)](https://travis-ci.org/voximity/dartsicord) [![Pub](https://img.shields.io/pub/v/dartsicord.svg)](https://pub.dartlang.org/packages/dartsicord) [![Discord](https://img.shields.io/discord/394664225626390538.svg)](http://discord.gg/d7PMs5K)
+# dartsicord
+[![Build Status](https://travis-ci.org/voximity/dartsicord.svg?branch=master)](https://travis-ci.org/voximity/dartsicord)
+[![Pub](https://img.shields.io/pub/v/dartsicord.svg)](https://pub.dartlang.org/packages/dartsicord)
+[![Discord](https://discordapp.com/api/guilds/394664225626390538/widget.png)](https://discord.gg/d7PMs5K)
 
 This is a Dart library intending to provide functionality to Discord's API. Many features are missing from this library. It is expandable, so I am open to modification.
 
