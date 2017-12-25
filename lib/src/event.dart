@@ -47,6 +47,7 @@ class ReadyEvent {
   static Future<Null> construct(Packet packet) async {
     packet.client
       ..ready = true
+      ..sessionId = packet.data["session_id"]
       ..user = await User.fromMap(packet.data["user"], packet.client);
 
     final event = new ReadyEvent();

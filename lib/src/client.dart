@@ -22,6 +22,9 @@ class DiscordClient extends EventExhibitor {
   Timer _heartbeat;
   WebSocket _socket;
   int _lastSeq;
+  bool _closed = false;
+
+  String sessionId;
 
   /// The shard of the current client.
   int shard;
@@ -216,11 +219,28 @@ class DiscordClient extends EventExhibitor {
     guilds = [];
   }
 
-  Future<dynamic> disconnect() async =>
-    _socket.close();
-  
-  /// Connects to Discord's API.
-  Future<Null> connect(String token, {TokenType tokenType = TokenType.bot}) async {
+  Future<dynamic> disconnect({bool reconnect = false}) async {
+    _closed = !reconnect;
+    return await _socket.close();
+  }
+
+  void _sendIdentify() {
+    _socket.add(new Packet(opcode: 2, seq: _lastSeq, data: {
+      "token": token,
+      "properties": {
+        "\$os": "windows",
+        "\$browser": "dartsicord",
+        "\$device": "dartsicord"
+      },
+      //"shard": shard != null ? [shard, shardCount] : null,
+      "compress": false,
+      "large_threshold": 250
+    }).toString());
+  }
+
+  Future<Null> _establishConnection(String token, {TokenType tokenType = TokenType.bot, bool reconnecting = false}) async {
+    _closed = false;
+
     this.token = token;
     this.tokenType = tokenType;
 
@@ -331,22 +351,23 @@ class DiscordClient extends EventExhibitor {
           print("found op 3 lol");
           break;
         case 7: // Reconnect
+          await disconnect(reconnect: true);
           break;
         case 9: // Invalid Session
+          await new Future.delayed(const Duration(seconds: 3));
+          _sendIdentify();
           break;
         case 10: // Hello
           _heartbeat = new Timer.periodic(new Duration(milliseconds: packet.data["heartbeat_interval"]), _sendHeartbeat);
-          _socket.add(new Packet(opcode: 2, seq: _lastSeq, data: {
+          if (reconnecting) {
+            _socket.add(new Packet(opcode: 6, seq: _lastSeq, data: {
               "token": token,
-              "properties": {
-                "\$os": "windows",
-                "\$browser": "dartsicord",
-                "\$device": "dartsicord"
-              },
-              //"shard": shard != null ? [shard, shardCount] : null,
-              "compress": false,
-              "large_threshold": 250
-          }).toString());
+              "session_id": sessionId,
+              "seq": _lastSeq
+            }));
+          } else {
+            _sendIdentify();
+          }
           break;
         case 11: // Heartbeat ACK
           break;
@@ -356,10 +377,19 @@ class DiscordClient extends EventExhibitor {
     }, onError: (e) {
       print(e.toString());
     }, onDone: () {
-      print(_socket.closeCode);
-      print(_socket.closeReason);
       _socket.close();
       _heartbeat.cancel();
+
+      if (!_closed) {
+        _reconnect();
+      }
     }, cancelOnError: true);
   }
+
+  Future<Null> _reconnect() =>
+    _establishConnection(token, tokenType: tokenType, reconnecting: true);
+  
+  /// Connects to Discord's API.
+  Future<Null> connect(String token, {TokenType tokenType = TokenType.bot}) =>
+    _establishConnection(token, tokenType: tokenType, reconnecting: false);
 }

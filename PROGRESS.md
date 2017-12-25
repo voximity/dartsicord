@@ -9,8 +9,8 @@ If something is missing, please let me know or contribute to this file.
 
 - [x] Hello
 - [x] Ready
-- [ ] Resumed
-- [ ] Invalid Session
+- [x] Resumed
+- [x] Invalid Session
 - [x] Channel Create
 - [x] Channel Update
 - [x] Channel Delete

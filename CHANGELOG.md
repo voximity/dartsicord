@@ -2,7 +2,17 @@
 
 ## 0.0.12
 
-TBA
+24 Dec 2017
+
+This update focuses on unit testing! (yay) I'm using the generic test library for Dart allowing for simple, straight-forward unit testing. You can find the tests in the test directory. They have been set up to execute often on Travis-CI, so you'll notice a new build badge on the README. Additionally, I've also implemented Resuming, a vital feature for maintaining a connection with the WS.
+
+- Add test directory
+- Add a message test
+- Add get message from a channel
+- connect -> _establishConnection
+- _reconnect -> _establishConnection with positional parameter reconnect: true
+- Add client.disconnect
+- Use Travis for building/testing (.travis.yml)
 
 ## 0.0.11
 
