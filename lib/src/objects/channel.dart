@@ -224,8 +224,9 @@ class TextChannel extends Channel {
       case ChannelType.guildText:
         final channel = new TextChannel(obj["name"], new Snowflake(obj["id"]), channelType,
           guild: guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null))
-          ..overwrites = obj["permission_overwrites"]?.map((o) => Overwrite.fromMap(o, client))
           ..client = client;
+          for (int i = 0; i < obj["permission_overwrites"].length; i++)
+            channel.overwrites.add(Overwrite.fromMap(obj["permission_overwrites"][i], client));
         return channel;
 
       case ChannelType.dm:
