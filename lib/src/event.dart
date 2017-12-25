@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import "enums.dart";
-import "internals.dart";
+import "networking.dart";
 import "objects/game.dart";
 import "objects/user.dart";
 

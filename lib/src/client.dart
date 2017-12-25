@@ -9,7 +9,7 @@ import "events/channel.dart";
 import "events/guild.dart";
 import "events/message.dart";
 
-import "internals.dart";
+import "networking.dart";
 
 import "objects/channel.dart";
 import "objects/embed.dart";

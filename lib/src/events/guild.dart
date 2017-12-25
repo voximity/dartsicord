@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "../internals.dart";
+import "../networking.dart";
 import "../object.dart";
 import "../objects/emoji.dart";
 import "../objects/guild.dart";

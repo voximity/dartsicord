@@ -66,8 +66,8 @@ If something is missing, please let me know or contribute to this file.
 - [x] Delete Message
 - [x] Bulk Delete Messages
 - [ ] Edit Channel Permissions
-- [ ] Get Channel Invites
-- [ ] Create Channel Invite
+- [x] Get Channel Invites
+- [x] Create Channel Invite
 - [ ] Delete Channel Permission
 - [x] Trigger Typing Indicator
 - [x] Get Pinned Messages
@@ -123,9 +123,9 @@ If something is missing, please let me know or contribute to this file.
 
 ### Invite
 
-- [ ] Get Invite
-- [ ] Delete Invite
-- [ ] Accept Invite
+- [ ] Get Invite \*
+- [x] Delete Invite
+- [x] Accept Invite
 
 ### User
 

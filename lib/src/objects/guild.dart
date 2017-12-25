@@ -2,7 +2,7 @@ import "dart:async";
 import "dart:convert";
 
 import "../client.dart";
-import "../internals.dart";
+import "../networking.dart";
 import "../object.dart";
 
 import "channel.dart";

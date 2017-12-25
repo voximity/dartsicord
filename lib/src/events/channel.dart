@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import "../internals.dart";
+import "../networking.dart";
 import "../objects/channel.dart";
 import "../objects/guild.dart";
 import "../objects/webhook.dart";

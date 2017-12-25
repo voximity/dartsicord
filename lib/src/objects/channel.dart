@@ -3,11 +3,12 @@ import "dart:convert";
 
 import "../client.dart";
 import "../enums.dart";
-import "../internals.dart";
+import "../networking.dart";
 import "../object.dart";
 
 import "embed.dart";
 import "guild.dart";
+import "invite.dart";
 import "message.dart";
 import "user.dart";
 import "webhook.dart";
@@ -24,6 +25,9 @@ abstract class Channel extends Resource {
 
   /// The type of the channel.
   ChannelType type;
+
+  /// Whether or not this object is considered a partial channel object.
+  bool get partial => name == null;
 
   Snowflake id;
 
@@ -94,7 +98,7 @@ class TextChannel extends Channel {
     this.nsfw = map["nsfw"];
   }
 
-  /// Creates a webhook for this channel named [name] using the given positional parameter [avatar].
+  /// Creates a [Webhook] for this channel named [name] using the given positional parameter [avatar].
   Future<Webhook> createWebhook(String name, {String avatar}) async {
     final query = {
       "name": name,
@@ -110,6 +114,29 @@ class TextChannel extends Channel {
   Future<Null> startTyping() async {
     final route = localEndpoint + "typing";
     await route.post({}, client: client);
+  }
+
+  /// Gets a [List] of [Invite] objects that this channel possesses.
+  Future<List<Invite>> getInvites() async {
+    final route = localEndpoint + "invites";
+    final response = await route.get(client: client);
+    return JSON.decode(response.body).map((i) => Invite.fromMap(i, client));
+  }
+
+  /// Creates a new [Invite] for this channel using the given positional parameters [maxAge], [maxUses], [temporary], and [unique].
+  Future<Invite> createInvite({Duration maxAge, int maxUses = 0, bool temporary = false, bool unique = false}) async {
+    maxAge ??= const Duration(hours: 24);
+
+    final query = {
+      "max_age": maxAge.inSeconds,
+      "max_uses": maxUses,
+      "temporary": temporary,
+      "unique": unique
+    };
+    
+    final route = localEndpoint + "invites";
+    final response = await route.post(query, client: client);
+    return Invite.fromMap(JSON.decode(response.body), client);
   }
 
   /// Gets a [List] of [Message] objects that represent the pins in this channel.
