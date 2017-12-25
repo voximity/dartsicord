@@ -14,11 +14,11 @@ class Route {
   Route({this.client});
 
   Route operator +(dynamic other) =>
-    new Route()..url = url + "/" + other.toString();
+    new Route(client: client)..url = url + "/" + other.toString();
 
   Map<String, String> authHeader({Map<String, String> header}) {
     header ??= {};
-    
+
     header["Authorization"] = (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}";
     header["Content-Type"] = "application/json";
     return header;
