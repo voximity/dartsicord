@@ -47,7 +47,7 @@ class ReadyEvent {
   static Future<Null> construct(Packet packet) async {
     packet.client
       ..ready = true
-      ..user = await User.fromMap(packet.data, packet.client);
+      ..user = await User.fromMap(packet.data["user"], packet.client);
 
     final event = new ReadyEvent();
     packet.client.onReady.add(event);

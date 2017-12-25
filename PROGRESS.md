@@ -55,7 +55,7 @@ If something is missing, please let me know or contribute to this file.
 - [x] Modify Channel
 - [x] Delete/Close Channel
 - [x] Get Channel Messages
-- [ ] Get Channel Message
+- [x] Get Channel Message
 - [x] Create Message
 - [x] Create Reaction
 - [ ] Delete Own Reaction

@@ -216,9 +216,11 @@ class DiscordClient extends EventExhibitor {
     guilds = [];
   }
 
+  Future<dynamic> disconnect() async =>
+    _socket.close();
   
   /// Connects to Discord's API.
-  Future connect(String token, {TokenType tokenType = TokenType.bot}) async {
+  Future<Null> connect(String token, {TokenType tokenType = TokenType.bot}) async {
     this.token = token;
     this.tokenType = tokenType;
 

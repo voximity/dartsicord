@@ -148,6 +148,13 @@ class TextChannel extends Channel {
     return JSON.decode(response.body).map((m) => Message.fromMap(m, client));
   }
 
+  /// Gets a [Message] object given the [id].
+  Future<Message> getMessage(dynamic id) async {
+    final route = localEndpoint + "messages" + id.toString();
+    final response = await route.get(client: client);
+    return await Message.fromMap(JSON.decode(response.body), client);
+  }
+
   /// Bulk-deletes a [List] of [Message] objects from this channel.
   /// 
   /// 2-100 messages may be specified. Messages older than 2 weeks are unaffected.

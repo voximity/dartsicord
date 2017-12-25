@@ -83,11 +83,12 @@ class Message extends Resource {
   /// Delete the message.
   Future delete() async {
     final route = channel.localEndpoint + "messages" + id;
-    await route.delete();
+    await route.delete(client: client);
   }
 
   /// Reply to the message. See [DiscordClient.sendMessage] for full documentation.
-  Future<Message> reply(String text, {Embed embed}) async => await channel.sendMessage(text, embed: embed);
+  Future<Message> reply(String text, {Embed embed}) async =>
+    await channel.sendMessage(text, embed: embed);
 
   //
   // Constructors

@@ -13,7 +13,9 @@ class Snowflake {
 
   String toString() => id.toString();
 
-  Snowflake(this.id);
+  Snowflake(dynamic id) {
+    this.id = id is String ? int.parse(id) : id;
+  }
   
   int get hashCode => id.hashCode;
   bool operator ==(dynamic idOther) => id.toString() == idOther.toString();
