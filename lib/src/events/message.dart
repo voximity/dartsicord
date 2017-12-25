@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import "../internals.dart";
+import "../object.dart";
 
 import "../objects/channel.dart";
 import "../objects/guild.dart";
@@ -32,14 +33,14 @@ class MessageDeleteEvent {
   /// The [TextChannel] this message was deleted in.
   TextChannel channel;
   /// A snowflake ID of the message that was deleted.
-  int messageId;
+  Snowflake messageId;
 
   MessageDeleteEvent(this.channel, this.messageId);
 
   static Future<Null> construct(Packet packet) async {
     final event = new MessageDeleteEvent(
       await packet.client.getChannel(packet.data["channel_id"]),
-      packet.data["id"]
+      new Snowflake(packet.data["id"])
     );
     packet.client.onMessageDelete.add(event);
   }
