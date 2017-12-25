@@ -34,7 +34,7 @@ void main() {
     final message = await channel.sendMessage("deleting messages correctly delete messages");
     await message.delete();
 
-    expect(channel.getMessage(message.id), throwsA(new isInstanceOf<NotFoundException>()));
+    expect(channel.getMessage(message.id), throwsA(const isInstanceOf<NotFoundException>()));
   });
 
   tearDownAll(() async {
