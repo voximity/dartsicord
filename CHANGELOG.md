@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0+1
+
+Fix critical heartbeat formatting issue.
+
 ## 0.1.0
 
 25 Dec 2017 (Merry Christmas again)
