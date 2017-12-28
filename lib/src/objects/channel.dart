@@ -72,13 +72,13 @@ class TextChannel extends Channel {
   User get recipient => type == ChannelType.dm ? recipients.first : null;
 
   /// A list of recipients of this group DM, if any. Refer to [type] property and check for [ChannelType.groupDm] or [ChannelType.dm].
-  List<User> recipients;
+  List<User> recipients = [];
 
   /// A list of [Webhook] objects, if any. Refer to the [type] property and check for [ChannelType.guildText].
-  List<Webhook> webhooks;
+  List<Webhook> webhooks = [];
 
   /// A list of [Overwrite] objects, if any. Refer to the [type] property and check for [ChannelType.guildText].
-  List<Overwrite> overwrites;
+  List<Overwrite> overwrites = [];
 
   /// Deletes this channel.
   Future<Null> delete() =>

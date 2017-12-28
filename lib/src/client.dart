@@ -129,7 +129,8 @@ class DiscordClient extends EventExhibitor {
   }
 
   void _sendHeartbeat(Timer timer) {
-    _socket.add(new Packet(data: _lastSeq).toString());
+    final packet = new Packet(data: _lastSeq, opcode: 1);
+    _socket.add(packet.toString());
   }
 
   void _defineEvents() {
@@ -285,6 +286,7 @@ class DiscordClient extends EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
+      print(payloadRaw);
       final payload = JSON.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
