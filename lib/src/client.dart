@@ -286,7 +286,6 @@ class DiscordClient extends EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
-      print(payloadRaw);
       final payload = JSON.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
@@ -396,7 +395,6 @@ class DiscordClient extends EventExhibitor {
           _sendHeartbeat(_heartbeat);
           break;
         case 3: // Update Status
-          print("found op 3 lol");
           break;
         case 7: // Reconnect
           await disconnect(reconnect: true);

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0+1
+## 0.1.0+1,2
 
 Fix critical heartbeat formatting issue.
 
