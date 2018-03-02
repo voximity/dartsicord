@@ -13,7 +13,7 @@ class Role extends Resource {
   /// 
   /// Typically, for [preset], you will want to use RolePermission.values. 
   static List<RolePermission> permissionFromRaw(int raw, {List<RolePermission> preset = RolePermission.values}) =>
-    preset.where((p) => raw & _permissionMap[p] != 0);
+    preset.where((p) => raw & _permissionMap[p] != 0).toList();
   
   static final Map<RolePermission, int> _permissionMap = {
     RolePermission.createInstantInvite: 1 << 0,
