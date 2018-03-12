@@ -35,7 +35,7 @@ class Emoji extends Resource {
       managed: obj["managed"])
       ..client = client;
     
-    if (obj["roles"]) {
+    if (obj.containsKey("roles")) {
       for (int i = 0; i < obj["roles"].length; i++) {
         final role = await Role._fromMap(obj["roles"][i], client)
           ..guild = guild;
