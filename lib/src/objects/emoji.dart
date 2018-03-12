@@ -22,13 +22,13 @@ class Emoji extends Resource {
   /// The user that created this emoji.
   User author;
 
-  Emoji._raw(this.name, {this.id, this.guild, this.roles, this.author, this.requiresColons, this.managed});
+  Emoji(this.name, {this.id, this.guild, this.roles, this.author, this.requiresColons, this.managed});
 
   String toString() =>
     id == null ? name : id.toString();
 
   static Future<Emoji> _fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
-    final emoji = new Emoji._raw(obj["name"], id: new Snowflake(obj["id"]),
+    final emoji = new Emoji(obj["name"], id: new Snowflake(obj["id"]),
       guild: guild,
       author: obj["user"] != null ? await User._fromMap(obj["user"], client) : null,
       requiresColons: obj["requires_colons"],
