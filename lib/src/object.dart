@@ -1,4 +1,4 @@
-import "client.dart";
+part of dartsicord;
 
 abstract class Resource {
   /// ID of the object.

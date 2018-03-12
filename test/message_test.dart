@@ -35,6 +35,22 @@ void main() {
 
     expect(channel.getMessage(message.id), throwsA(const isInstanceOf<NotFoundException>()));
   });
+  test("editing messages correctly edit messages", () async {
+    final channel = await client.getTextChannel(394615331705847810);
+    final message = await channel.sendMessage("editing messages correctly edit messages [unedited]");
+    await message.edit("editing messages correctly edit messages");
+
+    expect((await channel.getMessage(message.id)), isNot(endsWith("[unedited]")));
+  });
+  test("reacting on messages", () async {
+    final emoji = new Emoji("👍");
+    final channel = await client.getTextChannel(394615331705847810);
+    final message = await channel.sendMessage("reacting on messages");
+    await message.react(emoji);
+
+    final reactions = await (await channel.getMessage(message.id)).getReactions(emoji);
+    expect(reactions.length, greaterThan(0));
+  });
 
   tearDownAll(() async {
     await client.disconnect();

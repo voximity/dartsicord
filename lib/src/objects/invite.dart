@@ -1,13 +1,8 @@
-import "dart:async";
+part of dartsicord;
 
-import "../client.dart";
-import "../networking.dart";
-import "channel.dart";
-import "guild.dart";
-import "user.dart";
-
+/// An Invite object. Create with [TextChannel.createInvite].
 class Invite {
-  Route get endpoint => client.api + "invites" + code;
+  Route get _endpoint => client.api + "invites" + code;
 
   /// The code of the invite.
   String code;
@@ -34,23 +29,23 @@ class Invite {
   /// The client associated with the invite.
   DiscordClient client; // It's not an actual Resource, so I can't implement the class...
 
-  Invite(this.code, {this.guild, this.channel,
+  Invite._raw(this.code, {this.guild, this.channel,
     this.uses, this.maxUses, this.temporary, this.revoked, this.createdAt, this.maxAge, this.inviter});
 
   Future<Null> accept() =>
-    endpoint.post({});
+    _endpoint.post({});
   
   Future<Null> delete() =>
-    endpoint.delete();
+    _endpoint.delete();
 
-  static Future<Invite> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
-    final inv = new Invite(obj["code"],
+  static Future<Invite> _fromMap(Map<String, dynamic> obj, DiscordClient client) async {
+    final inv = new Invite._raw(obj["code"],
       guild: client.getGuild(obj["guild"]["id"]),
       channel: await client.getTextChannel(obj["channel"]["id"]));
 
     if (obj["inviter"] != null) { // Includes metadata.
       inv
-        ..inviter = await User.fromMap(obj["inviter"], client)
+        ..inviter = await User._fromMap(obj["inviter"], client)
         ..uses = obj["uses"]
         ..maxUses = obj["max_uses"]
         ..maxAge = new Duration(seconds: obj["max_age"])

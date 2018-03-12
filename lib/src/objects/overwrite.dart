@@ -1,9 +1,6 @@
-import "../client.dart";
-import "../enums.dart";
-import "../object.dart";
+part of dartsicord;
 
-import "role.dart";
-
+/// An Overwrite object. Can be directly created and used with [TextChannel.modify] and [TextChannel.modifyPermission].
 class Overwrite {
   static Map<String, OverwriteType> internalMap = {
     "role": OverwriteType.role,
@@ -23,16 +20,16 @@ class Overwrite {
 
   Overwrite(this.targetId, this.type, {this.allow, this.deny});
 
-  static Overwrite fromMap(Map<String, dynamic> obj, DiscordClient client) =>
+  static Overwrite _fromMap(Map<String, dynamic> obj, DiscordClient client) =>
     new Overwrite(new Snowflake(obj["id"]), Overwrite.internalMap[obj["type"]],
-      allow: Role.permissionFromRaw(obj["allow"]),
-      deny: Role.permissionFromRaw(obj["deny"]));
+      allow: Role._permissionFromRaw(obj["allow"]),
+      deny: Role._permissionFromRaw(obj["deny"]));
   
-  Map<String, dynamic> toMap() =>
+  Map<String, dynamic> _toMap() =>
     {
       "id": targetId.toString(),
       "type": (new Map.fromIterables(internalMap.values, internalMap.keys))[type],
-      "allow": Role.permissionToRaw(allow),
-      "deny": Role.permissionToRaw(deny)
+      "allow": Role._permissionToRaw(allow),
+      "deny": Role._permissionToRaw(deny)
     };
 }

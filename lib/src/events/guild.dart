@@ -1,11 +1,4 @@
-import "dart:async";
-
-import "../networking.dart";
-import "../object.dart";
-import "../objects/emoji.dart";
-import "../objects/guild.dart";
-import "../objects/role.dart";
-import "../objects/user.dart";
+part of dartsicord;
 
 class GuildCreateEvent {
   /// The created guild.
@@ -13,7 +6,7 @@ class GuildCreateEvent {
   GuildCreateEvent(this.guild);
 
   static Future<Null> construct(Packet packet) async {
-    final guild = await Guild.fromMap(packet.data, packet.client);
+    final guild = await Guild._fromMap(packet.data, packet.client);
     if (!packet.client.guilds.any((g) => g.id == guild.id))
       packet.client.guilds.add(guild);
 
@@ -27,7 +20,7 @@ class GuildUpdateEvent {
   GuildUpdateEvent(this.guild);
 
   static Future<Null> construct(Packet packet) async {
-    var guild = await Guild.fromMap(packet.data, packet.client);
+    var guild = await Guild._fromMap(packet.data, packet.client);
     
     final existing = packet.client.guilds.firstWhere((g) => g.id == guild.id)
       ..name = guild.name
@@ -46,7 +39,7 @@ class GuildUnavailableEvent {
   GuildUnavailableEvent(this.guild);
 
   static Future<Null> construct(Packet packet) async {
-    final guild = await Guild.fromMap(packet.data, packet.client);
+    final guild = await Guild._fromMap(packet.data, packet.client);
 
     packet.client.onGuildUnavailable.add(new GuildUnavailableEvent(guild));
   }
@@ -62,39 +55,39 @@ class GuildRemoveEvent {
       return await GuildUpdateEvent.construct(packet);
     
     packet.data["unavailable"] = true;
-    final guild = await Guild.fromMap(packet.data, packet.client);
+    final guild = await Guild._fromMap(packet.data, packet.client);
 
     packet.client.onGuildRemove.add(new GuildRemoveEvent(guild));
   }
 }
-class UserBannedEvent {
+class MemberBannedEvent {
   /// The guild the user was banned from.
   Guild guild;
   /// The user that was banned.
   User user;
 
-  UserBannedEvent({this.guild, this.user});
+  MemberBannedEvent({this.guild, this.user});
 
   static Future<Null> construct(Packet packet) async {
     final guild = await packet.client.getGuild(packet.data["guild_id"]);
-    final user = await User.fromMap(packet.data, packet.client);
+    final user = await User._fromMap(packet.data, packet.client);
 
-    packet.client.onUserBanned.add(new UserBannedEvent(guild: guild, user: user));
+    packet.client.onMemberBanned.add(new MemberBannedEvent(guild: guild, user: user));
   }
 }
-class UserUnbannedEvent {
+class MemberUnbannedEvent {
   /// The guild the user was unbanned from.
   Guild guild;
   /// The user that was banned.
   User user;
 
-  UserUnbannedEvent({this.guild, this.user});
+  MemberUnbannedEvent({this.guild, this.user});
 
   static Future<Null> construct(Packet packet) async {
     final guild = await packet.client.getGuild(packet.data["guild_id"]);
-    final user = await User.fromMap(packet.data, packet.client);
+    final user = await User._fromMap(packet.data, packet.client);
 
-    packet.client.onUserUnbanned.add(new UserUnbannedEvent(guild: guild, user: user));
+    packet.client.onMemberUnbanned.add(new MemberUnbannedEvent(guild: guild, user: user));
   }
 }
 
@@ -110,7 +103,7 @@ class GuildEmojisUpdateEvent {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
     final emojiList = [];
     packet.data["emojis"].forEach((e) async {
-      final emoji = await Emoji.fromMap(e, packet.client, guild: guild);
+      final emoji = await Emoji._fromMap(e, packet.client, guild: guild);
       emojiList.add(emoji);
     });
 
@@ -143,7 +136,7 @@ class MemberUpdatedEvent {
 
   static Future<Null> construct(Packet packet) async {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
-    final user = await User.fromMap(packet.data["user"], packet.client);
+    final user = await User._fromMap(packet.data["user"], packet.client);
     final member = await guild.getMember(user);
 
     final event = new MemberUpdatedEvent(guild, user, member: member);
@@ -151,7 +144,7 @@ class MemberUpdatedEvent {
   }
 }
 
-class UserAddedEvent {
+class MemberAddedEvent {
   /// The guild in which the user has joined.
   Guild guild;
   /// The user that has joined the guild.
@@ -159,33 +152,33 @@ class UserAddedEvent {
   /// The member representing the user's status in this guild.
   Member member;
 
-  UserAddedEvent(this.guild, this.user, {this.member});
+  MemberAddedEvent(this.guild, this.user, {this.member});
 
   static Future<Null> construct(Packet packet) async {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
-    final user = await User.fromMap(packet.data["user"], packet.client);
-    final member = await Member.fromMap(packet.data, packet.client, guild);
+    final user = await User._fromMap(packet.data["user"], packet.client);
+    final member = await Member._fromMap(packet.data, packet.client, guild);
     
-    final event = new UserAddedEvent(guild, user, member: member);
+    final event = new MemberAddedEvent(guild, user, member: member);
 
-    packet.client.onUserAdded.add(event);
+    packet.client.onMemberAdded.add(event);
   }
 }
-class UserRemovedEvent {
+class MemberRemovedEvent {
   /// The guild in which the user has been removed.
   Guild guild;
   /// The user that has been removed from the guild.
   User user;
 
-  UserRemovedEvent(this.guild, this.user);
+  MemberRemovedEvent(this.guild, this.user);
 
   static Future<Null> construct(Packet packet) async {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
-    final user = await User.fromMap(packet.data["user"], packet.client);
+    final user = await User._fromMap(packet.data["user"], packet.client);
     
-    final event = new UserRemovedEvent(guild, user);
+    final event = new MemberRemovedEvent(guild, user);
 
-    packet.client.onUserRemoved.add(event);
+    packet.client.onMemberRemoved.add(event);
   }
 }
 
@@ -197,7 +190,7 @@ class RoleCreatedEvent {
 
   static Future<Null> construct(Packet packet) async {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
-    final role = await Role.fromMap(packet.data["role"], packet.client)
+    final role = await Role._fromMap(packet.data["role"], packet.client)
       ..guild = guild;
     
     if (!guild.roles.any((r) => r.id == role.id))
@@ -215,7 +208,7 @@ class RoleUpdatedEvent {
 
   static Future<Null> construct(Packet packet) async {
     final guild = packet.client.getGuild(packet.data["guild_id"]);
-    final role = await Role.fromMap(packet.data["role"], packet.client)
+    final role = await Role._fromMap(packet.data["role"], packet.client)
       ..guild = guild;
     
     guild.roles

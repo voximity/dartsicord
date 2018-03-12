@@ -1,3 +1,6 @@
+part of dartsicord;
+
+/// An Embed object. Can be self-assembled and sent.
 class Embed {
   /// The title of the embed.
   String title;
@@ -25,9 +28,34 @@ class Embed {
   /// A [List] of [EmbedField] objects linked to this embed.
   List<EmbedField> fields = [];
 
+  Embed({this.title, this.description, this.url, this.color, this.footer, this.image, this.thumbnail, this.video, this.provider, this.author, this.fields});
+
+  /// Give this embed a title.
+  void withTitle(String title) => this.title = title;
+  /// Give this embed a description.
+  void withDescription(String description) => this.description = description;
+  /// Give this embed a clickable URL.
+  void withUrl(String url) => this.url = url;
+  /// Give this embed a color.
+  void withColor(int color) => this.color = color;
+  /// Give this embed a footer, given [text] and [iconUrl].
+  void withFooter(String text, {String iconUrl}) => footer = new EmbedFooter(text, iconUrl: iconUrl);
+  /// Give this embed an image, given [url].
+  void withImage(String url) => image = new EmbedImage(url);
+  /// Give this embed a thumbnail, given [url].
+  void withThumbnail(String url) => thumbnail = new EmbedThumbnail(url);
+  /// Give this embed a video, given [url].
+  void withVideo(String url) => video = new EmbedVideo(url);
+  /// Give this embed a provider, given [name] and [url].
+  void withProvider(String name, String url) => provider = new EmbedProvider(name, url);
+  /// Give this embed an author, given [name], [url], and [iconUrl].
+  void withAuthor(String name, {String url, String iconUrl}) => new EmbedAuthor(name, url: url, iconUrl: iconUrl);
+  /// Add a field to this embed.
+  void addField(String title, dynamic value, {bool inline = false}) => fields.add(new EmbedField(title, value.toString(), inline: inline));
+
   /// Converts the object-based embed definition to an internal API-usable JSON-encodable map.
-  Map<String, dynamic> toMap() {
-    final fieldsList = fields.fold([], (p, c) => p..add(c.toMap()));
+  Map<String, dynamic> _toMap() {
+    final fieldsList = fields.fold([], (p, c) => p..add(c._toMap()));
     final response = {
       "title": title,
       "type": type,
@@ -36,12 +64,12 @@ class Embed {
 
       "color": color,
 
-      "footer": footer?.toMap(),
-      "image": image?.toMap(),
-      "thumbnail": thumbnail?.toMap(),
-      "video": video?.toMap(),
-      "provider": provider?.toMap(),
-      "author": author?.toMap(),
+      "footer": footer?._toMap(),
+      "image": image?._toMap(),
+      "thumbnail": thumbnail?._toMap(),
+      "video": video?._toMap(),
+      "provider": provider?._toMap(),
+      "author": author?._toMap(),
       "fields": fieldsList
     };
     
@@ -53,10 +81,10 @@ class EmbedFooter {
   String iconUrl;
   String proxyIconUrl;
 
-  /// The footer of the embed. [text] is required. You may specify [iconUrl] and [proxyIconUrl].
-  EmbedFooter(this.text, {this.iconUrl, this.proxyIconUrl});
+  /// The footer of the embed. [text] is required. You may specify [iconUrl].
+  EmbedFooter(this.text, {this.iconUrl});
 
-  Map<String, dynamic> toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  Map<String, dynamic> _toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedImage {
   String url;
@@ -64,10 +92,10 @@ class EmbedImage {
   int height;
   int width;
 
-  /// The image of the embed. [url], [height] and [width] are required. You may specify the [proxyUrl].
-  EmbedImage(this.url, this.height, this.width, {this.proxyUrl});
+  /// The image of the embed. [url] is required.
+  EmbedImage(this.url, {this.height, this.width, this.proxyUrl});
 
-  Map<String, dynamic> toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  Map<String, dynamic> _toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedThumbnail {
   String url;
@@ -75,20 +103,20 @@ class EmbedThumbnail {
   int height;
   int width;
 
-  /// The thumbnail of the embed. [url], [height] and [width] are required. You may specify the [proxyUrl].
-  EmbedThumbnail(this.url, this.height, this.width, {this.proxyUrl});
+  /// The thumbnail of the embed. [url] is required.
+  EmbedThumbnail(this.url, {this.height, this.width, this.proxyUrl});
   
-  Map<String, dynamic> toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
+  Map<String, dynamic> _toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
 class EmbedVideo {
   String url;
   String height;
   String width;
 
-  /// The video of the embed. [url], [height] and [width] are required.
-  EmbedVideo(this.url, this.height, this.width);
+  /// The video of the embed. [url] is required.
+  EmbedVideo(this.url);
 
-  Map<String, dynamic> toMap() => {"url": url, "height": height, "width": width};
+  Map<String, dynamic> _toMap() => {"url": url, "height": height, "width": width};
 }
 class EmbedProvider {
   String name;
@@ -97,7 +125,7 @@ class EmbedProvider {
   /// The provider of the embed. [name] and [url] are required.
   EmbedProvider(this.name, this.url);
 
-  Map<String, dynamic> toMap() => {"name": url, "url": url};
+  Map<String, dynamic> _toMap() => {"name": url, "url": url};
 }
 class EmbedAuthor {
   String name;
@@ -105,10 +133,10 @@ class EmbedAuthor {
   String iconUrl;
   String proxyIconUrl;
 
-  /// The author of the embed. [name] and [url] are required. You may specify [iconUrl] and [proxyIconUrl].
-  EmbedAuthor(this.name, this.url, {this.iconUrl, this.proxyIconUrl});
+  /// The author of the embed. [name] and [url] are required. You may specify [iconUrl].
+  EmbedAuthor(this.name, {this.url, this.iconUrl});
 
-  Map<String, dynamic> toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
+  Map<String, dynamic> _toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
 class EmbedField {
   String name;
@@ -118,5 +146,5 @@ class EmbedField {
   /// A field (of many) in the embed. [name] and [value] are required. You may specify [inline].
   EmbedField(this.name, this.value, {this.inline = false});
 
-  Map<String, dynamic> toMap() => {"name": name, "value": value, "inline": inline};
+  Map<String, dynamic> _toMap() => {"name": name, "value": value, "inline": inline};
 }

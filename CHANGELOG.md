@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1
+
+12 Mar 2018
+
+This project is not abandoned, I just haven't seen a reason to update it lately. In this update, I focused on touching up the internals of the library quite a lot. More of the internally recognized fields and methods are now private because I've switched to using `part` and `part of`. It's becoming unsupported but it works a lot better in my case.
+
+- Move all events to an internal websocket event map
+- Switch to `part` and `part of`
+- Add embed builder methods
+- Finish `client.modify` avatar features
+- Make many existing constructors/methods internal
+- Add more tests
+
 ## 0.1.0+1,2
 
 Fix critical heartbeat formatting issue.
@@ -86,7 +99,7 @@ This update focuses mostly on user experience rather than new features. I have r
 
 - Add a lot more events
 - Move events from event.dart to events directory
-- Fix up some fromDynamic to fromMap parameter types
+- Fix up some fromDynamic to _fromMap parameter types
 - More REST methods
 - More work on Snowflake usage
 
@@ -108,7 +121,7 @@ This update focuses mostly on user experience rather than new features. I have r
 ## 0.0.4
 
 - Rehaul events
-- fromDynamic is now fromMap
+- fromDynamic is now _fromMap
 - More fixes
 
 ## 0.0.3

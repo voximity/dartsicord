@@ -5,7 +5,10 @@ void main() {
 
   client.onMessage.listen((event) async {
     if (event.message.content.toLowerCase() == "ping")
+      // method 1
       await event.message.reply("pong");
+      // method 2
+      // await event.channel.sendMessage("pong");
   });
 
   client.connect("YOUR-TOKEN");

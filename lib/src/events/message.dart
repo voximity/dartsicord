@@ -1,13 +1,4 @@
-import 'dart:async';
-
-import "../networking.dart";
-import "../object.dart";
-
-import "../objects/channel.dart";
-import "../objects/emoji.dart";
-import "../objects/guild.dart";
-import "../objects/message.dart";
-import "../objects/user.dart";
+part of dartsicord;
 
 class MessageCreateEvent {
   /// The channel the message was created in.
@@ -22,7 +13,7 @@ class MessageCreateEvent {
   MessageCreateEvent(this.message, {this.author, this.guild, this.channel});
 
   static Future<Null> construct(Packet packet) async {
-    final message = await Message.fromMap(packet.data, packet.client);
+    final message = await Message._fromMap(packet.data, packet.client);
     final event = new MessageCreateEvent(message,
       author: message.author,
       channel: message.channel,
@@ -76,7 +67,7 @@ class ReactionAddEvent {
   ReactionAddEvent(this.emoji, {this.userId, this.channelId, this.messageId});
 
   static Future<Null> construct(Packet packet) async {
-    final event = new ReactionAddEvent(await Emoji.fromMap(packet.data["emoji"], packet.client),
+    final event = new ReactionAddEvent(await Emoji._fromMap(packet.data["emoji"], packet.client),
       userId: new Snowflake(packet.data["user_id"]),
       channelId: new Snowflake(packet.data["channel_id"]),
       messageId: new Snowflake(packet.data["message_id"])
@@ -98,7 +89,7 @@ class ReactionRemoveEvent {
   ReactionRemoveEvent(this.emoji, {this.userId, this.channelId, this.messageId});
 
   static Future<Null> construct(Packet packet) async {
-    final event = new ReactionRemoveEvent(await Emoji.fromMap(packet.data["emoji"], packet.client),
+    final event = new ReactionRemoveEvent(await Emoji._fromMap(packet.data["emoji"], packet.client),
       userId: new Snowflake(packet.data["user_id"]),
       channelId: new Snowflake(packet.data["channel_id"]),
       messageId: new Snowflake(packet.data["message_id"])

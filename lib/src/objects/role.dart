@@ -1,19 +1,12 @@
-import "../client.dart";
-import "../enums.dart";
-import "../object.dart";
+part of dartsicord;
 
-import "guild.dart";
-
+/// A Role resource. Create with [Guild.createRole].
 class Role extends Resource {
-  /// Takes a list of [RolePermission] enums and converts it to a raw bitfield.
-  static int permissionToRaw(List<RolePermission> permissions) =>
+  static int _permissionToRaw(List<RolePermission> permissions) =>
     permissions.fold(0, (p, c) => p + _permissionMap[c]);
 
-  /// Takes raw permission bitfield and converts into a [List] of [RolePermission] enums given a [preset].
-  /// 
-  /// Typically, for [preset], you will want to use RolePermission.values. 
-  static List<RolePermission> permissionFromRaw(int raw, {List<RolePermission> preset = RolePermission.values}) =>
-    preset.where((p) => raw & _permissionMap[p] != 0);
+  static List<RolePermission> _permissionFromRaw(int raw, {List<RolePermission> preset = RolePermission.values}) =>
+    preset.where((p) => raw & _permissionMap[p] != 0).toList();
   
   static final Map<RolePermission, int> _permissionMap = {
     RolePermission.createInstantInvite: 1 << 0,
@@ -69,7 +62,7 @@ class Role extends Resource {
   int permissionsRaw;
 
   /// A list of [RolePermission] enums generated from the [permissionsRaw] variable.
-  List<RolePermission> get permissions => permissionFromRaw(permissionsRaw);
+  List<RolePermission> get permissions => _permissionFromRaw(permissionsRaw);
 
   /// Whether or not this role is created and managed by a bot user.
   bool managed;
@@ -77,10 +70,10 @@ class Role extends Resource {
   /// Whether or not this role is mentionable.
   bool mentionable;
 
-  Role(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});
+  Role._raw(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});
 
-  static Role fromMap(Map<String, dynamic> obj, DiscordClient client) => 
-    new Role(
+  static Role _fromMap(Map<String, dynamic> obj, DiscordClient client) => 
+    new Role._raw(
       obj["name"], new Snowflake(obj["id"]),
       hoisted: obj["hoist"],
       position: obj["position"],

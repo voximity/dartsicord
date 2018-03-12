@@ -1,17 +1,8 @@
-import "dart:async";
-import "dart:convert";
+part of dartsicord;
 
-import "../client.dart";
-import "../networking.dart";
-import "../object.dart";
-
-import "channel.dart";
-import "embed.dart";
-import "guild.dart";
-import "user.dart";
-
+/// A Webhook resource. Create with [TextChannel.createWebhook].
 class Webhook extends Resource {
-  Route get endpoint => client.api + "webhooks" + id;
+  Route get _endpoint => client.api + "webhooks" + id;
 
   Snowflake id;
 
@@ -31,7 +22,7 @@ class Webhook extends Resource {
 
   /// Delete this webhook.
   Future<Null> delete() =>
-    endpoint.delete();
+    _endpoint.delete();
 
   /// Modify this webhook using the given positional parameters [name], [avatar], and [channel].
   Future<Null> modify({String name, String avatar, Channel channel}) async {
@@ -43,7 +34,7 @@ class Webhook extends Resource {
     if (channel != null)
       query["channel_id"] = channel.id.id;
 
-    final response = await endpoint.patch(query);
+    final response = await _endpoint.patch(query);
     final object = JSON.decode(response.body);
 
     this.name = object["name"];
@@ -57,15 +48,15 @@ class Webhook extends Resource {
       "content": content,
       "username": username,
       "tts": tts,
-      "embeds": embeds.map((e) => e.toMap())
+      "embeds": embeds.map((e) => e._toMap())
     };
-    await (endpoint + token).post(query);
+    await (_endpoint + token).post(query);
   }
 
-  Webhook(this.id, this.name, this.token, {this.avatar, this.channel, this.guild});
+  Webhook._raw(this.id, this.name, this.token, {this.avatar, this.channel, this.guild});
 
-  static Future<Webhook> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
-    new Webhook(new Snowflake(obj["id"]), obj["name"], obj["token"],
+  static Future<Webhook> _fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
+    new Webhook._raw(new Snowflake(obj["id"]), obj["name"], obj["token"],
       avatar: obj["avatar"],
       channel: await client.getTextChannel(obj["channel_id"]),
       guild: obj["guild_id"] != null ? client.getGuild(obj["guild"]) : null);

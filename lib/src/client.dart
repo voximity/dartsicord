@@ -1,3 +1,6 @@
+part of dartsicord;
+
+/*
 import "dart:async";
 import "dart:convert";
 import "dart:io";
@@ -16,16 +19,44 @@ import "objects/embed.dart";
 import "objects/game.dart";
 import "objects/guild.dart";
 import "objects/message.dart";
-import "objects/user.dart";
+import "objects/user.dart";*/
 
 class DiscordClient extends EventExhibitor {
+  final Map<String, WebSocketEventConstructor> _websocketEvents = {
+    "READY": ReadyEvent.construct,
+    "CHANNEL_CREATE": ChannelCreateEvent.construct,
+    "CHANNEL_UPDATE": ChannelUpdateEvent.construct,
+    "CHANNEL_DELETE": ChannelDeleteEvent.construct,
+    "CHANNEL_PINS_UPDATE": ChannelPinsUpdateEvent.construct,
+    "GUILD_CREATE": GuildCreateEvent.construct,
+    "GUILD_UPDATE": GuildUpdateEvent.construct,
+    "GUILD_DELETE": GuildRemoveEvent.construct,
+    "GUILD_EMOJIS_UPDATE": GuildEmojisUpdateEvent.construct,
+    "GUILD_INTEGRATIONS_UPDATE": GuildIntegrationsUpdateEvent.construct,
+    "GUILD_MEMBER_UPDATE": MemberUpdatedEvent.construct,
+    "GUILD_MEMBER_ADD": MemberAddedEvent.construct,
+    "GUILD_MEMBER_REMOVE": MemberRemovedEvent.construct,
+    "USER_BANNED": MemberBannedEvent.construct,
+    "USER_UNBANNED": MemberUnbannedEvent.construct,
+    "GUILD_ROLE_CREATED": RoleCreatedEvent.construct,
+    "GUILD_ROLE_UPDATED": RoleUpdatedEvent.construct,
+    "GUILD_ROLE_DELETED": RoleDeletedEvent.construct,
+    "MESSAGE_CREATE": MessageCreateEvent.construct,
+    "MESSAGE_DELETE": MessageDeleteEvent.construct,
+    "MESSAGE_DELETE_BULK": MessageDeleteBulkEvent.construct,
+    "WEBHOOKS_UPDATE": WebhooksUpdateEvent.construct,
+    "PRESENCE_UPDATE": PresenceUpdateEvent.construct
+  };
+
   Timer _heartbeat;
   WebSocket _socket;
   int _lastSeq;
   bool _closed = false;
 
+  /// The global [Route] used for all interactions with the Discord API.
   Route get api => new Route(client: this);
 
+  /// The current session ID of this client.
   String sessionId;
 
   /// The shard of the current client.
@@ -68,9 +99,9 @@ class DiscordClient extends EventExhibitor {
   EventStream<GuildUnavailableEvent> onGuildUnavailable;
 
   /// Fired when the client sees a user banned.
-  EventStream<UserBannedEvent> onUserBanned;
+  EventStream<MemberBannedEvent> onMemberBanned;
   /// Fired when the client sees a user unbanned.
-  EventStream<UserUnbannedEvent> onUserUnbanned;
+  EventStream<MemberUnbannedEvent> onMemberUnbanned;
   /// Fired when the client sees a guild update its emojis.
   EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
   /// Fired when the client sees a guild update its integrations.
@@ -78,9 +109,9 @@ class DiscordClient extends EventExhibitor {
   /// Fired when the client sees a member updated on its guild.
   EventStream<MemberUpdatedEvent> onMemberUpdated;
   /// Fired when the client sees a user join a guild.
-  EventStream<UserAddedEvent> onUserAdded;
+  EventStream<MemberAddedEvent> onMemberAdded;
   /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
-  EventStream<UserRemovedEvent> onUserRemoved;
+  EventStream<MemberRemovedEvent> onMemberRemoved;
 
   /// Fired when the client sees a role created in a guild.
   EventStream<RoleCreatedEvent> onRoleCreated;
@@ -145,11 +176,11 @@ class DiscordClient extends EventExhibitor {
     onGuildEmojisUpdated = createEvent();
     onGuildIntegrationsUpdated = createEvent();
     onMemberUpdated = createEvent();
-    onUserAdded = createEvent();
-    onUserRemoved = createEvent();
+    onMemberAdded = createEvent();
+    onMemberRemoved = createEvent();
 
-    onUserBanned = createEvent();
-    onUserUnbanned = createEvent();
+    onMemberBanned = createEvent();
+    onMemberUnbanned = createEvent();
 
     onReactionAdd = createEvent();
     onReactionRemove = createEvent();
@@ -180,18 +211,15 @@ class DiscordClient extends EventExhibitor {
 
   // External methods
 
-  /// Modify the client's user. Note that the [avatar] parameter is currently experimental.
-  Future modify({String username, File avatar, String avatarFileType = "jpeg"}) async {
-    final query = {"username": username};
+  /// Modify the client's user. If you pass [avatar], you must pass [avatarFileType] or it will default to `jpg`.
+  Future modify({String username, File avatar, String avatarFileType = "jpg"}) async {
+    final query = {};
 
-    if (avatar != null) {
-      final data = await _avatarData(avatar, avatarFileType);
-      print(data);
-      query["avatar"] = data;
-    }
+    if (username != null) query["username"] = username;
+    if (avatar != null) query["avatar"] = await _avatarData(avatar, avatarFileType);
 
     final response = await (api + "users" + "@me").patch(query);
-    return User.fromMap(JSON.decode(response.body), this);
+    return User._fromMap(JSON.decode(response.body), this);
   }
 
   /// Get a guild from the client's cache.
@@ -206,7 +234,7 @@ class DiscordClient extends EventExhibitor {
       return guilds.firstWhere((c) => c.id == id).channels.firstWhere((c) => c.id == id);
 
     final response = await (api + "channels" + id).get();
-    return Channel.fromMap(JSON.decode(response.body), this);
+    return Channel._fromMap(JSON.decode(response.body), this);
   }
 
   /// Get a text channel given its [id].
@@ -231,9 +259,9 @@ class DiscordClient extends EventExhibitor {
   /// or not the client should be considered AFK.
   void updateStatus(StatusType status, {Game game, bool afk = false}) {
     final query = {
-      "status": Game.statusesR[status],
+      "status": Game.statusesInverse[status],
       "afk": afk,
-      "game": game?.toMap(),
+      "game": game?._toMap(),
       "since": null
     };
     final packet = new Packet(
@@ -301,88 +329,7 @@ class DiscordClient extends EventExhibitor {
         case 0: // Dispatch
           final event = payload["t"];
           if (ready) {
-            switch (event) {
-              case "READY":
-                await ReadyEvent.construct(packet);
-                break;
-
-              case "CHANNEL_CREATE":
-                await ChannelCreateEvent.construct(packet);
-                break;
-              case "CHANNEL_UPDATE":
-                await ChannelUpdateEvent.construct(packet);
-                break;
-              case "CHANNEL_DELETE":
-                await ChannelDeleteEvent.construct(packet);
-                break;
-              case "CHANNEL_PINS_UPDATE":
-                await ChannelPinsUpdateEvent.construct(packet);
-                break;
-
-              case "GUILD_CREATE":
-                await GuildCreateEvent.construct(packet);
-                break;
-              case "GUILD_UPDATE":
-                await GuildUpdateEvent.construct(packet);
-                break;
-              case "GUILD_DELETE":
-                await GuildRemoveEvent.construct(packet); // This method checks if this event was fired because of unavailability or removal from a guild.
-                break;
-              
-              case "GUILD_EMOJIS_UPDATE":
-                await GuildEmojisUpdateEvent.construct(packet);
-                break;
-              case "GUILD_INTEGRATIONS_UPDATE":
-                await GuildIntegrationsUpdateEvent.construct(packet);
-                break;
-              case "GUILD_MEMBER_UPDATE":
-                await MemberUpdatedEvent.construct(packet);
-                break;
-              case "GUILD_MEMBER_ADD":
-                await UserAddedEvent.construct(packet);
-                break;
-              case "GUILD_MEMBER_REMOVE":
-                await UserRemovedEvent.construct(packet);
-                break;
-
-              case "USER_BANNED":
-                await UserBannedEvent.construct(packet);
-                break;
-              case "USER_UNBANNED":
-                await UserUnbannedEvent.construct(packet);
-                break;
-              
-              case "GUILD_ROLE_CREATED":
-                await RoleCreatedEvent.construct(packet);
-                break;
-              case "GUILD_ROLE_UPDATED":
-                await RoleUpdatedEvent.construct(packet);
-                break;
-              case "GUILD_ROLE_DELETED":
-                await RoleDeletedEvent.construct(packet);
-                break;
-
-              case "MESSAGE_CREATE":
-                await MessageCreateEvent.construct(packet);
-                break;
-              case "MESSAGE_DELETE":
-                await MessageDeleteEvent.construct(packet);
-                break;
-              case "MESSAGE_DELETE_BULK":
-                await MessageDeleteBulkEvent.construct(packet);
-                break;
-              
-              case "WEBHOOKS_UPDATE":
-                await WebhooksUpdateEvent.construct(packet);
-                break;
-
-              case "PRESENCE_UPDATE":
-                await PresenceUpdateEvent.construct(packet);
-                break;
-
-              default:
-                break;
-            }
+            if (_websocketEvents.containsKey(event)) await _websocketEvents[event](packet);
           } else {
             if (event == "READY")
               await ReadyEvent.construct(packet);
@@ -391,15 +338,19 @@ class DiscordClient extends EventExhibitor {
           }
 
           break;
+
         case 1: // Heartbeat
           _sendHeartbeat(_heartbeat);
           break;
+
         case 3: // Update Status
           break;
+
         case 7: // Reconnect
           await disconnect(reconnect: true);
           break;
         case 9: // Invalid Session
+
           await new Future.delayed(const Duration(seconds: 3));
           _sendIdentify();
           break;
@@ -415,8 +366,10 @@ class DiscordClient extends EventExhibitor {
             _sendIdentify();
           }
           break;
+
         case 11: // Heartbeat ACK
           break;
+
         default:
           break;
       }

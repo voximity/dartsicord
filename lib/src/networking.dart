@@ -1,11 +1,4 @@
-import "dart:async";
-import "dart:convert";
-
-import "package:http/http.dart" as http;
-
-import "client.dart";
-import "enums.dart";
-import "exception.dart";
+part of dartsicord;
 
 class Route {
   String url = "https://discordapp.com/api";
@@ -20,7 +13,7 @@ class Route {
     header ??= {};
 
     header["Authorization"] = (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}";
-    header["Content-Type"] = "application/json";
+    header["Content-Type"] = header["Content-Type"] ?? "application/json";
     return header;
   }
 

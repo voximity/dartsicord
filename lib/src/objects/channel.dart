@@ -1,22 +1,8 @@
-import "dart:async";
-import "dart:convert";
+part of dartsicord;
 
-import "../client.dart";
-import "../enums.dart";
-import "../networking.dart";
-import "../object.dart";
-
-import "embed.dart";
-import "guild.dart";
-import "invite.dart";
-import "message.dart";
-import "overwrite.dart";
-import "role.dart";
-import "user.dart";
-import "webhook.dart";
-
+/// A Channel resource. Could potentially be any of [ChannelType].
 abstract class Channel extends Resource {
-  Route get endpoint => client.api + "channels" + id;
+  Route get _endpoint => client.api + "channels" + id;
   
   /// Name of the channel.
   String name;
@@ -41,15 +27,16 @@ abstract class Channel extends Resource {
     4: ChannelType.guildCategory
   };
 
-  static Future<Channel> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
+  static Future<Channel> _fromMap(Map<String, dynamic> obj, DiscordClient client) async {
     final type = obj["type"];
     if (type == 2)
-      return VoiceChannel.fromMap(obj, client);
+      return VoiceChannel._fromMap(obj, client);
     else
-      return TextChannel.fromMap(obj, client);
+      return TextChannel._fromMap(obj, client);
   }
 }
 
+/// A Text Channel resource. Could be any of [ChannelType] suffixed with `Text`.
 class TextChannel extends Channel {
   String name;
   Snowflake id;
@@ -82,7 +69,7 @@ class TextChannel extends Channel {
 
   /// Deletes this channel.
   Future<Null> delete() =>
-    endpoint.delete();
+    _endpoint.delete();
 
   /// Modifies this channel using the given positional parameters [name], [position], [topic], [newOverwrites], and [nsfw].
   Future<Null> modify({String name, int position, String topic, List<Overwrite> newOverwrites, bool nsfw}) async {
@@ -91,17 +78,17 @@ class TextChannel extends Channel {
       "position": position,
       "topic": topic,
       "nsfw": nsfw,
-      "permission_overwrites": newOverwrites.map((o) => o.toMap())
+      "permission_overwrites": newOverwrites.map((o) => o._toMap())
     };
     
-    final response = await endpoint.patch(query);
+    final response = await _endpoint.patch(query);
     final map = JSON.decode(response.body);
 
     this.name = map["name"];
     this.position = map["position"];
     this.topic = map["topic"];
     this.nsfw = map["nsfw"];
-    overwrites = map["permission_overwrites"].map(Overwrite.fromMap);
+    overwrites = map["permission_overwrites"].map(Overwrite._fromMap);
   }
 
   /// Creates a [Webhook] for this channel named [name] using the given positional parameter [avatar].
@@ -111,30 +98,30 @@ class TextChannel extends Channel {
       "avatar": avatar
     };
 
-    final route = endpoint + "webhooks";
+    final route = _endpoint + "webhooks";
     final response = await route.post(query);
-    return Webhook.fromMap(JSON.decode(response.body), client);
+    return Webhook._fromMap(JSON.decode(response.body), client);
   }
 
   /// Modify [existingOverwrite]. If either [newAllow] or [newDeny] are specified, they will completely overwrite
   /// the old allow/deny, so do not rely on this to add new permissions.
   Future<Null> modifyPermission({Overwrite existingOverwrite, List<RolePermission> newAllow, List<RolePermission> newDeny, OverwriteType type}) async {
     final query = {
-      "allow": Role.permissionToRaw(newAllow),
-      "deny": Role.permissionToRaw(newDeny),
+      "allow": Role._permissionToRaw(newAllow),
+      "deny": Role._permissionToRaw(newDeny),
       "type": (new Map.fromIterables(Overwrite.internalMap.values, Overwrite.internalMap.keys))[type]
     };
-    await (endpoint + "permissions" + existingOverwrite.targetId).put(query);
+    await (_endpoint + "permissions" + existingOverwrite.targetId).put(query);
   }
 
   /// Fire a typing request to this channel.
   Future<Null> startTyping() =>
-    (endpoint + "typing").post({});
+    (_endpoint + "typing").post({});
 
   /// Gets a [List] of [Invite] objects that this channel possesses.
   Future<List<Invite>> getInvites() async {
-    final response = await (endpoint + "invites").get();
-    return JSON.decode(response.body).map((i) => Invite.fromMap(i, client));
+    final response = await (_endpoint + "invites").get();
+    return JSON.decode(response.body).map((i) => Invite._fromMap(i, client));
   }
 
   /// Creates a new [Invite] for this channel using the given positional parameters [maxAge], [maxUses], [temporary], and [unique].
@@ -148,14 +135,14 @@ class TextChannel extends Channel {
       "unique": unique
     };
 
-    final response = await (endpoint + "invites").post(query);
-    return Invite.fromMap(JSON.decode(response.body), client);
+    final response = await (_endpoint + "invites").post(query);
+    return Invite._fromMap(JSON.decode(response.body), client);
   }
 
   /// Gets a [List] of [Message] objects that represent the pins in this channel.
   Future<List<Message>> getPins() async {
-    final response = await (endpoint + "pins").get();
-    return Future.wait(JSON.decode(response.body).map((m) async => await Message.fromMap(m, client)));
+    final response = await (_endpoint + "pins").get();
+    return Future.wait(JSON.decode(response.body).map((m) async => await Message._fromMap(m, client)));
   }
 
   /// Gets a [List] of [Message] objects given the [limit].
@@ -181,16 +168,16 @@ class TextChannel extends Channel {
       }
     }
     
-    final route = endpoint + "messages"
+    final route = _endpoint + "messages"
      ..url += query;
     final response = await route.get();
-    return Future.wait(JSON.decode(response.body).map((m) async => await Message.fromMap(m, client)));
+    return Future.wait(JSON.decode(response.body).map((m) async => await Message._fromMap(m, client)));
   }
 
   /// Gets a [Message] object given the [id].
   Future<Message> getMessage(dynamic id) async {
-    final response = await (endpoint + "messages" + id).get();
-    return await Message.fromMap(JSON.decode(response.body), client);
+    final response = await (_endpoint + "messages" + id).get();
+    return await Message._fromMap(JSON.decode(response.body), client);
   }
 
   /// Bulk-deletes a [List] of [Message] objects from this channel.
@@ -198,7 +185,7 @@ class TextChannel extends Channel {
   /// 2-100 messages may be specified. Messages older than 2 weeks are unaffected.
   Future<Null> bulkDeleteMessages(List<Message> messages) async {
     final query = messages.map((m) => m.id.id);
-    await (endpoint + "messages" + "bulk-delete").post(query);
+    await (_endpoint + "messages" + "bulk-delete").post(query);
   }
 
   /// Send a message to this channel.
@@ -209,39 +196,39 @@ class TextChannel extends Channel {
   Future<Message> sendMessage(String content, {Embed embed}) async {
     final query = {
       "content": content,
-      "embed": embed?.toMap()
+      "embed": embed?._toMap()
     };
-    final response = await (endpoint + "messages").post(query);
+    final response = await (_endpoint + "messages").post(query);
     final parsed = JSON.decode(response.body);
-    return (await Message.fromMap(parsed, client))..author = client.user;
+    return (await Message._fromMap(parsed, client))..author = client.user;
   }
 
-  TextChannel(this.name, this.id, this.type, {this.guild, this.recipients});
+  TextChannel._raw(this.name, this.id, this.type, {this.guild, this.recipients});
 
-  static Future<TextChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
+  static Future<TextChannel> _fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
     final channelType = Channel.types[obj["type"]];
     switch (channelType) {
       case ChannelType.guildText:
-        final channel = new TextChannel(obj["name"], new Snowflake(obj["id"]), channelType,
+        final channel = new TextChannel._raw(obj["name"], new Snowflake(obj["id"]), channelType,
           guild: guild != null ? guild : (obj["guild_id"] != null ? client.getGuild(obj["guild_id"]) : null))
           ..client = client;
           for (int i = 0; i < obj["permission_overwrites"].length; i++)
-            channel.overwrites.add(Overwrite.fromMap(obj["permission_overwrites"][i], client));
+            channel.overwrites.add(Overwrite._fromMap(obj["permission_overwrites"][i], client));
         return channel;
 
       case ChannelType.dm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
-          users.add(await User.fromMap(obj["recipients"][i], client));
-        final channel = new TextChannel("DM", new Snowflake(obj["id"]), channelType, recipients: users)
+          users.add(await User._fromMap(obj["recipients"][i], client));
+        final channel = new TextChannel._raw("DM", new Snowflake(obj["id"]), channelType, recipients: users)
           ..client = client;
         return channel;
 
       case ChannelType.groupDm:
         final users = [];
         for (int i = 0; i < obj["recipients"].length; i++)
-          users.add(await User.fromMap(obj["recipients"][i], client));
-        final channel = new TextChannel("GroupDM", new Snowflake(obj["id"]), channelType, recipients: users)
+          users.add(await User._fromMap(obj["recipients"][i], client));
+        final channel = new TextChannel._raw("GroupDM", new Snowflake(obj["id"]), channelType, recipients: users)
           ..client = client;
         return channel;
 
@@ -251,11 +238,12 @@ class TextChannel extends Channel {
   }
 }
 
+/// Rather unfinished class
 class VoiceChannel extends Channel {
   String name;
   Guild guild;
 
-  Route get endpoint => client.api + "channels" + id;
+  Route get _endpoint => client.api + "channels" + id;
 
   ChannelType type;
 
@@ -263,6 +251,6 @@ class VoiceChannel extends Channel {
 
   VoiceChannel(this.name, this.id);
 
-  static Future<VoiceChannel> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) =>
+  static Future<VoiceChannel> _fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) =>
     null;
 }

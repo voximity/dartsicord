@@ -1,9 +1,6 @@
-import "dart:async";
+part of dartsicord;
 
-import "../client.dart";
-import "../enums.dart";
-import "../object.dart";
-
+/// A Game resource. Can be self-assembled to set the game.
 class Game extends Resource {
   static Map<String, StatusType> statuses = {
     "online": StatusType.online,
@@ -18,11 +15,11 @@ class Game extends Resource {
     2: ActivityType.listen,
     3: ActivityType.watch
   };
-  static Map<ActivityType, int> get activitiesR =>
+  static Map<ActivityType, int> get activitiesInverse =>
     new Map.fromIterables(activities.values, activities.keys);
-  static Map<StatusType, String> get statusesR =>
+  static Map<StatusType, String> get statusesInverse =>
     new Map.fromIterables(statuses.values, statuses.keys);
-  static Future<Game> fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
+  static Future<Game> _fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
     new Game(obj["name"], Game.activities[obj["type"]],
       streamUrl: obj["url"] != null ? Uri.parse(obj["url"]) : null)
       ..client = client;
@@ -33,10 +30,10 @@ class Game extends Resource {
 
   Game(this.name, this.type, {this.streamUrl});
   
-  Map<String, dynamic> toMap() =>
+  Map<String, dynamic> _toMap() =>
     {
       "name": name,
-      "type": Game.activitiesR[type],
+      "type": Game.activitiesInverse[type],
       "url": streamUrl?.toString()
     };
 }

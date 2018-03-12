@@ -1,14 +1,4 @@
-import 'dart:async';
-
-import "enums.dart";
-import "networking.dart";
-import "objects/game.dart";
-import "objects/user.dart";
-
-
-//
-// Event system
-//
+part of dartsicord;
 
 class EventStream<T> extends Stream<T> {
   StreamController<T> _controller;
@@ -39,7 +29,7 @@ abstract class EventExhibitor {
   Future<List> destroyEvents() => Future.wait(_events.map((event) => event.close()));
 }
 
-
+typedef Future<Null> WebSocketEventConstructor(Packet packet);
 
 class ReadyEvent {
   ReadyEvent();
@@ -48,7 +38,7 @@ class ReadyEvent {
     packet.client
       ..ready = true
       ..sessionId = packet.data["session_id"]
-      ..user = await User.fromMap(packet.data["user"], packet.client);
+      ..user = await User._fromMap(packet.data["user"], packet.client);
 
     final event = new ReadyEvent();
     packet.client.onReady.add(event);
@@ -58,7 +48,7 @@ class UserUpdateEvent {
   UserUpdateEvent();
 
   static Future<Null> construct(Packet packet) async {
-    packet.client.user = await User.fromMap(packet.data, packet.client);
+    packet.client.user = await User._fromMap(packet.data, packet.client);
 
     final event = new UserUpdateEvent();
     packet.client.onUserUpdate.add(event);
@@ -75,8 +65,8 @@ class PresenceUpdateEvent {
   PresenceUpdateEvent(this.user, this.status, {this.game});
 
   static Future<Null> construct(Packet packet) async {
-    final user = await User.fromMap(packet.data["user"], packet.client);
-    final game = packet.data["game"] != null ? await Game.fromMap(packet.data["game"], packet.client) : null;
+    final user = await User._fromMap(packet.data["user"], packet.client);
+    final game = packet.data["game"] != null ? await Game._fromMap(packet.data["game"], packet.client) : null;
     final status = Game.statuses[packet.data["status"]];
 
     final event = new PresenceUpdateEvent(user, status, game: game);

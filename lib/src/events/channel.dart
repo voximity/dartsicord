@@ -1,11 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-
-import "../networking.dart";
-import "../object.dart";
-import "../objects/channel.dart";
-import "../objects/guild.dart";
-import "../objects/webhook.dart";
+part of dartsicord;
 
 class ChannelCreateEvent {
   /// The created channel.
@@ -14,7 +7,7 @@ class ChannelCreateEvent {
 
   static Future<Null> construct(Packet packet) async {
 
-    final channel = await Channel.fromMap(packet.data, packet.client);
+    final channel = await Channel._fromMap(packet.data, packet.client);
 
     if (channel.guild != null && !channel.guild.channels.any((c) => c.id == channel.id))
       channel.guild.channels.add(channel);
@@ -30,7 +23,7 @@ class ChannelUpdateEvent {
   ChannelUpdateEvent(this.channel);
 
   static Future<Null> construct(Packet packet) async {
-    var channel = await Channel.fromMap(packet.data, packet.client);
+    var channel = await Channel._fromMap(packet.data, packet.client);
     if (channel.guild != null) {
       final existing = channel.guild.channels.firstWhere((c) => c.id == channel.id)
         ..name = channel.name;
@@ -58,7 +51,7 @@ class ChannelDeleteEvent {
   ChannelDeleteEvent(this.channel);
 
   static Future<Null> construct(Packet packet) async {
-    final channel = await Channel.fromMap(packet.data, packet.client);
+    final channel = await Channel._fromMap(packet.data, packet.client);
     if (channel.guild != null)
       channel.guild.channels.removeWhere((c) => c.id == channel.id);
     
@@ -95,7 +88,7 @@ class WebhooksUpdateEvent {
     final route = packet.client.api + "channels" + channel.id + "webhooks";
     final response = await route.get();
     final webhooks = JSON.decode(response.body);
-    channel.webhooks = webhooks.map((w) async => await Webhook.fromMap(w, packet.client));
+    channel.webhooks = webhooks.map((w) async => await Webhook._fromMap(w, packet.client));
 
     final event = new WebhooksUpdateEvent(channel, guild: channel.guild);
     packet.client.onWebhooksUpdate.add(event);

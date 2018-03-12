@@ -1,3 +1,5 @@
+part of dartsicord;
+
 enum ChannelType {
   guildText,
   dm,

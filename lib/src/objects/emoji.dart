@@ -1,10 +1,6 @@
-import "dart:async";
-import "../client.dart";
-import "../object.dart";
-import "guild.dart";
-import "role.dart";
-import "user.dart";
+part of dartsicord;
 
+/// An Emoji resource. Can correspond to a guild or be a global emoji.
 class Emoji extends Resource {
   Snowflake id;
 
@@ -26,22 +22,22 @@ class Emoji extends Resource {
   /// The user that created this emoji.
   User author;
 
-  Emoji(this.name, {this.id, this.guild, this.roles, this.author, this.requiresColons, this.managed});
+  Emoji._raw(this.name, {this.id, this.guild, this.roles, this.author, this.requiresColons, this.managed});
 
   String toString() =>
     id == null ? name : id.toString();
 
-  static Future<Emoji> fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
-    final emoji = new Emoji(obj["name"], id: new Snowflake(obj["id"]),
+  static Future<Emoji> _fromMap(Map<String, dynamic> obj, DiscordClient client, {Guild guild}) async {
+    final emoji = new Emoji._raw(obj["name"], id: new Snowflake(obj["id"]),
       guild: guild,
-      author: obj["user"] != null ? await User.fromMap(obj["user"], client) : null,
+      author: obj["user"] != null ? await User._fromMap(obj["user"], client) : null,
       requiresColons: obj["requires_colons"],
       managed: obj["managed"])
       ..client = client;
     
     if (obj["roles"]) {
       for (int i = 0; i < obj["roles"].length; i++) {
-        final role = await Role.fromMap(obj["roles"][i], client)
+        final role = await Role._fromMap(obj["roles"][i], client)
           ..guild = guild;
         emoji.roles.add(role);
       }

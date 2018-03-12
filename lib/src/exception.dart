@@ -1,3 +1,5 @@
+part of dartsicord;
+
 class NotAuthorException implements Exception {
   NotAuthorException() : super();
 }

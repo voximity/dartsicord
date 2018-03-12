@@ -1,20 +1,8 @@
-import "dart:async";
-import "dart:convert";
+part of dartsicord;
 
-import "../client.dart";
-import "../exception.dart";
-import "../networking.dart";
-import "../object.dart";
-
-import "channel.dart";
-import "embed.dart";
-import "emoji.dart";
-import "guild.dart";
-import "role.dart";
-import "user.dart";
-
+/// A Message resource. Create with [TextChannel.sendMessage] or [DiscordClient.sendMessage].
 class Message extends Resource {
-  Route get endpoint => channel.endpoint + "messages" + id;
+  Route get _endpoint => channel._endpoint + "messages" + id;
 
   /// Content of the message.
   String content;
@@ -60,42 +48,42 @@ class Message extends Resource {
   /// or you can instantiate an Emoji object yourself given the name,
   /// which can be raw emoji unicode. For example, `new Emoji("🎊")`
   Future<Null> react(Emoji emoji) =>
-    (endpoint + "reactions" + emoji + "@me").put({});
+    (_endpoint + "reactions" + emoji + "@me").put({});
 
   /// Removes a previously created reaction from the message using [emoji].
   /// 
   /// See [Message.react] for more information on how to use this method.
-  Future<Null> removeReact(Emoji emoji) =>
-    (endpoint + "reactions" + emoji + "@me").delete();
+  Future<Null> removeReaction(Emoji emoji) =>
+    (_endpoint + "reactions" + emoji + "@me").delete();
 
   /// Gets all users who reacted to the message using [emoji] given the [limit], if any.
   /// 
   /// [limit] will default to 100. Positional retrieval will be implemented some time soon.
   Future<List<User>> getReactions(Emoji emoji, {int limit = 100}) async {
-    final route = endpoint + "reactions" + emoji
+    final route = _endpoint + "reactions" + emoji
       ..url += "?limit=$limit";
     final response = await route.get();
-    return Future.wait(JSON.decode(response.body).map((u) async => await User.fromMap(u, client)));
+    return Future.wait(JSON.decode(response.body).map((u) async => await User._fromMap(u, client)));
   }
 
   /// Deletes all reactions created on this message.
   Future<Null> deleteReactions() =>
-    (endpoint + "reactions").delete();
+    (_endpoint + "reactions").delete();
 
   /// Pin a message to its [channel].
   Future<Null> pin() =>
-    (channel.endpoint + "pins" + id).put({});
+    (channel._endpoint + "pins" + id).put({});
 
   /// Unpins a message from its [channel].
-  Future<Null> unpin() =>
-    (channel.endpoint + "pins" + id).delete();
+  Future<Null> unPin() =>
+    (channel._endpoint + "pins" + id).delete();
 
   /// Edit the message, given it is yours.
   Future<Null> edit(String content, {Embed embed}) async {
     if (!isAuthor)
       throw new ForbiddenException();
 
-    final newMessage = await endpoint.patch({"content": content, "embed": embed?.toMap()});
+    final newMessage = await _endpoint.patch({"content": content, "embed": embed?._toMap()});
     this.content = content;
     this.embed ??= embed;
     
@@ -104,7 +92,7 @@ class Message extends Resource {
 
   /// Delete the message.
   Future<Null> delete() =>
-    endpoint.delete();
+    _endpoint.delete();
 
   /// Reply to the message. See [DiscordClient.sendMessage] for full documentation.
   Future<Message> reply(String text, {Embed embed}) async =>
@@ -114,11 +102,11 @@ class Message extends Resource {
   // Constructors
   //
 
-  Message(this.content, this.id, {this.author, this.channel, this.guild});
+  Message._raw(this.content, this.id, {this.author, this.channel, this.guild});
   
-  static Future<Message> fromMap(Map<String, dynamic> obj, DiscordClient client) async {
-    final message = new Message(obj["content"], new Snowflake(obj["id"]),
-      author: obj["author"] != null ? await User.fromMap(obj["author"], client) : null,
+  static Future<Message> _fromMap(Map<String, dynamic> obj, DiscordClient client) async {
+    final message = new Message._raw(obj["content"], new Snowflake(obj["id"]),
+      author: obj["author"] != null ? await User._fromMap(obj["author"], client) : null,
       channel: await client.getChannel(obj["channel_id"]),
       guild: (await client.getTextChannel(obj["channel_id"])).guild)
 
@@ -127,13 +115,13 @@ class Message extends Resource {
       ..client = client;
 
     obj["mentions"]?.forEach((m) async {
-      final user = await User.fromMap(m, client);
+      final user = await User._fromMap(m, client);
 
       message.mentions.add(user);
     });
 
     obj["role_mentions"]?.forEach((m) async {
-      final role = await Role.fromMap(m, client)
+      final role = await Role._fromMap(m, client)
         ..guild = message.guild;
 
       message.roleMentions.add(role);

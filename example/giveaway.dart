@@ -16,8 +16,6 @@ class Giveaway {
 void main() {
   final client = new DiscordClient();
 
-  final giveaways = [];
-
   client.onMessage.listen((ev) async {
     final message = ev.message;
 
@@ -25,20 +23,18 @@ void main() {
       final name = message.content.substring(9); // Find the name of the giveaway.
 
       final emoji = new Emoji("🎊"); // Create an emoji object to use for reactions.
-      final field = new EmbedField("How to get in", "React with the existing reaction to enter the giveaway!"); // Create an embed field for our embed.
-      final embed = new Embed() // Create an Embed and register our properties.
-        ..title = "A giveaway has begun!"
-        ..description = name
-        ..fields.add(field);
+      final embed = new Embed() // Build the giveaway...
+        .withTitle("A giveaway has begun!")
+        .withDescription(name)
+        .addField("How to get in", "React with the existing reaction to enter the giveaway.");
       
       final giveawayMessage = await message.reply("", embed: embed) // Reply with the embed and...
         ..react(emoji); // react with the emoji.
 
+      // Create our proprietary giveaway object...
       final giveaway = new Giveaway(name, length: const Duration(seconds: 60), createdAt: new DateTime.now(), message: giveawayMessage);
-      giveaways.add(giveaway); // Create and add our proprietary Giveaway object to the giveaways array.
 
       await new Future.delayed(giveaway.length); // Wait the length of the giveaway (60 seconds)
-      giveaways.remove(giveaway); // Remove the giveaway from the active giveaways array.
 
       final reactors = await giveawayMessage.getReactions(emoji); // Get the reactors for the emoji we used.
       final participants = reactors.where((u) => u.id != client.user.id); // Get only the reactors that aren't ourselves.
