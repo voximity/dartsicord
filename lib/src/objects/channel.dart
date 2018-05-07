@@ -184,7 +184,7 @@ class TextChannel extends Channel {
   /// 
   /// 2-100 messages may be specified. Messages older than 2 weeks are unaffected.
   Future<Null> bulkDeleteMessages(List<Message> messages) async {
-    final query = messages.map((m) => m.id.id);
+    final query = {"messages": messages.map((m) => m.id.id).toList()};
     await (_endpoint + "messages" + "bulk-delete").post(query);
   }
 

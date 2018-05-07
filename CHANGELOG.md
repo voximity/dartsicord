@@ -15,6 +15,8 @@ This project is not abandoned, I just haven't seen a reason to update it lately.
 
 ## 0.1.0+1,2
 
+5/7/2018: Fix bulk delete messages issue.
+
 Fix critical heartbeat formatting issue.
 
 ## 0.1.0
