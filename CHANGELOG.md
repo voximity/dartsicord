@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1+2
+
+Fix bulk delete messages issue.
+
 ## 0.1.1
 
 12 Mar 2018
@@ -12,10 +16,6 @@ This project is not abandoned, I just haven't seen a reason to update it lately.
 - Finish `client.modify` avatar features
 - Make many existing constructors/methods internal
 - Add more tests
-
-## 0.1.0+3
-
-Fix bulk delete messages issue.
 
 ## 0.1.0+1,2
 
