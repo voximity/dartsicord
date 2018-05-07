@@ -13,9 +13,11 @@ This project is not abandoned, I just haven't seen a reason to update it lately.
 - Make many existing constructors/methods internal
 - Add more tests
 
-## 0.1.0+1,2
+## 0.1.0+3
 
-5/7/2018: Fix bulk delete messages issue.
+Fix bulk delete messages issue.
+
+## 0.1.0+1,2
 
 Fix critical heartbeat formatting issue.
 
