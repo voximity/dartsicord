@@ -1,8 +1,8 @@
 part of dartsicord;
 
 /// A Guild resource. Contains information on what is known as a Server through Discord.
-class Guild extends Resource {
-  Route get _endpoint => client.api + "guilds" + id;
+class Guild extends _Resource {
+  _Route get _endpoint => client.api + "guilds" + id;
 
   /// Name of guild.
   String name;
@@ -34,7 +34,7 @@ class Guild extends Resource {
   /// Retrieves a Member object from a User object.
   Future<Member> getMember(User user) async {
     final response = await (_endpoint + "members" + user.id).get();
-    return Member._fromMap(JSON.decode(response.body), client, this);
+    return Member._fromMap(json.decode(await response.readAsString()), client, this);
   }
 
   /// Kick a member from this guild.
@@ -68,7 +68,7 @@ class Guild extends Resource {
     };
 
     final response = await (_endpoint + "roles").post(query);
-    return Role._fromMap(JSON.decode(response.body), client);
+    return Role._fromMap(json.decode(await response.readAsString()), client);
   }
 
   /// Give a member a role.
@@ -106,7 +106,7 @@ class Guild extends Resource {
 
     final response = await _endpoint.get();
 
-    final obj = JSON.decode(response.body);
+    final obj = json.decode(await response.readAsString());
     if (obj["channels"] != null) {
         for(int i = 0; i < obj["channels"].length; i++) {
           if (obj["channels"][i]["type"] != 0)

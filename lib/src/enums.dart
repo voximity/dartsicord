@@ -1,5 +1,6 @@
 part of dartsicord;
 
+/// The type of the channel.
 enum ChannelType {
   guildText,
   dm,
@@ -8,11 +9,13 @@ enum ChannelType {
   guildCategory
 }
 
+/// The token type of the authorized bot.
 enum TokenType {
   bot,
   user
 }
 
+/// The user's status.
 enum StatusType {
   online,
   doNotDisturb,
@@ -21,12 +24,14 @@ enum StatusType {
   offline
 }
 
+/// Directs the library how to download messages.
 enum MessageDownloadType {
   before,
   after,
   around
 }
 
+/// The activity the user is engaged in.
 enum ActivityType {
   game,
   stream,
@@ -34,11 +39,13 @@ enum ActivityType {
   watch
 }
 
+/// The type of permission overwrite for the channel.
 enum OverwriteType {
   role,
   member
 }
 
+/// The role permissions.
 enum RolePermission {
   createInstantInvite,
   kickMembers,

@@ -1,8 +1,8 @@
 part of dartsicord;
 
 /// A User resource. Not used for guild membership.
-class User extends Resource {
-  Route get _endpoint => client.api + "users" + (id == client.user.id ? "@me" : id);
+class User extends _Resource {
+  _Route get _endpoint => client.api + "users" + (id == client.user.id ? "@me" : id);
 
   /// Username of the user.
   String username;
@@ -25,7 +25,7 @@ class User extends Resource {
   /// Creates a direct message channel with this user.
   Future<TextChannel> createDirectMessage() async {
     final response = await (_endpoint + "channels").post({"recipient_id": id});
-    final channel = TextChannel._fromMap(JSON.decode(response.body), client);
+    final channel = TextChannel._fromMap(json.decode(await response.readAsString()), client);
     return channel;
   }
 
@@ -34,8 +34,8 @@ class User extends Resource {
 
 
   static Future<User> get(dynamic id, DiscordClient client) async {
-    final response = await (new Route(client: client) + "users" + id.toString()).get();
-    return await _fromMap(JSON.decode(response.body), client);
+    final response = await (new _Route(client: client) + "users" + id.toString()).get();
+    return await _fromMap(json.decode(await response.readAsString()), client);
   }
 
   static Future<User> _fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
@@ -44,7 +44,7 @@ class User extends Resource {
 }
 
 /// A Member resource. Modified [User] object that corresponds to a specific guild. Contains information such as [nickname], [roles], etc.
-class Member extends Resource {
+class Member extends _Resource {
   Snowflake id;
 
   /// The guild that this Member is in.

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.2
+
+3 June 2018
+
+Development on this project is definitely slowing down, and it may terminate sometime soon-ish. I updated my Dart to Dart 2 finally, and redid some things to work with Dart 2, be more user friendly, and depend on the [http](https://github.com/dart-lang/http) library on GitHub.
+
+- More docs
+- Internalize some classes
+- Redo Routes to work with new http
+- Dart 2 fixes
+
 ## 0.1.1+2
 
 Fix bulk delete messages issue.

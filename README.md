@@ -40,6 +40,12 @@ void main() {
 }
 ```
 
+## Making a big bot
+
+So you're writing a big bot with dartsicord... First off, good luck, have fun. Second off, might want to consider taking a look at my Discord Bots List API library for Dart, [dbldart](https://github.com/voximity/dbldart).
+
+If you are writing a cool bot with my library, let me know on Discord in the dartsicord server, or email me at [vox@voximity.net](mailto:vox@voximity.net).
+
 ## Contributing
 
 Feel free to fork and contribute. Try to keep my style of code, or else I might get mad. That means double quotes and decent organization. I'll still probably fix any consistency issues after you've made a pull request.

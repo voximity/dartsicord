@@ -85,9 +85,9 @@ class WebhooksUpdateEvent {
 
   static Future<Null> construct(Packet packet) async {
     final channel = await packet.client.getTextChannel(packet.data["channel_id"]);
-    final route = packet.client.api + "channels" + channel.id + "webhooks";
-    final response = await route.get();
-    final webhooks = JSON.decode(response.body);
+    final _Route = packet.client.api + "channels" + channel.id + "webhooks";
+    final response = await _Route.get();
+    final webhooks = json.decode(await response.readAsString());
     channel.webhooks = webhooks.map((w) async => await Webhook._fromMap(w, packet.client));
 
     final event = new WebhooksUpdateEvent(channel, guild: channel.guild);

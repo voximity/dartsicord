@@ -1,8 +1,8 @@
 part of dartsicord;
 
 /// A Message resource. Create with [TextChannel.sendMessage] or [DiscordClient.sendMessage].
-class Message extends Resource {
-  Route get _endpoint => channel._endpoint + "messages" + id;
+class Message extends _Resource {
+  _Route get _endpoint => channel._endpoint + "messages" + id;
 
   /// Content of the message.
   String content;
@@ -60,10 +60,10 @@ class Message extends Resource {
   /// 
   /// [limit] will default to 100. Positional retrieval will be implemented some time soon.
   Future<List<User>> getReactions(Emoji emoji, {int limit = 100}) async {
-    final route = _endpoint + "reactions" + emoji
+    final _Route = _endpoint + "reactions" + emoji
       ..url += "?limit=$limit";
-    final response = await route.get();
-    return Future.wait(JSON.decode(response.body).map((u) async => await User._fromMap(u, client)));
+    final response = await _Route.get();
+    return Future.wait(json.decode(await response.readAsString()).map((u) async => await User._fromMap(u, client)));
   }
 
   /// Deletes all reactions created on this message.
@@ -87,7 +87,7 @@ class Message extends Resource {
     this.content = content;
     this.embed ??= embed;
     
-    editedAt = DateTime.parse(JSON.decode(newMessage.body)["edited_timestamp"]);
+    editedAt = DateTime.parse(json.decode(await newMessage.readAsString())["edited_timestamp"]);
   }
 
   /// Delete the message.

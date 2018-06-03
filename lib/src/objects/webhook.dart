@@ -1,8 +1,8 @@
 part of dartsicord;
 
 /// A Webhook resource. Create with [TextChannel.createWebhook].
-class Webhook extends Resource {
-  Route get _endpoint => client.api + "webhooks" + id;
+class Webhook extends _Resource {
+  _Route get _endpoint => client.api + "webhooks" + id;
 
   Snowflake id;
 
@@ -35,7 +35,7 @@ class Webhook extends Resource {
       query["channel_id"] = channel.id.id;
 
     final response = await _endpoint.patch(query);
-    final object = JSON.decode(response.body);
+    final object = json.decode(await response.readAsString());
 
     this.name = object["name"];
     this.avatar = object["avatar"];

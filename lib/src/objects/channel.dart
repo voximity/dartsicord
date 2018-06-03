@@ -1,8 +1,8 @@
 part of dartsicord;
 
 /// A Channel resource. Could potentially be any of [ChannelType].
-abstract class Channel extends Resource {
-  Route get _endpoint => client.api + "channels" + id;
+abstract class Channel extends _Resource {
+  _Route get _endpoint => client.api + "channels" + id;
   
   /// Name of the channel.
   String name;
@@ -82,7 +82,7 @@ class TextChannel extends Channel {
     };
     
     final response = await _endpoint.patch(query);
-    final map = JSON.decode(response.body);
+    final map = json.decode(await response.readAsString());
 
     this.name = map["name"];
     this.position = map["position"];
@@ -98,9 +98,9 @@ class TextChannel extends Channel {
       "avatar": avatar
     };
 
-    final route = _endpoint + "webhooks";
-    final response = await route.post(query);
-    return Webhook._fromMap(JSON.decode(response.body), client);
+    final _Route = _endpoint + "webhooks";
+    final response = await _Route.post(query);
+    return Webhook._fromMap(json.decode(await response.readAsString()), client);
   }
 
   /// Modify [existingOverwrite]. If either [newAllow] or [newDeny] are specified, they will completely overwrite
@@ -121,7 +121,7 @@ class TextChannel extends Channel {
   /// Gets a [List] of [Invite] objects that this channel possesses.
   Future<List<Invite>> getInvites() async {
     final response = await (_endpoint + "invites").get();
-    return JSON.decode(response.body).map((i) => Invite._fromMap(i, client));
+    return json.decode(await response.readAsString()).map((i) => Invite._fromMap(i, client));
   }
 
   /// Creates a new [Invite] for this channel using the given positional parameters [maxAge], [maxUses], [temporary], and [unique].
@@ -136,13 +136,13 @@ class TextChannel extends Channel {
     };
 
     final response = await (_endpoint + "invites").post(query);
-    return Invite._fromMap(JSON.decode(response.body), client);
+    return Invite._fromMap(json.decode(await response.readAsString()), client);
   }
 
   /// Gets a [List] of [Message] objects that represent the pins in this channel.
   Future<List<Message>> getPins() async {
     final response = await (_endpoint + "pins").get();
-    return Future.wait(JSON.decode(response.body).map((m) async => await Message._fromMap(m, client)));
+    return Future.wait(json.decode(await response.readAsString()).map((m) async => await Message._fromMap(m, client)));
   }
 
   /// Gets a [List] of [Message] objects given the [limit].
@@ -168,16 +168,16 @@ class TextChannel extends Channel {
       }
     }
     
-    final route = _endpoint + "messages"
+    final _Route = _endpoint + "messages"
      ..url += query;
-    final response = await route.get();
-    return Future.wait(JSON.decode(response.body).map((m) async => await Message._fromMap(m, client)));
+    final response = await _Route.get();
+    return Future.wait(json.decode(await response.readAsString()).map((m) async => await Message._fromMap(m, client)));
   }
 
   /// Gets a [Message] object given the [id].
   Future<Message> getMessage(dynamic id) async {
     final response = await (_endpoint + "messages" + id).get();
-    return await Message._fromMap(JSON.decode(response.body), client);
+    return await Message._fromMap(json.decode(await response.readAsString()), client);
   }
 
   /// Bulk-deletes a [List] of [Message] objects from this channel.
@@ -199,7 +199,7 @@ class TextChannel extends Channel {
       "embed": embed?._toMap()
     };
     final response = await (_endpoint + "messages").post(query);
-    final parsed = JSON.decode(response.body);
+    final parsed = json.decode(await response.readAsString());
     return (await Message._fromMap(parsed, client))..author = client.user;
   }
 
@@ -243,7 +243,7 @@ class VoiceChannel extends Channel {
   String name;
   Guild guild;
 
-  Route get _endpoint => client.api + "channels" + id;
+  _Route get _endpoint => client.api + "channels" + id;
 
   ChannelType type;
 

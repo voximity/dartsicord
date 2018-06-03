@@ -1,7 +1,7 @@
 part of dartsicord;
 
 /// A Game resource. Can be self-assembled to set the game.
-class Game extends Resource {
+class Game extends _Resource {
   static Map<String, StatusType> statuses = {
     "online": StatusType.online,
     "dnd": StatusType.doNotDisturb,

@@ -1,14 +1,15 @@
 name: dartsicord
 author: voximity <0zanfran@gmail.com>
 description: A Discord library for Dart
-version: 0.1.1+2
+version: 0.1.2
 homepage: https://github.com/voximity/dartsicord
 
 environment:
   sdk: '>=1.20.1 <2.0.0'
 
 dependencies:
-  http: "^0.11.3+16"
+  http:
+    git: https://github.com/dart-lang/http
 
 dev_dependencies:
   test: ^0.12.0

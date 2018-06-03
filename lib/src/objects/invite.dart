@@ -2,7 +2,7 @@ part of dartsicord;
 
 /// An Invite object. Create with [TextChannel.createInvite].
 class Invite {
-  Route get _endpoint => client.api + "invites" + code;
+  _Route get _endpoint => client.api + "invites" + code;
 
   /// The code of the invite.
   String code;

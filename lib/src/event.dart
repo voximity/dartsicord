@@ -1,10 +1,10 @@
 part of dartsicord;
 
-class EventStream<T> extends Stream<T> {
+class _EventStream<T> extends Stream<T> {
   StreamController<T> _controller;
   Stream<T> _stream;
 
-  EventStream() {
+  _EventStream() {
     _controller = new StreamController.broadcast();
     _stream = _controller.stream;
   }
@@ -16,11 +16,11 @@ class EventStream<T> extends Stream<T> {
   Future close() => _controller.close();
 }
 
-abstract class EventExhibitor {
-  final List<EventStream> _events = [];
+abstract class _EventExhibitor {
+  final List<_EventStream> _events = [];
 
-  EventStream createEvent() {
-    final event = new EventStream();
+  _EventStream createEvent() {
+    final event = new _EventStream();
     _events.add(event);
 
     return event;

@@ -1,7 +1,7 @@
 part of dartsicord;
 
 /// A Role resource. Create with [Guild.createRole].
-class Role extends Resource {
+class Role extends _Resource {
   static int _permissionToRaw(List<RolePermission> permissions) =>
     permissions.fold(0, (p, c) => p + _permissionMap[c]);
 

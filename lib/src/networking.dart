@@ -1,21 +1,19 @@
 part of dartsicord;
 
-class Route {
+class _Route {
   String url = "https://discordapp.com/api";
   DiscordClient client;
 
-  Route({this.client});
+  _Route({this.client});
 
-  Route operator +(dynamic other) =>
-    new Route(client: client)..url = url + "/" + other.toString();
+  _Route operator +(dynamic other) =>
+    new _Route(client: client)..url = url + "/" + other.toString();
 
-  Map<String, String> authHeader({Map<String, String> header}) {
-    header ??= {};
-
-    header["Authorization"] = (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}";
-    header["Content-Type"] = header["Content-Type"] ?? "application/json";
-    return header;
-  }
+  Map<String, String> authHeader({Map<String, String> header}) =>
+		({
+			"Authorization": (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}",
+			"Content-Type": "application/json"
+		})..addAll(header ?? {});
 
   void handleStatusCode(http.Response response) {
     switch (response.statusCode) {
@@ -57,17 +55,17 @@ class Route {
     return response;
   }
   Future<http.Response> post(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.post(url, body: JSON.encode(body), headers: authHeader(header: headers));
+    final response = await http.post(url, json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
   Future<http.Response> patch(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.patch(url, body: JSON.encode(body), headers: authHeader(header: headers));
+    final response = await http.patch(url, json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
   Future<http.Response> put(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.put(url, body: JSON.encode(body), headers: authHeader(header: headers));
+    final response = await http.put(url, json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
@@ -82,5 +80,5 @@ class Packet {
 
   Packet({this.opcode, this.data, this.seq, this.event, this.client});
 
-  String toString() => JSON.encode({"op": opcode, "d": data, "s": seq, "t": event});
+  String toString() => json.encode({"op": opcode, "d": data, "s": seq, "t": event});
 }

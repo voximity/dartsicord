@@ -1,6 +1,6 @@
 part of dartsicord;
 
-abstract class Resource {
+abstract class _Resource {
   /// ID of the object.
   Snowflake id;
 

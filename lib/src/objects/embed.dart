@@ -76,6 +76,8 @@ class Embed {
     return response;
   }
 }
+
+/// An [Embed] footer object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedFooter {
   String text;
   String iconUrl;
@@ -86,6 +88,8 @@ class EmbedFooter {
 
   Map<String, dynamic> _toMap() => {"text": text, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
+
+/// An [Embed] image object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedImage {
   String url;
   String proxyUrl;
@@ -97,6 +101,8 @@ class EmbedImage {
 
   Map<String, dynamic> _toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
+
+/// An [Embed] thumbnail object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedThumbnail {
   String url;
   String proxyUrl;
@@ -108,6 +114,8 @@ class EmbedThumbnail {
   
   Map<String, dynamic> _toMap() => {"url": url, "proxy_url": proxyUrl, "height": height, "width": width};
 }
+
+/// An [Embed] video object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedVideo {
   String url;
   String height;
@@ -118,6 +126,8 @@ class EmbedVideo {
 
   Map<String, dynamic> _toMap() => {"url": url, "height": height, "width": width};
 }
+
+/// An [Embed] provider object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedProvider {
   String name;
   String url;
@@ -127,6 +137,8 @@ class EmbedProvider {
 
   Map<String, dynamic> _toMap() => {"name": url, "url": url};
 }
+
+/// An [Embed] author object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedAuthor {
   String name;
   String url;
@@ -138,6 +150,8 @@ class EmbedAuthor {
 
   Map<String, dynamic> _toMap() => {"name": name, "url": url, "icon_url": iconUrl, "proxy_icon_url": proxyIconUrl};
 }
+
+/// An [Embed] field object. Can be self-assembled for an [Embed], or chained on the original [Embed].
 class EmbedField {
   String name;
   String value;

@@ -1,7 +1,7 @@
 part of dartsicord;
 
 /// An Emoji resource. Can correspond to a guild or be a global emoji.
-class Emoji extends Resource {
+class Emoji extends _Resource {
   Snowflake id;
 
   /// The guild this emoji was created in.

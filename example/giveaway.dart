@@ -24,9 +24,9 @@ void main() {
 
       final emoji = new Emoji("🎊"); // Create an emoji object to use for reactions.
       final embed = new Embed() // Build the giveaway...
-        .withTitle("A giveaway has begun!")
-        .withDescription(name)
-        .addField("How to get in", "React with the existing reaction to enter the giveaway.");
+        ..withTitle("A giveaway has begun!")
+        ..withDescription(name)
+        ..addField("How to get in", "React with the existing reaction to enter the giveaway.");
       
       final giveawayMessage = await message.reply("", embed: embed) // Reply with the embed and...
         ..react(emoji); // react with the emoji.

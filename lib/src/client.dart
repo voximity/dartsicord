@@ -21,7 +21,7 @@ import "objects/guild.dart";
 import "objects/message.dart";
 import "objects/user.dart";*/
 
-class DiscordClient extends EventExhibitor {
+class DiscordClient extends _EventExhibitor {
   final Map<String, WebSocketEventConstructor> _websocketEvents = {
     "READY": ReadyEvent.construct,
     "CHANNEL_CREATE": ChannelCreateEvent.construct,
@@ -53,8 +53,8 @@ class DiscordClient extends EventExhibitor {
   int _lastSeq;
   bool _closed = false;
 
-  /// The global [Route] used for all interactions with the Discord API.
-  Route get api => new Route(client: this);
+  /// The global [_Route] used for all interactions with the Discord API.
+  _Route get api => new _Route(client: this);
 
   /// The current session ID of this client.
   String sessionId;
@@ -85,78 +85,78 @@ class DiscordClient extends EventExhibitor {
   //
 
   /// Fired when the client receives the `READY` payload.
-  EventStream<ReadyEvent> onReady;
+  _EventStream<ReadyEvent> onReady;
   /// Fired when the client's user updates.
-  EventStream<UserUpdateEvent> onUserUpdate;
+  _EventStream<UserUpdateEvent> onUserUpdate;
 
   /// Fired when the client sees a guild created. Not fired before [ready] is reached.
-  EventStream<GuildCreateEvent> onGuildCreate;
+  _EventStream<GuildCreateEvent> onGuildCreate;
   /// Fired when the client sees a guild update.
-  EventStream<GuildUpdateEvent> onGuildUpdate;
+  _EventStream<GuildUpdateEvent> onGuildUpdate;
   /// Fired when the client is removed from a guild.
-  EventStream<GuildRemoveEvent> onGuildRemove;
+  _EventStream<GuildRemoveEvent> onGuildRemove;
   /// Fired when the client sees a guild become unavailable.
-  EventStream<GuildUnavailableEvent> onGuildUnavailable;
+  _EventStream<GuildUnavailableEvent> onGuildUnavailable;
 
   /// Fired when the client sees a user banned.
-  EventStream<MemberBannedEvent> onMemberBanned;
+  _EventStream<MemberBannedEvent> onMemberBanned;
   /// Fired when the client sees a user unbanned.
-  EventStream<MemberUnbannedEvent> onMemberUnbanned;
+  _EventStream<MemberUnbannedEvent> onMemberUnbanned;
   /// Fired when the client sees a guild update its emojis.
-  EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
+  _EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
   /// Fired when the client sees a guild update its integrations.
-  EventStream<GuildIntegrationsUpdateEvent> onGuildIntegrationsUpdated;
+  _EventStream<GuildIntegrationsUpdateEvent> onGuildIntegrationsUpdated;
   /// Fired when the client sees a member updated on its guild.
-  EventStream<MemberUpdatedEvent> onMemberUpdated;
+  _EventStream<MemberUpdatedEvent> onMemberUpdated;
   /// Fired when the client sees a user join a guild.
-  EventStream<MemberAddedEvent> onMemberAdded;
+  _EventStream<MemberAddedEvent> onMemberAdded;
   /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
-  EventStream<MemberRemovedEvent> onMemberRemoved;
+  _EventStream<MemberRemovedEvent> onMemberRemoved;
 
   /// Fired when the client sees a role created in a guild.
-  EventStream<RoleCreatedEvent> onRoleCreated;
+  _EventStream<RoleCreatedEvent> onRoleCreated;
   /// Fired when the client sees a role updated in a guild.
-  EventStream<RoleUpdatedEvent> onRoleUpdated;
+  _EventStream<RoleUpdatedEvent> onRoleUpdated;
   /// Fired when the client sees a role deleted in a guild.
-  EventStream<RoleDeletedEvent> onRoleDeleted;
+  _EventStream<RoleDeletedEvent> onRoleDeleted;
 
   /// Fired when the client sees a message created.
-  EventStream<MessageCreateEvent> onMessage;
+  _EventStream<MessageCreateEvent> onMessage;
   /// Fired when the client sees a message delete.
-  EventStream<MessageDeleteEvent> onMessageDelete;
+  _EventStream<MessageDeleteEvent> onMessageDelete;
   /// Fired when the client sees messages bulk-deleted.
-  EventStream<MessageDeleteBulkEvent> onMessageBulkDelete;
+  _EventStream<MessageDeleteBulkEvent> onMessageBulkDelete;
 
   /// Fired when the client sees a reaction created on a message.
-  EventStream<ReactionAddEvent> onReactionAdd;
+  _EventStream<ReactionAddEvent> onReactionAdd;
   /// Fired when the client sees a reaction removed from a message.
-  EventStream<ReactionRemoveEvent> onReactionRemove;
+  _EventStream<ReactionRemoveEvent> onReactionRemove;
   /// Fired when the client sees all reactions removed from a message.
-  EventStream<ReactionRemoveAllEvent> onReactionRemoveAll;
+  _EventStream<ReactionRemoveAllEvent> onReactionRemoveAll;
 
   /// Fired when the client sees a channel created.
-  EventStream<ChannelCreateEvent> onChannelCreate;
+  _EventStream<ChannelCreateEvent> onChannelCreate;
   /// Fired when the client sees a channel updated.
-  EventStream<ChannelUpdateEvent> onChannelUpdate;
+  _EventStream<ChannelUpdateEvent> onChannelUpdate;
   /// Fired when the client sees a channel deleted.
-  EventStream<ChannelDeleteEvent> onChannelDelete;
+  _EventStream<ChannelDeleteEvent> onChannelDelete;
   /// Fired when the client sees a channel update its pins.
-  EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
+  _EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
 
   /// Fired when the client sees a user start typing in a channel.
-  EventStream<TypingStartEvent> onTypingStart;
+  _EventStream<TypingStartEvent> onTypingStart;
 
   /// Fired when the client sees a channel update its webhooks.
-  EventStream<WebhooksUpdateEvent> onWebhooksUpdate;
+  _EventStream<WebhooksUpdateEvent> onWebhooksUpdate;
 
   /// Fired when the client sees a user update their presence.
-  EventStream<PresenceUpdateEvent> onPresenceUpdate;
+  _EventStream<PresenceUpdateEvent> onPresenceUpdate;
 
   // Internal methods
 
   Future _getGateway() async {
     final response = await (api + "gateway").get();
-    return JSON.decode(response.body)["url"];
+    return json.decode(await response.readAsString())["url"];
   }
 
   void _sendHeartbeat(Timer timer) {
@@ -204,7 +204,7 @@ class DiscordClient extends EventExhibitor {
 
   Future<String> _avatarData(File avatar, String headerType) async {
     final bytes = await avatar.readAsBytes();
-    final encoded = BASE64.encode(bytes);
+    final encoded = base64.encode(bytes);
     return "data:image/$headerType;base64,$encoded";
   }
 
@@ -219,7 +219,7 @@ class DiscordClient extends EventExhibitor {
     if (avatar != null) query["avatar"] = await _avatarData(avatar, avatarFileType);
 
     final response = await (api + "users" + "@me").patch(query);
-    return User._fromMap(JSON.decode(response.body), this);
+    return User._fromMap(json.decode(await response.readAsString()), this);
   }
 
   /// Get a guild from the client's cache.
@@ -234,7 +234,7 @@ class DiscordClient extends EventExhibitor {
       return guilds.firstWhere((c) => c.id == id).channels.firstWhere((c) => c.id == id);
 
     final response = await (api + "channels" + id).get();
-    return Channel._fromMap(JSON.decode(response.body), this);
+    return Channel._fromMap(json.decode(await response.readAsString()), this);
   }
 
   /// Get a text channel given its [id].
@@ -291,7 +291,7 @@ class DiscordClient extends EventExhibitor {
   }
 
   void _sendIdentify() {
-    _socket.add(new Packet(opcode: 2, seq: _lastSeq, data: {
+		Packet packet = new Packet(opcode: 2, seq: _lastSeq, data: {
       "token": token,
       "properties": {
         "\$os": "windows",
@@ -301,7 +301,11 @@ class DiscordClient extends EventExhibitor {
       //"shard": shard != null ? [shard, shardCount] : null,
       "compress": false,
       "large_threshold": 250
-    }).toString());
+    });
+		if (shard != null)
+			packet.data["shard"] = [shard, shardCount];
+
+		_socket.add(packet.toString());
   }
 
   Future<Null> _establishConnection(String token, {TokenType tokenType = TokenType.bot, bool reconnecting = false}) async {
@@ -314,7 +318,7 @@ class DiscordClient extends EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
-      final payload = JSON.decode(payloadRaw);
+      final payload = json.decode(payloadRaw);
       final packet = new Packet(
         data: payload["d"],
         event: payload["t"],
