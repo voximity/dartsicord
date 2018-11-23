@@ -1,6 +1,8 @@
 # Files and directories created by pub
 .packages
 .pub/
+.dart_tool/
+.vs_code/
 build/
 example-private/
 pubspec.lock
