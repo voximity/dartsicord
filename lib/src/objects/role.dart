@@ -1,13 +1,14 @@
-part of dartsicord;
+part of '../../dartsicord.dart';
 
 /// A Role resource. Create with [Guild.createRole].
 class Role extends _Resource {
   static int _permissionToRaw(List<RolePermission> permissions) =>
-    permissions.fold(0, (p, c) => p + _permissionMap[c]);
+      permissions.fold(0, (p, c) => p + _permissionMap[c]);
 
-  static List<RolePermission> _permissionFromRaw(int raw, {List<RolePermission> preset = RolePermission.values}) =>
-    preset.where((p) => raw & _permissionMap[p] != 0).toList();
-  
+  static List<RolePermission> _permissionFromRaw(int raw,
+          {List<RolePermission> preset = RolePermission.values}) =>
+      preset.where((p) => raw & _permissionMap[p] != 0).toList();
+
   static final Map<RolePermission, int> _permissionMap = {
     RolePermission.createInstantInvite: 1 << 0,
     RolePermission.kickMembers: 1 << 1,
@@ -17,7 +18,6 @@ class Role extends _Resource {
     RolePermission.manageGuild: 1 << 5,
     RolePermission.addReactions: 1 << 6,
     RolePermission.viewAuditLog: 1 << 7,
-
     RolePermission.readMessages: 1 << 10,
     RolePermission.sendMessages: 1 << 11,
     RolePermission.sendTtsMessages: 1 << 12,
@@ -27,7 +27,6 @@ class Role extends _Resource {
     RolePermission.readMessageHistory: 1 << 16,
     RolePermission.mentionEveryone: 1 << 17,
     RolePermission.useExternalEmojis: 1 << 18,
-
     RolePermission.connect: 1 << 20,
     RolePermission.speak: 1 << 21,
     RolePermission.muteMembers: 1 << 22,
@@ -70,15 +69,21 @@ class Role extends _Resource {
   /// Whether or not this role is mentionable.
   bool mentionable;
 
-  Role._raw(this.name, this.id, {this.color, this.hoisted, this.position, this.permissionsRaw, this.managed, this.mentionable, this.guild});
+  Role._raw(this.name, this.id,
+      {this.color,
+      this.hoisted,
+      this.position,
+      this.permissionsRaw,
+      this.managed,
+      this.mentionable,
+      this.guild});
 
-  static Role _fromMap(Map<String, dynamic> obj, DiscordClient client) => 
-    new Role._raw(
-      obj["name"], new Snowflake(obj["id"]),
-      hoisted: obj["hoist"],
-      position: obj["position"],
-      permissionsRaw: obj["permissions"],
-      managed: obj["managed"],
-      mentionable: obj["mentionable"]
-    )..client = client;
+  static Role _fromMap(Map<String, dynamic> obj, DiscordClient client) =>
+      new Role._raw(obj["name"] as String, new Snowflake(obj["id"]),
+          hoisted: obj["hoist"] as bool,
+          position: obj["position"] as int,
+          permissionsRaw: obj["permissions"] as int,
+          managed: obj["managed"] as bool,
+          mentionable: obj["mentionable"] as bool)
+        ..client = client;
 }

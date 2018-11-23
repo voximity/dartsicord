@@ -1,4 +1,4 @@
-part of dartsicord;
+part of '../dartsicord.dart';
 
 abstract class _Resource {
   /// ID of the object.
@@ -14,10 +14,9 @@ class Snowflake {
   String toString() => id.toString();
 
   Snowflake(dynamic id) {
-    this.id = id is String ? int.parse(id) : id;
+    this.id = id is String ? int.parse(id) : id as int;
   }
-  
+
   int get hashCode => id.hashCode;
   bool operator ==(dynamic idOther) => id.toString() == idOther.toString();
 }
-
