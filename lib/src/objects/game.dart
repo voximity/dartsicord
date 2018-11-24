@@ -1,4 +1,4 @@
-part of dartsicord;
+part of '../../dartsicord.dart';
 
 /// A Game resource. Can be self-assembled to set the game.
 class Game extends _Resource {
@@ -16,25 +16,25 @@ class Game extends _Resource {
     3: ActivityType.watch
   };
   static Map<ActivityType, int> get activitiesInverse =>
-    new Map.fromIterables(activities.values, activities.keys);
+      new Map.fromIterables(activities.values, activities.keys);
   static Map<StatusType, String> get statusesInverse =>
-    new Map.fromIterables(statuses.values, statuses.keys);
-  static Future<Game> _fromMap(Map<String, dynamic> obj, DiscordClient client) async =>
-    new Game(obj["name"], Game.activities[obj["type"]],
-      streamUrl: obj["url"] != null ? Uri.parse(obj["url"]) : null)
-      ..client = client;
+      new Map.fromIterables(statuses.values, statuses.keys);
+  static Future<Game> _fromMap(
+          Map<String, dynamic> obj, DiscordClient client) async =>
+      new Game(obj["name"] as String, Game.activities[obj["type"]],
+          streamUrl:
+              obj["url"] != null ? Uri.parse(obj["url"] as String) : null)
+        ..client = client;
 
   String name;
   Uri streamUrl;
   ActivityType type;
 
   Game(this.name, this.type, {this.streamUrl});
-  
-  Map<String, dynamic> _toMap() =>
-    {
-      "name": name,
-      "type": Game.activitiesInverse[type],
-      "url": streamUrl?.toString()
-    };
-}
 
+  Map<String, dynamic> _toMap() => {
+        "name": name,
+        "type": Game.activitiesInverse[type],
+        "url": streamUrl?.toString()
+      };
+}

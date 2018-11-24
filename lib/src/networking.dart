@@ -1,4 +1,4 @@
-part of dartsicord;
+part of '../dartsicord.dart';
 
 class _Route {
   String url = "https://discordapp.com/api";
@@ -7,13 +7,14 @@ class _Route {
   _Route({this.client});
 
   _Route operator +(dynamic other) =>
-    new _Route(client: client)..url = url + "/" + other.toString();
+      new _Route(client: client)..url = url + "/" + other.toString();
 
-  Map<String, String> authHeader({Map<String, String> header}) =>
-		({
-			"Authorization": (client.tokenType == TokenType.bot ? "Bot " : "") + "${client.token}",
-			"Content-Type": "application/json"
-		})..addAll(header ?? {});
+  Map<String, String> authHeader({Map<String, String> header}) => ({
+        "Authorization": (client.tokenType == TokenType.bot ? "Bot " : "") +
+            "${client.token}",
+        "Content-Type": "application/json"
+      })
+        ..addAll(header ?? {});
 
   void handleStatusCode(http.Response response) {
     switch (response.statusCode) {
@@ -49,23 +50,33 @@ class _Route {
     handleStatusCode(response);
     return response;
   }
+
   Future<http.Response> delete({Map<String, String> headers}) async {
-    final response = await http.delete(url, headers: authHeader(header: headers));
+    final response =
+        await http.delete(url, headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
-  Future<http.Response> post(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.post(url, json.encode(body), headers: authHeader(header: headers));
+
+  Future<http.Response> post(dynamic body,
+      {Map<String, String> headers}) async {
+    final response = await http.post(url,
+        body: json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
-  Future<http.Response> patch(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.patch(url, json.encode(body), headers: authHeader(header: headers));
+
+  Future<http.Response> patch(dynamic body,
+      {Map<String, String> headers}) async {
+    final response = await http.patch(url,
+        body: json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
+
   Future<http.Response> put(dynamic body, {Map<String, String> headers}) async {
-    final response = await http.put(url, json.encode(body), headers: authHeader(header: headers));
+    final response = await http.put(url,
+        body: json.encode(body), headers: authHeader(header: headers));
     handleStatusCode(response);
     return response;
   }
@@ -80,5 +91,6 @@ class Packet {
 
   Packet({this.opcode, this.data, this.seq, this.event, this.client});
 
-  String toString() => json.encode({"op": opcode, "d": data, "s": seq, "t": event});
+  String toString() =>
+      json.encode({"op": opcode, "d": data, "s": seq, "t": event});
 }

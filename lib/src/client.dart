@@ -1,4 +1,4 @@
-part of dartsicord;
+part of '../dartsicord.dart';
 
 /*
 import "dart:async";
@@ -86,60 +86,79 @@ class DiscordClient extends _EventExhibitor {
 
   /// Fired when the client receives the `READY` payload.
   _EventStream<ReadyEvent> onReady;
+
   /// Fired when the client's user updates.
   _EventStream<UserUpdateEvent> onUserUpdate;
 
   /// Fired when the client sees a guild created. Not fired before [ready] is reached.
   _EventStream<GuildCreateEvent> onGuildCreate;
+
   /// Fired when the client sees a guild update.
   _EventStream<GuildUpdateEvent> onGuildUpdate;
+
   /// Fired when the client is removed from a guild.
   _EventStream<GuildRemoveEvent> onGuildRemove;
+
   /// Fired when the client sees a guild become unavailable.
   _EventStream<GuildUnavailableEvent> onGuildUnavailable;
 
   /// Fired when the client sees a user banned.
   _EventStream<MemberBannedEvent> onMemberBanned;
+
   /// Fired when the client sees a user unbanned.
   _EventStream<MemberUnbannedEvent> onMemberUnbanned;
+
   /// Fired when the client sees a guild update its emojis.
   _EventStream<GuildEmojisUpdateEvent> onGuildEmojisUpdated;
+
   /// Fired when the client sees a guild update its integrations.
   _EventStream<GuildIntegrationsUpdateEvent> onGuildIntegrationsUpdated;
+
   /// Fired when the client sees a member updated on its guild.
   _EventStream<MemberUpdatedEvent> onMemberUpdated;
+
   /// Fired when the client sees a user join a guild.
   _EventStream<MemberAddedEvent> onMemberAdded;
+
   /// Fired when the client sees a user get removed from a guild. (left, kicked, banned, etc.)
   _EventStream<MemberRemovedEvent> onMemberRemoved;
 
   /// Fired when the client sees a role created in a guild.
   _EventStream<RoleCreatedEvent> onRoleCreated;
+
   /// Fired when the client sees a role updated in a guild.
   _EventStream<RoleUpdatedEvent> onRoleUpdated;
+
   /// Fired when the client sees a role deleted in a guild.
   _EventStream<RoleDeletedEvent> onRoleDeleted;
 
   /// Fired when the client sees a message created.
   _EventStream<MessageCreateEvent> onMessage;
+
   /// Fired when the client sees a message delete.
   _EventStream<MessageDeleteEvent> onMessageDelete;
+
   /// Fired when the client sees messages bulk-deleted.
   _EventStream<MessageDeleteBulkEvent> onMessageBulkDelete;
 
   /// Fired when the client sees a reaction created on a message.
   _EventStream<ReactionAddEvent> onReactionAdd;
+
   /// Fired when the client sees a reaction removed from a message.
   _EventStream<ReactionRemoveEvent> onReactionRemove;
+
   /// Fired when the client sees all reactions removed from a message.
   _EventStream<ReactionRemoveAllEvent> onReactionRemoveAll;
 
   /// Fired when the client sees a channel created.
   _EventStream<ChannelCreateEvent> onChannelCreate;
+
   /// Fired when the client sees a channel updated.
   _EventStream<ChannelUpdateEvent> onChannelUpdate;
+
   /// Fired when the client sees a channel deleted.
   _EventStream<ChannelDeleteEvent> onChannelDelete;
+
   /// Fired when the client sees a channel update its pins.
   _EventStream<ChannelPinsUpdateEvent> onChannelPinsUpdate;
 
@@ -154,9 +173,9 @@ class DiscordClient extends _EventExhibitor {
 
   // Internal methods
 
-  Future _getGateway() async {
+  Future<String> _getGateway() async {
     final response = await (api + "gateway").get();
-    return json.decode(await response.readAsString())["url"];
+    return json.decode(response.body)["url"] as String;
   }
 
   void _sendHeartbeat(Timer timer) {
@@ -208,53 +227,57 @@ class DiscordClient extends _EventExhibitor {
     return "data:image/$headerType;base64,$encoded";
   }
 
-
   // External methods
 
   /// Modify the client's user. If you pass [avatar], you must pass [avatarFileType] or it will default to `jpg`.
-  Future modify({String username, File avatar, String avatarFileType = "jpg"}) async {
+  Future modify(
+      {String username, File avatar, String avatarFileType = "jpg"}) async {
     final query = {};
 
     if (username != null) query["username"] = username;
-    if (avatar != null) query["avatar"] = await _avatarData(avatar, avatarFileType);
+    if (avatar != null)
+      query["avatar"] = await _avatarData(avatar, avatarFileType);
 
     final response = await (api + "users" + "@me").patch(query);
-    return User._fromMap(json.decode(await response.readAsString()), this);
+    return User._fromMap(
+        json.decode(response.body) as Map<String, dynamic>, this);
   }
 
   /// Get a guild from the client's cache.
-  Guild getGuild(dynamic id) => 
-    guilds.firstWhere((g) =>
-      g.id.toString() == id.toString()
-    );
-  
+  Guild getGuild(dynamic id) =>
+      guilds.firstWhere((g) => g.id.toString() == id.toString());
+
   /// Get a channel given its [id].
-  Future<Channel> getChannel(dynamic id) async {
-    if (!guilds.any((g) => g.channels.any((c) => c.id == id))) // Check if this channel is already cached.
-      return guilds.firstWhere((c) => c.id == id).channels.firstWhere((c) => c.id == id);
+  Future<T> getChannel<T extends Channel>(dynamic id) async {
+    if (!guilds.any((g) => g.channels
+        .any((c) => c.id == id))) // Check if this channel is already cached.
+      return guilds
+          .firstWhere((c) => c.id == id)
+          .channels
+          .firstWhere((c) => c.id == id) as T;
 
     final response = await (api + "channels" + id).get();
-    return Channel._fromMap(json.decode(await response.readAsString()), this);
+    return Channel._fromMap<T>(
+        json.decode(response.body) as Map<String, dynamic>, this);
   }
 
   /// Get a text channel given its [id].
-  Future<TextChannel> getTextChannel(dynamic id) =>
-    getChannel(id);
-
-
+  Future<TextChannel> getTextChannel(dynamic id) async =>
+      await getChannel(id) as TextChannel;
 
   // External method references
 
   /// Sends a message to a text channel. See [TextChannel.sendMessage]
-  Future<Message> sendMessage(String content, TextChannel channel, {Embed embed}) =>
-    channel.sendMessage(content, embed: embed);
+  Future<Message> sendMessage(String content, TextChannel channel,
+          {Embed embed}) =>
+      channel.sendMessage(content, embed: embed);
 
   /// Creates a direct message channel with the given [recipient].
   Future<TextChannel> createDirectMessage(User recipient) =>
-    recipient.createDirectMessage();
-  
+      recipient.createDirectMessage();
+
   /// Updates the client's status using a [StatusType] status enum.
-  /// 
+  ///
   /// Optionally, you can include a self-made [Game] object and whether
   /// or not the client should be considered AFK.
   void updateStatus(StatusType status, {Game game, bool afk = false}) {
@@ -264,18 +287,11 @@ class DiscordClient extends _EventExhibitor {
       "game": game?._toMap(),
       "since": null
     };
-    final packet = new Packet(
-      opcode: 3,
-      data: query,
-      seq: _lastSeq,
+    final packet =
+        new Packet(opcode: 3, data: query, seq: _lastSeq, client: this);
 
-      client: this
-    );
-    
     _socket.add(packet.toString());
   }
-
-
 
   // Constructor
 
@@ -291,7 +307,7 @@ class DiscordClient extends _EventExhibitor {
   }
 
   void _sendIdentify() {
-		Packet packet = new Packet(opcode: 2, seq: _lastSeq, data: {
+    final packet = new Packet(opcode: 2, seq: _lastSeq, data: {
       "token": token,
       "properties": {
         "\$os": "windows",
@@ -302,13 +318,13 @@ class DiscordClient extends _EventExhibitor {
       "compress": false,
       "large_threshold": 250
     });
-		if (shard != null)
-			packet.data["shard"] = [shard, shardCount];
+    if (shard != null) packet.data["shard"] = [shard, shardCount];
 
-		_socket.add(packet.toString());
+    _socket.add(packet.toString());
   }
 
-  Future<Null> _establishConnection(String token, {TokenType tokenType = TokenType.bot, bool reconnecting = false}) async {
+  Future<Null> _establishConnection(String token,
+      {TokenType tokenType = TokenType.bot, bool reconnecting = false}) async {
     _closed = false;
 
     this.token = token;
@@ -318,26 +334,26 @@ class DiscordClient extends _EventExhibitor {
     _socket = await WebSocket.connect(gateway + "?v=6&encoding=json");
 
     _socket.listen((payloadRaw) async {
-      final payload = json.decode(payloadRaw);
+      final payload = json.decode(payloadRaw as String);
       final packet = new Packet(
-        data: payload["d"],
-        event: payload["t"],
-        opcode: payload["op"],
-        seq: payload["s"],
-        client: this);
+          data: payload["d"],
+          event: payload["t"] as String,
+          opcode: payload["op"] as int,
+          seq: payload["s"] as int,
+          client: this);
 
-      if (packet.seq != null)
-        _lastSeq = packet.seq;
+      if (packet.seq != null) _lastSeq = packet.seq;
 
       switch (packet.opcode) {
         case 0: // Dispatch
           final event = payload["t"];
           if (ready) {
-            if (_websocketEvents.containsKey(event)) await _websocketEvents[event](packet);
+            if (_websocketEvents.containsKey(event))
+              await _websocketEvents[event](packet);
           } else {
             if (event == "READY")
               await ReadyEvent.construct(packet);
-            else if(event == "GUILD_CREATE")
+            else if (event == "GUILD_CREATE")
               await GuildCreateEvent.construct(packet);
           }
 
@@ -359,7 +375,10 @@ class DiscordClient extends _EventExhibitor {
           _sendIdentify();
           break;
         case 10: // Hello
-          _heartbeat = new Timer.periodic(new Duration(milliseconds: packet.data["heartbeat_interval"]), _sendHeartbeat);
+          _heartbeat = new Timer.periodic(
+              new Duration(
+                  milliseconds: packet.data["heartbeat_interval"] as int),
+              _sendHeartbeat);
           if (reconnecting) {
             _socket.add(new Packet(opcode: 6, seq: _lastSeq, data: {
               "token": token,
@@ -390,9 +409,9 @@ class DiscordClient extends _EventExhibitor {
   }
 
   Future<Null> _reconnect() =>
-    _establishConnection(token, tokenType: tokenType, reconnecting: true);
-  
+      _establishConnection(token, tokenType: tokenType, reconnecting: true);
+
   /// Connects to Discord's API.
   Future<Null> connect(String token, {TokenType tokenType = TokenType.bot}) =>
-    _establishConnection(token, tokenType: tokenType, reconnecting: false);
+      _establishConnection(token, tokenType: tokenType, reconnecting: false);
 }

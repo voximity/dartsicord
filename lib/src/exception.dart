@@ -1,4 +1,4 @@
-part of dartsicord;
+part of '../dartsicord.dart';
 
 class NotAuthorException implements Exception {
   NotAuthorException() : super();
